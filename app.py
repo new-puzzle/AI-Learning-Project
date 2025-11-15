@@ -331,8 +331,66 @@ def render_progress_tracker(generator, path_id):
             st.session_state.current_path_id = None
             st.rerun()
 
-    # Delete confirmation
+    # Export and advanced options
     with st.expander("⚙️ Advanced Options"):
+        # PDF Export
+        st.markdown("**📄 Export**")
+        if st.button("📥 Download as PDF", key=f"export_pdf_{path_id}"):
+            try:
+                from io import BytesIO
+                from reportlab.lib.pagesizes import letter
+                from reportlab.lib.styles import getSampleStyleSheet
+                from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+                from reportlab.lib.units import inch
+
+                buffer = BytesIO()
+                doc = SimpleDocTemplate(buffer, pagesize=letter)
+                styles = getSampleStyleSheet()
+                story = []
+
+                # Title
+                goal_type = path_info.get('goal_type', 'learning').title()
+                title = Paragraph(f"<b>{path_info['goal']}</b>", styles['Title'])
+                story.append(title)
+                story.append(Spacer(1, 0.2*inch))
+
+                # Metadata
+                meta = Paragraph(f"Type: {goal_type} | Timeframe: {path_info['timeframe']} days | Progress: {stats['progress_percentage']:.0f}%", styles['Normal'])
+                story.append(meta)
+                story.append(Spacer(1, 0.3*inch))
+
+                # Curriculum
+                for topic in curriculum:
+                    day_text = Paragraph(f"<b>Day {topic['day']}: {topic['topic']}</b>", styles['Heading2'])
+                    story.append(day_text)
+                    story.append(Spacer(1, 0.1*inch))
+
+                    # Priority and hours
+                    priority = topic.get('priority', 'medium').upper()
+                    info = Paragraph(f"Priority: {priority} | Estimated: {topic['estimated_hours']} hours", styles['Normal'])
+                    story.append(info)
+                    story.append(Spacer(1, 0.1*inch))
+
+                    # Subtopics
+                    if topic['subtopics']:
+                        for subtopic in topic['subtopics']:
+                            bullet = Paragraph(f"• {subtopic}", styles['Normal'])
+                            story.append(bullet)
+                    story.append(Spacer(1, 0.2*inch))
+
+                doc.build(story)
+                buffer.seek(0)
+
+                st.download_button(
+                    label="💾 Save PDF",
+                    data=buffer,
+                    file_name=f"goalpath_{path_info['goal'][:30].replace(' ', '_')}.pdf",
+                    mime="application/pdf"
+                )
+            except Exception as e:
+                st.error(f"PDF generation failed: {str(e)}")
+
+        st.markdown("---")
         st.warning("Danger Zone")
         if st.button("🗑️ Delete this learning path", key=f"delete_{path_id}"):
             if st.session_state.get(f"confirm_delete_{path_id}", False):
@@ -476,6 +534,26 @@ def render_progress_tracker(generator, path_id):
                                 }.get(resource_type, '🔗')
 
                                 st.markdown(f"{icon} [{resource_name}]({resource_url})")
+
+                                # YouTube auto-embed
+                                if 'youtube.com' in resource_url or 'youtu.be' in resource_url:
+                                    import re
+                                    # Extract video ID
+                                    video_id = None
+                                    if 'youtube.com/watch?v=' in resource_url:
+                                        video_id = resource_url.split('v=')[1].split('&')[0]
+                                    elif 'youtu.be/' in resource_url:
+                                        video_id = resource_url.split('youtu.be/')[1].split('?')[0]
+
+                                    if video_id:
+                                        st.markdown(f"""
+                                        <iframe width="100%" height="315"
+                                        src="https://www.youtube.com/embed/{video_id}"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen>
+                                        </iframe>
+                                        """, unsafe_allow_html=True)
 
             st.markdown("<br>", unsafe_allow_html=True)
 
