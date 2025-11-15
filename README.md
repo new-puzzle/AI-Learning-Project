@@ -8,10 +8,10 @@ An AI-powered learning path planner and progress tracker that helps you structur
 
 ## 🌟 Features
 
-### Day 1 - Core Features (Current)
+### Core Learning Features
 - **🚀 AI Learning Path Generator**
   - Input your learning goal and timeframe
-  - Claude AI generates a complete day-by-day curriculum
+  - AI generates a complete day-by-day curriculum
   - Structured breakdown with topics, subtopics, and time estimates
   - Curated learning resources for each topic
   - Visual timeline and roadmap view
@@ -21,34 +21,94 @@ An AI-powered learning path planner and progress tracker that helps you structur
   - Visual progress bar showing completion percentage
   - Track time spent on each topic
   - Learning streak counter
-  - Detailed progress statistics
+  - Status management (Active, On Hold, Archived, Deleted)
 
 - **💾 Database Storage**
   - Save multiple learning paths
   - Persistent progress tracking
+  - Filter paths by status
   - View and manage all your learning journeys
 
-### Coming Soon (Roadmap)
+### 🤖 Multi-Model AI Tutor (NEW!)
 
-**Day 2 - Enhanced Features**
-- AI Learning Assistant with built-in chat
-- Contextual help based on current topic
-- Practice problem generator
-- Adaptive learning recommendations
+**15+ AI Models Across 6 Providers:**
+- **Claude** (Anthropic)
+  - Claude Sonnet 4.5 👁️ (vision)
+  - Claude Sonnet 3.5 👁️ (vision)
+  - Claude Haiku 👁️ (vision)
 
-**Day 3 - Analytics & Resources**
-- Learning analytics dashboard
-- Time tracking per topic
-- Learning velocity metrics
-- Knowledge gap identification
-- Advanced resource library
+- **OpenAI**
+  - GPT-4 Turbo 👁️ (vision)
+  - GPT-4 👁️ (vision)
+  - GPT-3.5 Turbo
+  - GPT-4 Vision 👁️
+
+- **Google Gemini**
+  - Gemini Pro
+  - Gemini Pro Vision 👁️
+
+- **DeepSeek**
+  - DeepSeek Chat
+  - DeepSeek Coder
+  - OCR support for image analysis
+
+- **Mistral AI**
+  - Mistral Large
+  - Mistral Medium
+  - Mistral Small
+
+- **Qwen** (Alibaba)
+  - Qwen Plus
+  - Qwen Turbo
+  - Qwen Max
+
+**Features:**
+- Switch between models mid-conversation
+- Compare responses from different AI models
+- Silent failure: All models shown even if API not configured
+- Visual indicators for configured/unconfigured models
+- Vision models can analyze images
+
+### 📎 File Upload & Analysis (NEW!)
+
+**Upload and Analyze:**
+- **Images** (PNG, JPG, JPEG)
+  - Solve math problems from photos
+  - Explain diagrams and charts
+  - Read handwritten notes
+  - Analyze screenshots
+
+- **PDFs**
+  - Extract and analyze text
+  - Answer questions about documents
+  - Summarize content
+
+- **Text Files** (TXT)
+  - Read and understand content
+  - Answer questions about the file
+
+- **Word Documents** (DOCX)
+  - Parse and analyze
+  - Q&A on document content
+
+**Supported by:**
+- Claude (native vision)
+- OpenAI GPT-4 Vision (native vision)
+- Google Gemini Pro Vision (native vision)
+- DeepSeek (OCR-based image analysis)
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - Python 3.8 or higher
-- Anthropic API key ([Get one here](https://console.anthropic.com/))
+- At least ONE AI provider API key:
+  - **Claude** ([Get key](https://console.anthropic.com/)) - Recommended
+  - **OpenAI** ([Get key](https://platform.openai.com/))
+  - **Google Gemini** ([Get key](https://makersuite.google.com/app/apikey))
+  - **DeepSeek** ([Get key](https://platform.deepseek.com/))
+  - **Mistral** ([Get key](https://console.mistral.ai/))
+  - **Qwen** ([Get key](https://dashscope.console.aliyun.com/))
 
 ### Installation
 
@@ -63,13 +123,19 @@ An AI-powered learning path planner and progress tracker that helps you structur
    pip install -r requirements.txt
    ```
 
-3. **Set up your API key**
+3. **Set up your API keys**
    ```bash
    # Copy the example environment file
    cp .env.example .env
 
-   # Edit .env and add your Anthropic API key
-   # ANTHROPIC_API_KEY=your_actual_api_key_here
+   # Edit .env and add API keys for the providers you want to use
+   # You only need ONE provider to get started, but can add more later
+
+   # Example .env file:
+   ANTHROPIC_API_KEY=your_claude_key_here
+   OPENAI_API_KEY=your_openai_key_here
+   DEEPSEEK_API_KEY=your_deepseek_key_here
+   # ... add others as needed
    ```
 
 4. **Run the application**
