@@ -5,13 +5,15 @@ Combines AI generation with database storage and retrieval
 
 from typing import Dict, List, Optional
 from .ai_helpers import ClaudeAI
+from .ai_providers import AIProviderManager
 from .database import Database
 
 
 class LearningPathGenerator:
     def __init__(self, api_key: str = None):
         """Initialize the learning path generator"""
-        self.ai = ClaudeAI(api_key=api_key)
+        self.ai = ClaudeAI(api_key=api_key)  # Keep for backward compatibility
+        self.ai_manager = AIProviderManager()  # New multi-model manager
         self.db = Database()
 
     def create_learning_path(self, goal: str, timeframe: int) -> Dict:
@@ -137,21 +139,81 @@ class LearningPathGenerator:
         """
         return self.db.get_paths_by_status(status)
 
-    def get_assistance(self, question: str, context: str = "", model_name: str = "Claude Sonnet 4.5") -> str:
+    def get_assistance(self, question: str, context: str = "", model_selection: str = "Claude Sonnet 4.5") -> str:
         """
         Get AI assistance for learning questions
 
         Args:
             question: The user's question
             context: Learning context
-            model_name: AI model to use
+            model_selection: Full model selection (e.g., "Claude / Claude Sonnet 4.5" or "Claude Sonnet 4.5" for backward compat)
 
         Returns:
             AI response
         """
-        # Set the model
-        self.ai.set_model(model_name)
-        return self.ai.get_learning_assistance(question, context)
+        # Parse model selection
+        if " / " in model_selection:
+            provider_name, model_name = model_selection.split(" / ", 1)
+        else:
+            # Backward compatibility - assume Claude
+            provider_name = "Claude"
+            model_name = model_selection
+
+        # Build the full prompt
+        if context:
+            full_prompt = f"{context}\n\nQuestion: {question}"
+        else:
+            full_prompt = question
+
+        system_prompt = "You are a helpful learning assistant. Provide clear, concise explanations that help users understand concepts."
+
+        try:
+            response = self.ai_manager.generate_text(
+                provider_name=provider_name,
+                model_name=model_name,
+                prompt=full_prompt,
+                system_prompt=system_prompt
+            )
+            return response
+        except Exception as e:
+            # Fallback to Claude if configured
+            if provider_name != "Claude":
+                try:
+                    self.ai.set_model(model_name if model_name.startswith("Claude") else "Claude Sonnet 4.5")
+                    return self.ai.get_learning_assistance(question, context)
+                except:
+                    pass
+            raise e
+
+    def get_available_models(self) -> Dict:
+        """Get all available AI models"""
+        return self.ai_manager.get_available_models()
+
+    def analyze_uploaded_image(self, image_data: bytes, question: str, model_selection: str = "Claude Sonnet 4.5") -> str:
+        """
+        Analyze an uploaded image
+
+        Args:
+            image_data: Image bytes
+            question: Question about the image
+            model_selection: Model to use (format: "Provider / Model")
+
+        Returns:
+            AI analysis of the image
+        """
+        # Parse model selection
+        if " / " in model_selection:
+            provider_name, model_name = model_selection.split(" / ", 1)
+        else:
+            provider_name = "Claude"
+            model_name = model_selection
+
+        return self.ai_manager.analyze_image(
+            provider_name=provider_name,
+            model_name=model_name,
+            image_data=image_data,
+            prompt=question
+        )
 
     def generate_practice(self, topic: str, difficulty: str = "medium", count: int = 3) -> List[Dict]:
         """Generate practice problems for a topic"""
