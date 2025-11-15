@@ -306,7 +306,7 @@ def render_progress_tracker(generator, path_id):
             with col1:
                 # Checkbox for completion
                 completed = st.checkbox(
-                    "",
+                    f"Mark {topic_name} as complete",
                     value=is_completed,
                     key=f"topic_{topic_id}",
                     label_visibility="collapsed"
