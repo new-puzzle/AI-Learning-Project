@@ -240,7 +240,66 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 7. 💾 Database & Persistence
+### 9. 🎥 YouTube Auto-Embed (NEW!)
+**Status:** ✅ Fully Working
+
+**What it does:**
+- Automatically detects YouTube URLs in resources
+- Embeds video player directly in curriculum view
+- Works with both URL formats:
+  - `youtube.com/watch?v=VIDEO_ID`
+  - `youtu.be/VIDEO_ID`
+- No need to open external tabs - watch inline
+
+**How it works:**
+1. AI generates resources with YouTube links
+2. System automatically detects YouTube URLs
+3. Extracts video ID from URL
+4. Displays embedded player below the link
+5. Watch videos without leaving GoalPath
+
+**User Experience:**
+```
+🎥 [Introduction to Prompt Engineering](https://youtube.com/...)
+[Embedded YouTube player appears here - click to watch]
+```
+
+---
+
+### 10. 📄 PDF Export (NEW!)
+**Status:** ✅ Fully Working
+
+**What it does:**
+- Export any goal plan as a professional PDF document
+- Includes full curriculum breakdown
+- Shows priorities, estimated hours, and subtopics
+- Perfect for offline reference or printing
+
+**PDF Contents:**
+- Goal title and type
+- Timeframe and current progress
+- Complete day-by-day breakdown
+- Priority levels (HIGH/MEDIUM/LOW)
+- Estimated hours per topic
+- All subtopics and action items
+- Clean, professional formatting
+
+**How to use:**
+1. Open any goal plan
+2. Expand "⚙️ Advanced Options"
+3. Click "📥 Download as PDF"
+4. Click "💾 Save PDF" to download
+5. File saved as: `goalpath_[your_goal].pdf`
+
+**Use Cases:**
+- Print for offline study
+- Share with mentors/coaches
+- Archive completed goals
+- Create physical goal journal
+
+---
+
+### 11. 💾 Database & Persistence
 **Status:** ✅ Fully Working
 
 **SQLite Database with 3 Tables:**
@@ -275,7 +334,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 8. 🎨 User Interface
+### 12. 🎨 User Interface
 **Status:** ✅ Fully Working
 
 **Layout:**
@@ -345,6 +404,7 @@ pillow>=10.0.0
 pytesseract>=0.3.10
 PyPDF2>=3.0.0
 python-docx>=1.0.0
+reportlab>=4.0.0
 ```
 
 ---
@@ -358,10 +418,12 @@ python-docx>=1.0.0
 5. **Vision Capabilities** - 4 providers support image analysis
 6. **Silent Failure** - Doesn't crash on missing API keys
 7. **Priority System** - High/medium/low for better focus
-8. **Progress Tracking** - Comprehensive metrics
+8. **Progress Tracking** - Comprehensive metrics with on-track indicator
 9. **Status Management** - Flexible plan organization
 10. **Chat History** - Persistent per goal plan
 11. **Model Switching** - Compare AI responses easily
+12. **YouTube Auto-Embed** - Watch tutorial videos inline without leaving app
+13. **PDF Export** - Download goal plans for offline use or sharing
 
 ---
 
@@ -484,13 +546,13 @@ Based on "very interactive tool" goal:
 
 ## 💡 QUICK WINS (Can do in 1-2 hours each)
 
-1. **YouTube Integration** - Auto-search and embed relevant videos
-2. **Daily Learning Reminders** - Email/notification system
-3. **Export to PDF** - Print learning path
+1. ✅ ~~**YouTube Integration**~~ - COMPLETED! Auto-embeds YouTube videos
+2. ✅ ~~**Export to PDF**~~ - COMPLETED! Export goal plans as PDF
+3. **Daily Reminders** - Email/notification system for active goals
 4. **Dark Mode** - Better for extended study sessions
-5. **Keyboard Shortcuts** - Faster navigation
+5. **Keyboard Shortcuts** - Faster navigation (n=next, m=mark complete)
 6. **Mobile Responsive** - Better mobile experience
-7. **Share Learning Path** - Export/import feature
+7. **Share/Import** - Export/import goal plans between users
 
 ---
 
@@ -549,8 +611,10 @@ QWEN_API_KEY=your_qwen_key
 6. **Priority-driven** - AI assigns priorities to keep you focused
 7. **File upload** - PDFs, images, docs all supported
 8. **Goal-focused** - Not just chatbot, structured action planning
-9. **Progress tracking** - Know where you are in journey
+9. **Progress tracking** - Know where you are in journey with on-track indicator
 10. **Model comparison** - Try different AIs for same question
+11. **YouTube auto-embed** - Watch tutorials without leaving the app
+12. **PDF export** - Take your goals offline, share with coaches/mentors
 
 ---
 
