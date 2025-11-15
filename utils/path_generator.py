@@ -16,29 +16,31 @@ class LearningPathGenerator:
         self.ai_manager = AIProviderManager()  # New multi-model manager
         self.db = Database()
 
-    def create_learning_path(self, goal: str, timeframe: int) -> Dict:
+    def create_learning_path(self, goal: str, timeframe: int, goal_type: str = 'learning') -> Dict:
         """
-        Create a complete learning path with AI generation and database storage
+        Create a complete goal plan with AI generation and database storage
 
         Args:
-            goal: The learning goal
+            goal: The goal to achieve
             timeframe: Number of days for completion
+            goal_type: Type of goal (learning, career, freelance, project, personal)
 
         Returns:
-            Dictionary containing the learning path with path_id
+            Dictionary containing the goal plan with path_id
         """
-        # Generate learning path using AI
-        learning_path = self.ai.generate_learning_path(goal, timeframe)
+        # Generate goal plan using AI
+        learning_path = self.ai.generate_learning_path(goal, timeframe, goal_type)
 
         # Save to database
-        path_id = self.db.save_learning_path(goal, timeframe)
+        path_id = self.db.save_learning_path(goal, timeframe, goal_type)
 
-        # Save curriculum topics
+        # Save action items/milestones
         curriculum = learning_path.get('curriculum', [])
         self.db.save_topics(path_id, curriculum)
 
-        # Add path_id to the response
+        # Add path_id and goal_type to the response
         learning_path['path_id'] = path_id
+        learning_path['goal_type'] = goal_type
 
         return learning_path
 

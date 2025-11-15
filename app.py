@@ -89,21 +89,46 @@ def check_api_key():
 
 def render_header():
     """Render the application header"""
-    st.markdown('<p class="main-header">🎓 LearnPath AI</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">AI-Powered Learning Path Planner & Progress Tracker</p>', unsafe_allow_html=True)
+    st.markdown('<p class="main-header">🎯 GoalPath AI</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">AI-Powered Goal Planner for Learning, Career, Freelancing & More</p>', unsafe_allow_html=True)
 
 
 def render_learning_path_generator(generator):
-    """Render the learning path generator form"""
-    st.markdown("### 🚀 Create Your Learning Path")
+    """Render the goal plan generator form"""
+    st.markdown("### 🚀 Create Your Goal Plan")
+
+    # Goal type selector
+    goal_type_options = {
+        "📚 Learning & Skills": "learning",
+        "💼 Career Transition": "career",
+        "💰 Freelance & Business": "freelance",
+        "🚀 Project Completion": "project",
+        "🎯 Personal Achievement": "personal"
+    }
+
+    selected_type = st.selectbox(
+        "Goal Type",
+        list(goal_type_options.keys()),
+        help="Select the type of goal you want to achieve"
+    )
+    goal_type = goal_type_options[selected_type]
+
+    # Update placeholder based on goal type
+    placeholders = {
+        "learning": "e.g., Learn prompt engineering, Master Python, Understand blockchain",
+        "career": "e.g., Get hired as AI engineer, Transition to product management, Land remote job",
+        "freelance": "e.g., Get 5 Fiverr clients, Earn $1000/month freelancing, Launch consulting business",
+        "project": "e.g., Build portfolio website, Launch mobile app, Write a book",
+        "personal": "e.g., Run a 10K race, Learn guitar, Lose 20 pounds"
+    }
 
     col1, col2 = st.columns([2, 1])
 
     with col1:
         goal = st.text_input(
-            "What do you want to learn?",
-            placeholder="e.g., Learn Python programming, Master Machine Learning, Become a Web Developer",
-            help="Enter your learning goal in a clear, specific way"
+            "What do you want to achieve?",
+            placeholder=placeholders.get(goal_type, "Enter your goal"),
+            help="Enter your goal in a clear, specific way"
         )
 
     with col2:
@@ -115,26 +140,26 @@ def render_learning_path_generator(generator):
             help="How many days do you want to dedicate to this goal?"
         )
 
-    if st.button("Generate Learning Path", type="primary", use_container_width=True):
+    if st.button("Generate Goal Plan", type="primary", use_container_width=True):
         if not goal:
-            st.error("Please enter a learning goal!")
+            st.error("Please enter a goal!")
             return
 
-        with st.spinner("🤖 AI is creating your personalized learning path..."):
+        with st.spinner(f"🤖 AI is creating your personalized {selected_type.split()[0].lower()} plan..."):
             try:
-                # Generate learning path
-                learning_path = generator.create_learning_path(goal, timeframe)
+                # Generate goal plan
+                learning_path = generator.create_learning_path(goal, timeframe, goal_type)
 
                 # Store in session state
                 st.session_state.generated_path = learning_path
                 st.session_state.current_path_id = learning_path['path_id']
                 st.session_state.show_generator = False
 
-                st.success("✅ Learning path generated successfully!")
+                st.success(f"✅ {selected_type} plan generated successfully!")
                 st.rerun()
 
             except Exception as e:
-                st.error(f"Error generating learning path: {str(e)}")
+                st.error(f"Error generating goal plan: {str(e)}")
 
 
 def render_learning_path(path_data):

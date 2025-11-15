@@ -29,50 +29,109 @@ class ClaudeAI:
         """Set the model to use for API calls"""
         self.model = self.MODELS.get(model_name, self.MODELS["Claude Sonnet 4.5"])
 
-    def generate_learning_path(self, goal: str, timeframe: int) -> Dict:
-        """
-        Generate a comprehensive learning path based on the goal and timeframe
+    def _get_prompt_template(self, goal_type: str, goal: str, timeframe: int) -> str:
+        """Get the appropriate prompt template based on goal type"""
 
-        Args:
-            goal: The learning goal (e.g., "Learn Python")
-            timeframe: Number of days to complete the goal
-
-        Returns:
-            Dict containing the structured learning path
-        """
-        prompt = f"""You are an expert learning path designer. Create a detailed, day-by-day learning curriculum for the following goal:
-
-Goal: {goal}
-Timeframe: {timeframe} days
-
-Please create a comprehensive learning path that includes:
-
-1. Break down the learning into daily topics (one topic per day)
-2. For each day, provide:
-   - Main topic name
-   - 3-5 subtopics to cover
-   - Estimated hours needed
-   - 2-3 recommended resources (courses, articles, videos, books)
-
-Format your response as a structured JSON with the following format:
-{{
-    "overview": "Brief overview of the learning path and what the learner will achieve",
+        # Common JSON format for all types
+        json_format = """{{
+    "overview": "Brief overview and what will be achieved",
     "milestones": ["Milestone 1", "Milestone 2", "Milestone 3"],
     "curriculum": [
         {{
             "day": 1,
-            "topic": "Topic name",
-            "subtopics": ["Subtopic 1", "Subtopic 2", "Subtopic 3"],
+            "topic": "Topic/Task name",
+            "subtopics": ["Subtopic/Action 1", "Subtopic/Action 2", "Subtopic/Action 3"],
             "estimated_hours": 2.5,
+            "priority": "high|medium|low",
             "resources": [
-                {{"type": "course", "name": "Resource name", "url": "https://example.com"}},
-                {{"type": "article", "name": "Resource name", "url": "https://example.com"}}
+                {{"type": "course|article|video|tool", "name": "Resource name", "url": "https://example.com"}}
             ]
         }}
     ]
-}}
+}}"""
 
-Make the learning path progressive, building knowledge day by day. Keep it practical and achievable within the given timeframe."""
+        if goal_type == 'learning':
+            return f"""You are an expert learning path designer. Create a day-by-day learning curriculum for: {goal} in {timeframe} days.
+
+Include daily topics, subtopics, estimated hours, and recommended resources (courses, articles, videos).
+Format as structured learning path with clear progression. Mark foundational topics as "high" priority.
+
+Use this JSON format:
+{json_format}"""
+
+        elif goal_type == 'career':
+            return f"""You are a career transition coach. Create an action plan to achieve: {goal} in {timeframe} days.
+
+Break down into phases with:
+- Skills to acquire (with priority levels)
+- Portfolio projects to build
+- Networking activities
+- Application strategy
+- Interview preparation
+- Weekly milestones with specific actions
+
+Mark critical career-building actions as "high" priority. Use this JSON format:
+{json_format}"""
+
+        elif goal_type == 'freelance':
+            return f"""You are a freelance business consultant. Create a step-by-step plan to: {goal} in {timeframe} days.
+
+Include:
+- Profile/platform setup tasks (high priority at start)
+- Market research and positioning
+- Client acquisition strategy
+- Service pricing and packages
+- Marketing and outreach actions
+- Revenue milestones
+
+Mark revenue-generating actions as "high" priority. Use this JSON format:
+{json_format}"""
+
+        elif goal_type == 'project':
+            return f"""You are a project manager. Create a project plan to: {goal} in {timeframe} days.
+
+Break into phases:
+- Planning and research
+- Design/architecture decisions
+- Implementation milestones
+- Testing and refinement
+- Launch/delivery checklist
+- Specific deliverables per phase
+
+Mark critical path items as "high" priority. Use this JSON format:
+{json_format}"""
+
+        elif goal_type == 'personal':
+            return f"""You are a personal achievement coach. Create a progressive plan to: {goal} in {timeframe} days.
+
+Include:
+- Starting point assessment
+- Progressive milestones
+- Weekly targets
+- Required resources/tools
+- Habit formation strategy
+- Progress checkpoints
+
+Mark habit-building activities as "high" priority. Use this JSON format:
+{json_format}"""
+
+        else:
+            # Default to learning
+            return self._get_prompt_template('learning', goal, timeframe)
+
+    def generate_learning_path(self, goal: str, timeframe: int, goal_type: str = 'learning') -> Dict:
+        """
+        Generate a goal plan based on goal type and timeframe
+
+        Args:
+            goal: The goal (e.g., "Learn Python", "Get hired as AI engineer")
+            timeframe: Number of days to complete the goal
+            goal_type: Type of goal (learning, career, freelance, project, personal)
+
+        Returns:
+            Dict containing the structured goal plan
+        """
+        prompt = self._get_prompt_template(goal_type, goal, timeframe)
 
         try:
             message = self.client.messages.create(

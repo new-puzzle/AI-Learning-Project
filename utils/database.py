@@ -24,7 +24,7 @@ class Database:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        # Learning Paths table
+        # Learning Paths table (now supports all goal types)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS learning_paths (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,18 +33,23 @@ class Database:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_active BOOLEAN DEFAULT 1,
-                status TEXT DEFAULT 'active'
+                status TEXT DEFAULT 'active',
+                goal_type TEXT DEFAULT 'learning'
             )
         """)
 
-        # Add status column to existing tables if it doesn't exist
+        # Add new columns to existing tables if they don't exist
         try:
             cursor.execute("ALTER TABLE learning_paths ADD COLUMN status TEXT DEFAULT 'active'")
         except sqlite3.OperationalError:
-            # Column already exists
             pass
 
-        # Topics table (curriculum breakdown)
+        try:
+            cursor.execute("ALTER TABLE learning_paths ADD COLUMN goal_type TEXT DEFAULT 'learning'")
+        except sqlite3.OperationalError:
+            pass
+
+        # Topics table (now with priority, due dates, and notes)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS topics (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,9 +62,28 @@ class Database:
                 is_completed BOOLEAN DEFAULT 0,
                 completed_at TIMESTAMP,
                 time_spent_minutes INTEGER DEFAULT 0,
+                priority TEXT DEFAULT 'medium',
+                due_date DATE,
+                notes TEXT,
                 FOREIGN KEY (path_id) REFERENCES learning_paths(id)
             )
         """)
+
+        # Add new columns to topics table
+        try:
+            cursor.execute("ALTER TABLE topics ADD COLUMN priority TEXT DEFAULT 'medium'")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE topics ADD COLUMN due_date DATE")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE topics ADD COLUMN notes TEXT")
+        except sqlite3.OperationalError:
+            pass
 
         # Progress tracking table
         cursor.execute("""
@@ -78,15 +102,15 @@ class Database:
         conn.commit()
         conn.close()
 
-    def save_learning_path(self, goal: str, timeframe: int) -> int:
-        """Save a new learning path and return its ID"""
+    def save_learning_path(self, goal: str, timeframe: int, goal_type: str = 'learning') -> int:
+        """Save a new goal plan and return its ID"""
         conn = self.get_connection()
         cursor = conn.cursor()
 
         cursor.execute("""
-            INSERT INTO learning_paths (goal, timeframe)
-            VALUES (?, ?)
-        """, (goal, timeframe))
+            INSERT INTO learning_paths (goal, timeframe, goal_type)
+            VALUES (?, ?, ?)
+        """, (goal, timeframe, goal_type))
 
         path_id = cursor.lastrowid
         conn.commit()
@@ -95,7 +119,7 @@ class Database:
         return path_id
 
     def save_topics(self, path_id: int, topics: List[Dict]):
-        """Save curriculum topics for a learning path"""
+        """Save action items/milestones for a goal plan"""
         conn = self.get_connection()
         cursor = conn.cursor()
 
@@ -103,16 +127,19 @@ class Database:
             cursor.execute("""
                 INSERT INTO topics (
                     path_id, day_number, topic_name, subtopics,
-                    estimated_hours, resources
+                    estimated_hours, resources, priority, due_date, notes
                 )
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 path_id,
                 topic.get('day', 0),
                 topic.get('topic', ''),
                 json.dumps(topic.get('subtopics', [])),
                 topic.get('estimated_hours', 0),
-                json.dumps(topic.get('resources', []))
+                json.dumps(topic.get('resources', [])),
+                topic.get('priority', 'medium'),
+                topic.get('due_date', None),
+                topic.get('notes', '')
             ))
 
         conn.commit()
