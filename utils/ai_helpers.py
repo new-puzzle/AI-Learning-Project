@@ -9,14 +9,25 @@ import anthropic
 
 
 class ClaudeAI:
-    def __init__(self, api_key: str = None):
+    # Model mappings
+    MODELS = {
+        "Claude Sonnet 4.5": "claude-sonnet-4-5-20250929",
+        "Claude Sonnet 3.5": "claude-3-5-sonnet-20241022",
+        "Claude Haiku": "claude-3-5-haiku-20241022"
+    }
+
+    def __init__(self, api_key: str = None, model_name: str = "Claude Sonnet 4.5"):
         """Initialize Claude AI client"""
         self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
         if not self.api_key:
             raise ValueError("Anthropic API key not found. Please set ANTHROPIC_API_KEY environment variable.")
 
         self.client = anthropic.Anthropic(api_key=self.api_key)
-        self.model = "claude-sonnet-4-5-20250929"
+        self.set_model(model_name)
+
+    def set_model(self, model_name: str):
+        """Set the model to use for API calls"""
+        self.model = self.MODELS.get(model_name, self.MODELS["Claude Sonnet 4.5"])
 
     def generate_learning_path(self, goal: str, timeframe: int) -> Dict:
         """

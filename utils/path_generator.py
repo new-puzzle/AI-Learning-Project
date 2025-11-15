@@ -137,8 +137,20 @@ class LearningPathGenerator:
         """
         return self.db.get_paths_by_status(status)
 
-    def get_assistance(self, question: str, context: str = "") -> str:
-        """Get AI assistance for learning questions"""
+    def get_assistance(self, question: str, context: str = "", model_name: str = "Claude Sonnet 4.5") -> str:
+        """
+        Get AI assistance for learning questions
+
+        Args:
+            question: The user's question
+            context: Learning context
+            model_name: AI model to use
+
+        Returns:
+            AI response
+        """
+        # Set the model
+        self.ai.set_model(model_name)
         return self.ai.get_learning_assistance(question, context)
 
     def generate_practice(self, topic: str, difficulty: str = "medium", count: int = 3) -> List[Dict]:

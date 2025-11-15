@@ -338,64 +338,160 @@ def render_progress_tracker(generator, path_id):
 
     st.markdown("---")
 
-    # Curriculum with checkboxes
-    st.markdown("#### 📖 Your Curriculum")
+    # Tabs for Curriculum and AI Tutor
+    tab1, tab2 = st.tabs(["📖 Curriculum", "🤖 AI Tutor"])
 
-    for topic in curriculum:
-        topic_id = topic['id']
-        day_num = topic['day']
-        topic_name = topic['topic']
-        subtopics = topic['subtopics']
-        estimated_hours = topic['estimated_hours']
-        resources = topic['resources']
-        is_completed = topic['is_completed']
+    with tab1:
+        # Curriculum with checkboxes
+        st.markdown("#### 📖 Your Learning Curriculum")
 
-        # Topic card
-        card_class = "completed-topic" if is_completed else ""
+        for topic in curriculum:
+            topic_id = topic['id']
+            day_num = topic['day']
+            topic_name = topic['topic']
+            subtopics = topic['subtopics']
+            estimated_hours = topic['estimated_hours']
+            resources = topic['resources']
+            is_completed = topic['is_completed']
 
-        with st.container():
-            col1, col2 = st.columns([1, 20])
+            # Topic card
+            card_class = "completed-topic" if is_completed else ""
 
-            with col1:
-                # Checkbox for completion
-                completed = st.checkbox(
-                    f"Mark {topic_name} as complete",
-                    value=is_completed,
-                    key=f"topic_{topic_id}",
-                    label_visibility="collapsed"
-                )
+            with st.container():
+                col1, col2 = st.columns([1, 20])
 
-                # Update if changed
-                if completed != is_completed:
-                    generator.update_progress(topic_id, completed, 0)
-                    st.rerun()
+                with col1:
+                    # Checkbox for completion
+                    completed = st.checkbox(
+                        f"Mark {topic_name} as complete",
+                        value=is_completed,
+                        key=f"topic_{topic_id}",
+                        label_visibility="collapsed"
+                    )
 
-            with col2:
-                with st.expander(f"{'✅' if is_completed else '⭐'} Day {day_num}: {topic_name}", expanded=not is_completed):
-                    st.markdown(f"**Estimated Time:** {estimated_hours} hours")
+                    # Update if changed
+                    if completed != is_completed:
+                        generator.update_progress(topic_id, completed, 0)
+                        st.rerun()
 
-                    if subtopics:
-                        st.markdown("**What you'll learn:**")
-                        for subtopic in subtopics:
-                            st.markdown(f"- {subtopic}")
+                with col2:
+                    with st.expander(f"{'✅' if is_completed else '⭐'} Day {day_num}: {topic_name}", expanded=not is_completed):
+                        st.markdown(f"**Estimated Time:** {estimated_hours} hours")
 
-                    if resources:
-                        st.markdown("**📚 Resources:**")
-                        for resource in resources:
-                            resource_type = resource.get('type', 'resource')
-                            resource_name = resource.get('name', 'Resource')
-                            resource_url = resource.get('url', '#')
+                        if subtopics:
+                            st.markdown("**What you'll learn:**")
+                            for subtopic in subtopics:
+                                st.markdown(f"- {subtopic}")
 
-                            icon = {
-                                'course': '🎓',
-                                'article': '📄',
-                                'video': '🎥',
-                                'book': '📖'
-                            }.get(resource_type, '🔗')
+                        if resources:
+                            st.markdown("**📚 Resources:**")
+                            for resource in resources:
+                                resource_type = resource.get('type', 'resource')
+                                resource_name = resource.get('name', 'Resource')
+                                resource_url = resource.get('url', '#')
 
-                            st.markdown(f"{icon} [{resource_name}]({resource_url})")
+                                icon = {
+                                    'course': '🎓',
+                                    'article': '📄',
+                                    'video': '🎥',
+                                    'book': '📖'
+                                }.get(resource_type, '🔗')
 
-        st.markdown("<br>", unsafe_allow_html=True)
+                                st.markdown(f"{icon} [{resource_name}]({resource_url})")
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+    with tab2:
+        # AI Tutor Chat Interface
+        st.markdown("#### 🤖 AI Learning Tutor")
+        st.caption("Ask questions about your learning topics and get personalized explanations")
+
+        # Initialize chat history in session state
+        if f'chat_history_{path_id}' not in st.session_state:
+            st.session_state[f'chat_history_{path_id}'] = []
+
+        # Model selector
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.markdown("**Select AI Model:**")
+        with col2:
+            model_choice = st.selectbox(
+                "Model",
+                ["Claude Sonnet 4.5", "Claude Sonnet 3.5", "Claude Haiku"],
+                key=f"model_selector_{path_id}",
+                label_visibility="collapsed"
+            )
+
+        # Context about current learning path
+        current_context = f"Learning Goal: {path_info['goal']}\nTopics covered: " + ", ".join([t['topic'] for t in curriculum[:5]])
+
+        # Display chat history
+        for i, message in enumerate(st.session_state[f'chat_history_{path_id}']):
+            if message['role'] == 'user':
+                st.markdown(f"**You:** {message['content']}")
+            else:
+                model_used = message.get('model', 'Claude Sonnet 4.5')
+                st.markdown(f"**AI Tutor ({model_used}):** {message['content']}")
+            st.markdown("---")
+
+        # Chat input
+        user_question = st.text_area(
+            "Ask a question about your learning topics:",
+            placeholder="e.g., Can you explain prompt engineering in simple terms?\nWhat's the difference between zero-shot and few-shot prompting?",
+            height=100,
+            key=f"chat_input_{path_id}"
+        )
+
+        col1, col2 = st.columns([1, 5])
+        with col1:
+            if st.button("Ask Tutor", type="primary"):
+                if user_question.strip():
+                    # Add user message to history
+                    st.session_state[f'chat_history_{path_id}'].append({
+                        'role': 'user',
+                        'content': user_question
+                    })
+
+                    # Get AI response
+                    with st.spinner(f"AI Tutor ({model_choice}) is thinking..."):
+                        try:
+                            response = generator.get_assistance(user_question, current_context, model_choice)
+
+                            # Add AI response to history with model info
+                            st.session_state[f'chat_history_{path_id}'].append({
+                                'role': 'assistant',
+                                'content': response,
+                                'model': model_choice
+                            })
+
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error: {str(e)}")
+                else:
+                    st.warning("Please enter a question")
+
+        with col2:
+            if st.button("Clear Chat History"):
+                st.session_state[f'chat_history_{path_id}'] = []
+                st.rerun()
+
+        # Quick question suggestions
+        st.markdown("**💡 Quick Question Suggestions:**")
+        suggestions_col1, suggestions_col2 = st.columns(2)
+
+        with suggestions_col1:
+            if st.button("Explain this topic simply", key=f"suggest1_{path_id}"):
+                st.session_state[f'suggested_question_{path_id}'] = "Can you explain the current topic in simple terms with examples?"
+
+            if st.button("Give me practice problems", key=f"suggest2_{path_id}"):
+                st.session_state[f'suggested_question_{path_id}'] = "Can you give me some practice problems for this topic?"
+
+        with suggestions_col2:
+            if st.button("What are common mistakes?", key=f"suggest3_{path_id}"):
+                st.session_state[f'suggested_question_{path_id}'] = "What are common mistakes beginners make with this topic?"
+
+            if st.button("How does this apply in real-world?", key=f"suggest4_{path_id}"):
+                st.session_state[f'suggested_question_{path_id}'] = "How is this used in real-world applications?"
 
 
 def main():
