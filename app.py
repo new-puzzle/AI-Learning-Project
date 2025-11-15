@@ -404,23 +404,42 @@ def render_progress_tracker(generator, path_id):
     with tab2:
         # AI Tutor Chat Interface
         st.markdown("#### 🤖 AI Learning Tutor")
-        st.caption("Ask questions about your learning topics and get personalized explanations")
+        st.caption("Ask questions, upload images/files, and get personalized explanations from multiple AI models")
 
         # Initialize chat history in session state
         if f'chat_history_{path_id}' not in st.session_state:
             st.session_state[f'chat_history_{path_id}'] = []
 
+        # Get available models
+        available_models = generator.get_available_models()
+
+        # Build model options with provider grouping
+        model_options = []
+        for provider_name, provider_data in available_models.items():
+            configured_status = "✓" if provider_data['configured'] else "⚠️"
+            vision_status = "👁️" if provider_data['supports_vision'] else ""
+            for model in provider_data['models']:
+                model_options.append(f"{configured_status} {vision_status} {provider_name} / {model}")
+
         # Model selector
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.markdown("**Select AI Model:**")
-        with col2:
-            model_choice = st.selectbox(
-                "Model",
-                ["Claude Sonnet 4.5", "Claude Sonnet 3.5", "Claude Haiku"],
-                key=f"model_selector_{path_id}",
-                label_visibility="collapsed"
-            )
+        st.markdown("**Select AI Model:** (✓ = configured, ⚠️ = not configured, 👁️ = supports images)")
+        model_choice = st.selectbox(
+            "Model",
+            model_options,
+            key=f"model_selector_{path_id}",
+            label_visibility="collapsed",
+            help="Configure API keys in .env file to enable all models"
+        )
+
+        # File upload
+        st.markdown("**Upload Image or File (optional):**")
+        uploaded_file = st.file_uploader(
+            "Upload file",
+            type=["png", "jpg", "jpeg", "pdf", "txt", "docx"],
+            key=f"file_upload_{path_id}",
+            label_visibility="collapsed",
+            help="Upload images, PDFs, or documents for the AI to analyze"
+        )
 
         # Context about current learning path
         current_context = f"Learning Goal: {path_info['goal']}\nTopics covered: " + ", ".join([t['topic'] for t in curriculum[:5]])
@@ -445,30 +464,73 @@ def render_progress_tracker(generator, path_id):
         col1, col2 = st.columns([1, 5])
         with col1:
             if st.button("Ask Tutor", type="primary"):
-                if user_question.strip():
+                if user_question.strip() or uploaded_file:
+                    # Clean up model choice (remove status icons)
+                    clean_model = model_choice
+                    for icon in ["✓", "⚠️", "👁️", " "]:
+                        clean_model = clean_model.replace(icon, "")
+                    clean_model = clean_model.strip()
+
+                    # Prepare user message
+                    user_msg = user_question if user_question.strip() else "(Analyzing uploaded file)"
+                    if uploaded_file:
+                        user_msg += f"\n📎 Uploaded: {uploaded_file.name}"
+
                     # Add user message to history
                     st.session_state[f'chat_history_{path_id}'].append({
                         'role': 'user',
-                        'content': user_question
+                        'content': user_msg
                     })
 
                     # Get AI response
-                    with st.spinner(f"AI Tutor ({model_choice}) is thinking..."):
+                    with st.spinner(f"AI Tutor ({clean_model}) is thinking..."):
                         try:
-                            response = generator.get_assistance(user_question, current_context, model_choice)
+                            if uploaded_file and uploaded_file.type.startswith('image/'):
+                                # Image analysis
+                                image_data = uploaded_file.read()
+                                prompt = user_question if user_question.strip() else "Analyze this image and explain what you see. If it contains any problems or questions, solve them."
+                                response = generator.analyze_uploaded_image(image_data, prompt, clean_model)
+                            elif uploaded_file:
+                                # Text file handling (PDF, TXT, DOCX)
+                                file_content = ""
+                                if uploaded_file.type == "application/pdf":
+                                    try:
+                                        import PyPDF2
+                                        import io
+                                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
+                                        for page in pdf_reader.pages:
+                                            file_content += page.extract_text()
+                                    except:
+                                        file_content = "(Could not extract PDF text)"
+                                elif uploaded_file.type == "text/plain":
+                                    file_content = uploaded_file.read().decode('utf-8')
+                                elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                                    try:
+                                        import docx
+                                        import io
+                                        doc = docx.Document(io.BytesIO(uploaded_file.read()))
+                                        file_content = "\n".join([para.text for para in doc.paragraphs])
+                                    except:
+                                        file_content = "(Could not extract document text)"
+
+                                full_question = f"Based on this document:\n\n{file_content[:2000]}...\n\n{user_question}"
+                                response = generator.get_assistance(full_question, current_context, clean_model)
+                            else:
+                                # Regular text question
+                                response = generator.get_assistance(user_question, current_context, clean_model)
 
                             # Add AI response to history with model info
                             st.session_state[f'chat_history_{path_id}'].append({
                                 'role': 'assistant',
                                 'content': response,
-                                'model': model_choice
+                                'model': clean_model
                             })
 
                             st.rerun()
                         except Exception as e:
-                            st.error(f"Error: {str(e)}")
+                            st.error(f"Error: {str(e)}\n\nMake sure the API key for this provider is configured in your .env file.")
                 else:
-                    st.warning("Please enter a question")
+                    st.warning("Please enter a question or upload a file")
 
         with col2:
             if st.button("Clear Chat History"):
