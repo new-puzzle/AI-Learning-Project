@@ -32,9 +32,17 @@ class Database:
                 timeframe INTEGER NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                is_active BOOLEAN DEFAULT 1
+                is_active BOOLEAN DEFAULT 1,
+                status TEXT DEFAULT 'active'
             )
         """)
+
+        # Add status column to existing tables if it doesn't exist
+        try:
+            cursor.execute("ALTER TABLE learning_paths ADD COLUMN status TEXT DEFAULT 'active'")
+        except sqlite3.OperationalError:
+            # Column already exists
+            pass
 
         # Topics table (curriculum breakdown)
         cursor.execute("""
@@ -248,9 +256,64 @@ class Database:
 
         cursor.execute("""
             UPDATE learning_paths
-            SET is_active = 0
+            SET is_active = 0, status = 'deleted'
             WHERE id = ?
         """, (path_id,))
 
         conn.commit()
         conn.close()
+
+    def update_path_status(self, path_id: int, status: str):
+        """
+        Update the status of a learning path
+        Status can be: 'active', 'on_hold', 'archived', 'deleted'
+        """
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        is_active = 1 if status in ['active', 'on_hold'] else 0
+
+        cursor.execute("""
+            UPDATE learning_paths
+            SET status = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        """, (status, is_active, path_id))
+
+        conn.commit()
+        conn.close()
+
+    def get_paths_by_status(self, status: str = None) -> List[Dict]:
+        """
+        Get learning paths filtered by status
+        If status is None, return all paths
+        """
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        if status:
+            cursor.execute("""
+                SELECT id, goal, timeframe, created_at, updated_at, status
+                FROM learning_paths
+                WHERE status = ?
+                ORDER BY updated_at DESC
+            """, (status,))
+        else:
+            cursor.execute("""
+                SELECT id, goal, timeframe, created_at, updated_at, status
+                FROM learning_paths
+                ORDER BY updated_at DESC
+            """)
+
+        paths = []
+        for row in cursor.fetchall():
+            paths.append({
+                'id': row[0],
+                'goal': row[1],
+                'timeframe': row[2],
+                'created_at': row[3],
+                'updated_at': row[4],
+                'status': row[5] if len(row) > 5 else 'active'
+            })
+
+        conn.close()
+        return paths

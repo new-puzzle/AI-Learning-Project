@@ -115,6 +115,28 @@ class LearningPathGenerator:
         """Delete (soft delete) a learning path"""
         self.db.delete_learning_path(path_id)
 
+    def update_path_status(self, path_id: int, status: str):
+        """
+        Update the status of a learning path
+
+        Args:
+            path_id: The learning path ID
+            status: New status ('active', 'on_hold', 'archived', 'deleted')
+        """
+        self.db.update_path_status(path_id, status)
+
+    def get_paths_by_status(self, status: str = None) -> List[Dict]:
+        """
+        Get learning paths filtered by status
+
+        Args:
+            status: Filter by status (None for all paths)
+
+        Returns:
+            List of learning paths
+        """
+        return self.db.get_paths_by_status(status)
+
     def get_assistance(self, question: str, context: str = "") -> str:
         """Get AI assistance for learning questions"""
         return self.ai.get_learning_assistance(question, context)

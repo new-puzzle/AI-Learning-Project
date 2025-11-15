@@ -201,7 +201,22 @@ def render_saved_paths(generator):
     """Render list of saved learning paths"""
     st.markdown("### 📋 My Learning Paths")
 
-    paths = generator.get_all_paths()
+    # Status filter
+    status_filter = st.selectbox(
+        "Filter by status:",
+        ["All", "Active", "On Hold", "Archived"],
+        key="status_filter"
+    )
+
+    # Map filter to database values
+    status_map = {
+        "All": None,
+        "Active": "active",
+        "On Hold": "on_hold",
+        "Archived": "archived"
+    }
+
+    paths = generator.get_paths_by_status(status_map[status_filter])
 
     if not paths:
         st.info("No learning paths yet. Create your first one above!")
@@ -212,16 +227,26 @@ def render_saved_paths(generator):
         goal = path['goal']
         timeframe = path['timeframe']
         created_at = path['created_at']
+        status = path.get('status', 'active')
 
         # Get progress stats
         stats = generator.get_progress_stats(path_id)
         progress = stats['progress_percentage']
 
+        # Status badge
+        status_colors = {
+            'active': '🟢',
+            'on_hold': '🟡',
+            'archived': '⚪',
+            'deleted': '🔴'
+        }
+        status_icon = status_colors.get(status, '🟢')
+
         col1, col2, col3 = st.columns([3, 1, 1])
 
         with col1:
-            st.markdown(f"**{goal}**")
-            st.caption(f"Created: {created_at[:10]} | {timeframe} days")
+            st.markdown(f"{status_icon} **{goal}**")
+            st.caption(f"Created: {created_at[:10]} | {timeframe} days | Status: {status.replace('_', ' ').title()}")
 
         with col2:
             st.progress(progress / 100)
@@ -246,15 +271,43 @@ def render_progress_tracker(generator, path_id):
     curriculum = path_data['curriculum']
     stats = path_data['stats']
 
-    # Header with back button
-    col1, col2 = st.columns([4, 1])
+    # Header with back button and status controls
+    col1, col2, col3 = st.columns([3, 1, 1])
     with col1:
         st.markdown(f"### 📚 {path_info['goal']}")
     with col2:
+        # Status management
+        current_status = path_info.get('status', 'active')
+        new_status = st.selectbox(
+            "Status",
+            ["active", "on_hold", "archived"],
+            index=["active", "on_hold", "archived"].index(current_status),
+            key=f"status_select_{path_id}",
+            label_visibility="collapsed"
+        )
+        if new_status != current_status:
+            generator.update_path_status(path_id, new_status)
+            st.success(f"Status updated to: {new_status.replace('_', ' ').title()}")
+            st.rerun()
+    with col3:
         if st.button("← Back"):
             st.session_state.show_generator = True
             st.session_state.current_path_id = None
             st.rerun()
+
+    # Delete confirmation
+    with st.expander("⚙️ Advanced Options"):
+        st.warning("Danger Zone")
+        if st.button("🗑️ Delete this learning path", key=f"delete_{path_id}"):
+            if st.session_state.get(f"confirm_delete_{path_id}", False):
+                generator.update_path_status(path_id, 'deleted')
+                st.success("Learning path deleted!")
+                st.session_state.show_generator = True
+                st.session_state.current_path_id = None
+                st.rerun()
+            else:
+                st.session_state[f"confirm_delete_{path_id}"] = True
+                st.error("Click again to confirm deletion")
 
     # Progress stats
     col1, col2, col3, col4 = st.columns(4)
