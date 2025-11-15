@@ -253,6 +253,7 @@ def render_saved_paths(generator):
         timeframe = path['timeframe']
         created_at = path['created_at']
         status = path.get('status', 'active')
+        goal_type = path.get('goal_type', 'learning')
 
         # Get progress stats
         stats = generator.get_progress_stats(path_id)
@@ -267,11 +268,21 @@ def render_saved_paths(generator):
         }
         status_icon = status_colors.get(status, '🟢')
 
+        # Goal type icons
+        goal_type_icons = {
+            'learning': '📚',
+            'career': '💼',
+            'freelance': '💰',
+            'project': '🚀',
+            'personal': '🎯'
+        }
+        goal_type_icon = goal_type_icons.get(goal_type, '📚')
+
         col1, col2, col3 = st.columns([3, 1, 1])
 
         with col1:
-            st.markdown(f"{status_icon} **{goal}**")
-            st.caption(f"Created: {created_at[:10]} | {timeframe} days | Status: {status.replace('_', ' ').title()}")
+            st.markdown(f"{status_icon} {goal_type_icon} **{goal}**")
+            st.caption(f"Created: {created_at[:10]} | {timeframe} days | Type: {goal_type.title()} | Status: {status.replace('_', ' ').title()}")
 
         with col2:
             st.progress(progress / 100)
@@ -361,6 +372,40 @@ def render_progress_tracker(generator, path_id):
     # Progress bar
     st.progress(stats['progress_percentage'] / 100)
 
+    # On-track indicator
+    from datetime import datetime
+    created_at = path_info.get('created_at', '')
+    timeframe = path_info.get('timeframe', 30)
+
+    if created_at:
+        try:
+            # Parse created_at date (format: YYYY-MM-DD HH:MM:SS)
+            created_date = datetime.strptime(created_at.split(' ')[0], '%Y-%m-%d')
+            current_date = datetime.now()
+            days_elapsed = (current_date - created_date).days
+
+            # Calculate expected progress
+            expected_progress = min((days_elapsed / timeframe) * 100, 100)
+            actual_progress = stats['progress_percentage']
+
+            # Determine status
+            if actual_progress >= expected_progress:
+                status_text = "✅ On Track"
+                status_color = "green"
+            else:
+                behind_by = expected_progress - actual_progress
+                status_text = f"⚠️ Behind by {behind_by:.0f}%"
+                status_color = "orange"
+
+            # Display on-track status
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                st.markdown(f"**Status:**")
+            with col2:
+                st.markdown(f"<span style='color: {status_color}; font-weight: bold;'>{status_text}</span> (Expected: {expected_progress:.0f}% by day {days_elapsed})", unsafe_allow_html=True)
+        except:
+            pass  # Skip if date parsing fails
+
     st.markdown("---")
 
     # Tabs for Curriculum and AI Tutor
@@ -378,6 +423,14 @@ def render_progress_tracker(generator, path_id):
             estimated_hours = topic['estimated_hours']
             resources = topic['resources']
             is_completed = topic['is_completed']
+            priority = topic.get('priority', 'medium')
+
+            # Priority indicators
+            priority_emoji = {
+                'high': '🔴',
+                'medium': '🟡',
+                'low': '🟢'
+            }.get(priority, '🟡')
 
             # Topic card
             card_class = "completed-topic" if is_completed else ""
@@ -400,7 +453,7 @@ def render_progress_tracker(generator, path_id):
                         st.rerun()
 
                 with col2:
-                    with st.expander(f"{'✅' if is_completed else '⭐'} Day {day_num}: {topic_name}", expanded=not is_completed):
+                    with st.expander(f"{priority_emoji} {'✅' if is_completed else '⭐'} Day {day_num}: {topic_name}", expanded=not is_completed):
                         st.markdown(f"**Estimated Time:** {estimated_hours} hours")
 
                         if subtopics:

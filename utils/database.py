@@ -152,14 +152,14 @@ class Database:
 
         if active_only:
             cursor.execute("""
-                SELECT id, goal, timeframe, created_at, updated_at
+                SELECT id, goal, timeframe, created_at, updated_at, status, goal_type
                 FROM learning_paths
                 WHERE is_active = 1
                 ORDER BY created_at DESC
             """)
         else:
             cursor.execute("""
-                SELECT id, goal, timeframe, created_at, updated_at
+                SELECT id, goal, timeframe, created_at, updated_at, status, goal_type
                 FROM learning_paths
                 ORDER BY created_at DESC
             """)
@@ -171,7 +171,9 @@ class Database:
                 'goal': row[1],
                 'timeframe': row[2],
                 'created_at': row[3],
-                'updated_at': row[4]
+                'updated_at': row[4],
+                'status': row[5] if len(row) > 5 else 'active',
+                'goal_type': row[6] if len(row) > 6 else 'learning'
             })
 
         conn.close()
@@ -184,7 +186,8 @@ class Database:
 
         cursor.execute("""
             SELECT id, day_number, topic_name, subtopics, estimated_hours,
-                   resources, is_completed, completed_at, time_spent_minutes
+                   resources, is_completed, completed_at, time_spent_minutes,
+                   priority, due_date, notes
             FROM topics
             WHERE path_id = ?
             ORDER BY day_number
@@ -201,7 +204,10 @@ class Database:
                 'resources': json.loads(row[5]) if row[5] else [],
                 'is_completed': bool(row[6]),
                 'completed_at': row[7],
-                'time_spent_minutes': row[8]
+                'time_spent_minutes': row[8],
+                'priority': row[9] if len(row) > 9 else 'medium',
+                'due_date': row[10] if len(row) > 10 else None,
+                'notes': row[11] if len(row) > 11 else ''
             })
 
         conn.close()
