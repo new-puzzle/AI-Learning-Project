@@ -16,7 +16,7 @@ class ClaudeAI:
             raise ValueError("Anthropic API key not found. Please set ANTHROPIC_API_KEY environment variable.")
 
         self.client = anthropic.Anthropic(api_key=self.api_key)
-        self.model = "claude-3-5-sonnet-20240620"
+        self.model = "claude-sonnet-4-5-20250929"
 
     def generate_learning_path(self, goal: str, timeframe: int) -> Dict:
         """
