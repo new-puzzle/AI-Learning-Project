@@ -1380,7 +1380,7 @@ Format your response in 3 clear sections with those headers."""
         # Voice settings
         with st.expander("🎙️ Voice Settings", expanded=False):
             from utils.voice_handler import render_voice_settings
-            render_voice_settings()
+            render_voice_settings(key_prefix="tutor_")
 
         # Initialize chat history in session state
         if f'chat_history_{path_id}' not in st.session_state:
@@ -1559,7 +1559,7 @@ Format your response in 3 clear sections with those headers."""
         # Voice settings for coach chat
         with st.expander("🎙️ Voice Settings", expanded=False):
             from utils.voice_handler import render_voice_settings
-            render_voice_settings()
+            render_voice_settings(key_prefix="coach_")
 
         # Initialize coaching chat history
         if f'coach_chat_{path_id}' not in st.session_state:

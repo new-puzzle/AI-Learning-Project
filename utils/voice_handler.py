@@ -218,9 +218,12 @@ def render_voice_output_button(text_to_speak, button_text="🔊 Read Aloud", key
     html(html_code, height=100)
 
 
-def render_voice_settings():
+def render_voice_settings(key_prefix=""):
     """
     Render voice settings controls
+
+    Args:
+        key_prefix: Optional prefix for widget keys to avoid duplicates
     """
     st.markdown("### 🎙️ Voice Settings")
 
@@ -230,7 +233,7 @@ def render_voice_settings():
         st.checkbox(
             "Auto-read AI responses",
             value=st.session_state.get('auto_read_responses', False),
-            key='auto_read_responses',
+            key=f'{key_prefix}auto_read_responses',
             help="Automatically read AI responses aloud"
         )
 
@@ -238,7 +241,7 @@ def render_voice_settings():
         st.checkbox(
             "Enable voice input",
             value=st.session_state.get('voice_input_enabled', True),
-            key='voice_input_enabled',
+            key=f'{key_prefix}voice_input_enabled',
             help="Show voice input buttons"
         )
 
