@@ -330,7 +330,7 @@ def render_learning_path_generator(generator):
         "personal": "e.g., Run a 10K race, Learn guitar, Lose 20 pounds"
     }
 
-    col1, col2 = st.columns([2, 1])
+    col1, col2, col3 = st.columns([3, 1, 1])
 
     with col1:
         goal = st.text_input(
@@ -347,6 +347,11 @@ def render_learning_path_generator(generator):
             value=30,
             help="How many days do you want to dedicate to this goal?"
         )
+
+    with col3:
+        st.markdown("<br>", unsafe_allow_html=True)
+        from utils.voice_handler import render_voice_input_button
+        render_voice_input_button(key_suffix="goal_input")
 
     if st.button("Generate Goal Plan", type="primary", use_container_width=True):
         if not goal:
@@ -770,6 +775,11 @@ def render_progress_tracker(generator, path_id):
         st.markdown("#### 🤖 AI Learning Tutor")
         st.caption("Ask questions, upload images/files, and get personalized explanations from multiple AI models")
 
+        # Voice settings
+        with st.expander("🎙️ Voice Settings", expanded=False):
+            from utils.voice_handler import render_voice_settings
+            render_voice_settings()
+
         # Initialize chat history in session state
         if f'chat_history_{path_id}' not in st.session_state:
             st.session_state[f'chat_history_{path_id}'] = []
@@ -815,15 +825,35 @@ def render_progress_tracker(generator, path_id):
             else:
                 model_used = message.get('model', 'Claude Sonnet 4.5')
                 st.markdown(f"**AI Tutor ({model_used}):** {message['content']}")
+
+                # Voice output button for AI responses
+                if st.session_state.get('auto_read_responses', False) or True:  # Always show button
+                    col_voice1, col_voice2 = st.columns([1, 4])
+                    with col_voice1:
+                        from utils.voice_handler import render_voice_output_button
+                        render_voice_output_button(
+                            text_to_speak=message['content'][:500],  # Limit to 500 chars for performance
+                            button_text="🔊 Read",
+                            key_suffix=f"response_{path_id}_{i}"
+                        )
             st.markdown("---")
 
-        # Chat input
-        user_question = st.text_area(
-            "Ask a question about your learning topics:",
-            placeholder="e.g., Can you explain prompt engineering in simple terms?\nWhat's the difference between zero-shot and few-shot prompting?",
-            height=100,
-            key=f"chat_input_{path_id}"
-        )
+        # Chat input with voice
+        col_input, col_voice = st.columns([4, 1])
+
+        with col_input:
+            user_question = st.text_area(
+                "Ask a question about your learning topics:",
+                placeholder="e.g., Can you explain prompt engineering in simple terms?\nWhat's the difference between zero-shot and few-shot prompting?",
+                height=100,
+                key=f"chat_input_{path_id}"
+            )
+
+        with col_voice:
+            if st.session_state.get('voice_input_enabled', True):
+                st.markdown("<br>", unsafe_allow_html=True)
+                from utils.voice_handler import render_voice_input_button
+                render_voice_input_button(key_suffix=f"tutor_{path_id}")
 
         col1, col2 = st.columns([1, 5])
         with col1:

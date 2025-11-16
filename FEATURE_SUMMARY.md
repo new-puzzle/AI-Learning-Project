@@ -266,7 +266,86 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 10. 📄 PDF Export (NEW!)
+### 10. 🎤 Voice Interface (NEW!)
+**Status:** ✅ Fully Working
+
+**What it does:**
+- Hands-free interaction with GoalPath AI
+- Voice input for questions and goals (speech-to-text)
+- Voice output for AI responses (text-to-speech)
+- Browser-native Web Speech API (completely free!)
+
+**Voice Input Features:**
+
+**🎤 Speak Your Questions:**
+- Tap microphone button to start voice recognition
+- Speak naturally - AI transcribes automatically
+- Works in AI Tutor for asking questions
+- Works in goal creation for saying your goals
+- Real-time transcription
+
+**🎙️ Where You Can Use Voice:**
+1. **Goal Creation:** Speak your goal instead of typing
+2. **AI Tutor:** Ask questions by voice hands-free
+3. Any text input field in the app
+
+**Voice Output Features:**
+
+**🔊 Listen to AI Responses:**
+- "Read Aloud" button on every AI response
+- Adjustable settings (coming soon: speed, pitch, voice selection)
+- Pause/resume/stop controls
+- Auto-read mode available
+
+**Voice Settings:**
+- **Auto-read responses:** Automatically speak AI answers
+- **Enable voice input:** Show/hide voice buttons
+- Settings saved per session
+
+**How it works:**
+1. Open any goal plan or create new one
+2. Look for 🎤 button next to text inputs
+3. Tap 🎤 and speak when prompted
+4. Your speech converts to text automatically
+5. For AI responses, tap 🔊 Read to hear aloud
+
+**Browser Support:**
+- ✅ Chrome (Desktop & Mobile) - Best support
+- ✅ Safari (iOS & macOS) - Excellent
+- ✅ Edge (Desktop & Mobile) - Great
+- ✅ Firefox (Desktop) - Good
+- ⚠️ Opera - Limited support
+
+**Mobile Optimized:**
+- Large, touch-friendly voice buttons
+- Works with phone microphones
+- Hands-free operation while commuting
+- Perfect for mobile goal tracking
+
+**Use Cases:**
+- 🚗 Ask questions while driving (hands-free)
+- 🏃 Create goals while jogging
+- 🍳 Learn while cooking (hands-free)
+- ♿ Accessibility for users with disabilities
+- 📱 Mobile-first interaction
+- 🎧 Audio learning preference
+
+**Technical Details:**
+- Uses Web Speech API (browser-native)
+- $0 cost - completely free
+- No API keys required
+- Works offline once page loaded
+- HTTPS required (Streamlit Cloud has this)
+
+**Privacy:**
+- Voice processing happens in your browser
+- No audio sent to external servers
+- Speech recognition by browser engine (Google/Apple)
+- Completely private and secure
+
+---
+
+### 11. 📄 PDF Export (NEW!)
 **Status:** ✅ Fully Working
 
 **What it does:**
@@ -299,7 +378,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 11. 💾 Database & Persistence
+### 12. 💾 Database & Persistence
 **Status:** ✅ Fully Working
 
 **SQLite Database with 3 Tables:**
@@ -334,7 +413,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 12. 🎨 User Interface
+### 13. 🎨 User Interface
 **Status:** ✅ Fully Working
 
 **Layout:**
@@ -422,8 +501,10 @@ reportlab>=4.0.0
 9. **Status Management** - Flexible plan organization
 10. **Chat History** - Persistent per goal plan
 11. **Model Switching** - Compare AI responses easily
-12. **YouTube Auto-Embed** - Watch tutorial videos inline without leaving app
-13. **PDF Export** - Download goal plans for offline use or sharing
+12. **Voice Interface** - Hands-free voice input and output (FREE!)
+13. **YouTube Auto-Embed** - Watch tutorial videos inline without leaving app
+14. **PDF Export** - Download goal plans for offline use or sharing
+15. **Mobile Optimized** - Perfect experience on phones and tablets
 
 ---
 
@@ -613,8 +694,11 @@ QWEN_API_KEY=your_qwen_key
 8. **Goal-focused** - Not just chatbot, structured action planning
 9. **Progress tracking** - Know where you are in journey with on-track indicator
 10. **Model comparison** - Try different AIs for same question
-11. **YouTube auto-embed** - Watch tutorials without leaving the app
-12. **PDF export** - Take your goals offline, share with coaches/mentors
+11. **Voice interface** - Hands-free interaction (FREE browser-native)
+12. **YouTube auto-embed** - Watch tutorials without leaving the app
+13. **PDF export** - Take your goals offline, share with coaches/mentors
+14. **Mobile optimized** - Works perfectly on phones and tablets
+15. **Fully accessible** - Voice support for users with disabilities
 
 ---
 
