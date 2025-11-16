@@ -398,12 +398,34 @@ AI-Learning-Project/
 ├── requirements.txt         # Python dependencies
 ├── .env.example            # Environment template
 ├── .gitignore              # Git ignore rules
+├── DEPLOYMENT.md           # Step-by-step deployment guide
 ├── MOBILE_GUIDE.md         # Mobile optimization documentation
 ├── FEATURE_SUMMARY.md      # Complete feature documentation
 └── README.md               # This file
 ```
 
 ## 🚀 Deployment
+
+**For complete step-by-step deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md)**
+
+**Quick Summary:**
+
+### Recommended: Streamlit Cloud (Best for Mobile)
+
+Perfect for your use case - access GoalPath AI from anywhere on your phone!
+
+**Steps:**
+1. Get Anthropic API key ([console.anthropic.com](https://console.anthropic.com/))
+2. Push code to GitHub
+3. Deploy on [share.streamlit.io](https://share.streamlit.io)
+4. Add secrets (APP_PASSWORD + API keys)
+5. Access from mobile - add to home screen!
+
+**Time:** 15 minutes | **Cost:** FREE (Anthropic has free tier)
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed walkthrough with screenshots and mobile setup tips.
+
+---
 
 ### Option 1: Streamlit Cloud (Recommended)
 
