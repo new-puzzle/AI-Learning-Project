@@ -63,6 +63,7 @@ GoalPath AI is not just another to-do list or learning platform. It's a complete
 - **Visual Progress** - Completion percentage, streak counters
 - **Status Management** - Active, On Hold, Archived, Deleted
 - **Activity Metrics** - Time spent, completed topics, active days
+- **Resource Links** - Add links to your own study materials (Google Drive, Notion, local files) (NEW!)
 
 ### 📄 Export & Share
 - **Calendar Export (.ics)** - Import your goal plan into Google Calendar, Outlook, Apple Calendar, or any calendar app (NEW!)
@@ -238,6 +239,35 @@ GoalPath AI uses **cookie-based password protection** with 24-hour persistent se
 - Supported: PNG, JPG, PDF, TXT, DOCX
 - Add your question
 - AI analyzes and responds based on file content
+
+### Adding Your Own Resource Links (NEW!)
+
+**Keep your study materials organized:**
+
+1. Expand any task in your goal plan
+2. Scroll to "📎 My Resource Links" section
+3. Add links to your external resources (one per line):
+   - Google Drive folders
+   - Notion pages
+   - Saved PDF files
+   - YouTube playlists
+   - GitHub repos
+   - Any other study materials
+
+**Examples:**
+```
+https://drive.google.com/folder/my-python-notes
+https://notion.so/my-study-guide
+~/Documents/python-tutorial.pdf
+https://github.com/myusername/learning-project
+```
+
+**Features:**
+- Auto-saves as you type
+- Web links become clickable (open in new tab)
+- Local file paths displayed for reference
+- Perfect for quick access to frequently used materials
+- Mobile-friendly - tap to open links on the go
 
 ### Time Tracking & Coaching (NEW!)
 

@@ -115,6 +115,11 @@ class Database:
         except sqlite3.OperationalError:
             pass
 
+        try:
+            cursor.execute("ALTER TABLE topics ADD COLUMN resource_links TEXT")
+        except sqlite3.OperationalError:
+            pass
+
         # Time tracking sessions table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS time_sessions (
@@ -268,7 +273,7 @@ class Database:
         cursor.execute("""
             SELECT id, day_number, topic_name, subtopics, estimated_hours,
                    resources, is_completed, completed_at, time_spent_minutes,
-                   priority, due_date, notes, actual_hours
+                   priority, due_date, notes, actual_hours, resource_links
             FROM topics
             WHERE path_id = ?
             ORDER BY day_number
@@ -289,7 +294,8 @@ class Database:
                 'priority': row[9] if len(row) > 9 else 'medium',
                 'due_date': row[10] if len(row) > 10 else None,
                 'notes': row[11] if len(row) > 11 else '',
-                'actual_hours': row[12] if len(row) > 12 else 0
+                'actual_hours': row[12] if len(row) > 12 else 0,
+                'resource_links': row[13] if len(row) > 13 else ''
             })
 
         conn.close()

@@ -1332,6 +1332,44 @@ Format your response in 3 clear sections with those headers."""
                                         </iframe>
                                         """, unsafe_allow_html=True)
 
+                        # Resource Links Section
+                        st.markdown("---")
+                        st.markdown("**📎 My Resource Links**")
+                        st.caption("Add links to your own study materials (Google Drive, Notion, saved files, etc.)")
+
+                        current_links = topic.get('resource_links', '') or ''
+                        resource_links = st.text_area(
+                            "Add your resource links (one per line)",
+                            value=current_links,
+                            height=100,
+                            key=f"resource_links_{topic_id}",
+                            placeholder="Example:\nhttps://drive.google.com/folder/my-python-notes\nhttps://notion.so/my-study-guide\n~/Documents/python-tutorial.pdf",
+                            label_visibility="collapsed"
+                        )
+
+                        # Auto-save on change
+                        if resource_links != current_links:
+                            conn = generator.db.get_connection()
+                            cursor = conn.cursor()
+                            cursor.execute("""
+                                UPDATE topics
+                                SET resource_links = ?
+                                WHERE id = ?
+                            """, (resource_links, topic_id))
+                            conn.commit()
+                            conn.close()
+
+                        # Display links as clickable
+                        if resource_links and resource_links.strip():
+                            st.markdown("**Your saved links:**")
+                            for link in resource_links.strip().split('\n'):
+                                link = link.strip()
+                                if link:
+                                    if link.startswith('http://') or link.startswith('https://'):
+                                        st.markdown(f"🔗 [{link}]({link})")
+                                    else:
+                                        st.markdown(f"📁 `{link}`")
+
             st.markdown("<br>", unsafe_allow_html=True)
 
     with tab2:
