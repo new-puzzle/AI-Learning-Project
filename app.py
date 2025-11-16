@@ -448,8 +448,16 @@ def render_template_selector(generator):
     # If template selected, show the custom form with pre-filled values
     if st.session_state.selected_template:
         st.markdown("---")
-        st.markdown("#### ✏️ Customize Your Template")
-        st.info(f"**Template:** {st.session_state.selected_template.name} - All fields below are editable!")
+
+        # Header with close button
+        col_header, col_close = st.columns([5, 1])
+        with col_header:
+            st.markdown("#### ✏️ Customize Your Template")
+            st.info(f"**Template:** {st.session_state.selected_template.name} - All fields below are editable!")
+        with col_close:
+            if st.button("❌ Close", key="close_template_top", use_container_width=True):
+                st.session_state.selected_template = None
+                st.rerun()
 
         render_custom_goal_form(generator, template=st.session_state.selected_template, key_prefix="template_")
 
@@ -516,7 +524,7 @@ def render_custom_goal_form(generator, template=None, key_prefix=""):
     with col3:
         st.markdown("<br>", unsafe_allow_html=True)
         from utils.voice_handler import render_voice_input_button
-        render_voice_input_button(key_suffix="goal_input")
+        render_voice_input_button(key_suffix=f"{key_prefix}goal_input")
 
     # Date and time planning inputs
     st.markdown("#### 📅 Schedule Your Goal")
@@ -1763,6 +1771,132 @@ Respond naturally and conversationally. Keep it to 3-4 sentences unless they exp
                 st.rerun()
 
 
+def render_general_ai_chat():
+    """Render general AI assistant chat (available before creating any goal)"""
+    st.markdown("## 💬 Ask AI Anything")
+    st.markdown("""
+    **Get AI-powered advice before creating your goal plan!**
+
+    Ask questions like:
+    - "What should I learn to become an AI engineer?"
+    - "Is supervised learning harder than reinforcement learning?"
+    - "What job opportunities should I hunt for in tech?"
+    - "How long does it take to master Python?"
+    """)
+
+    # Initialize chat history for general chat
+    if 'general_chat_history' not in st.session_state:
+        st.session_state.general_chat_history = []
+
+    # Model selector
+    from utils.ai_providers import get_available_providers
+    available_providers = get_available_providers()
+
+    col_model, col_voice = st.columns([3, 1])
+    with col_model:
+        selected_model = st.selectbox(
+            "Select AI Model",
+            list(available_providers.keys()),
+            key="general_chat_model",
+            help="Choose which AI model to chat with"
+        )
+
+    with col_voice:
+        from utils.voice_handler import render_voice_settings
+        render_voice_settings(key_prefix="general_chat_")
+
+    # Display chat history
+    st.markdown("### 💭 Conversation")
+
+    if st.session_state.general_chat_history:
+        for i, msg in enumerate(st.session_state.general_chat_history):
+            if msg['role'] == 'user':
+                st.markdown(f"**You:** {msg['content']}")
+            else:
+                st.markdown(f"**AI ({msg.get('model', 'Assistant')}):** {msg['content']}")
+            st.markdown("---")
+    else:
+        st.info("👋 Start a conversation! Ask me anything about your goals, career, learning, or anything else.")
+
+    # Input area
+    col_input, col_voice_btn = st.columns([5, 1])
+
+    with col_input:
+        user_message = st.text_area(
+            "Your message",
+            placeholder="Ask me anything...",
+            key="general_chat_input",
+            height=100
+        )
+
+    with col_voice_btn:
+        from utils.voice_handler import render_voice_input_button
+        render_voice_input_button(key_suffix="general_chat_input")
+
+    # Send button
+    col_send, col_clear = st.columns([4, 1])
+
+    with col_send:
+        if st.button("🚀 Send Message", type="primary", use_container_width=True, key="send_general_chat"):
+            if user_message.strip():
+                # Add user message to history
+                st.session_state.general_chat_history.append({
+                    'role': 'user',
+                    'content': user_message
+                })
+
+                # Generate AI response
+                with st.spinner(f"🤖 {selected_model} is thinking..."):
+                    try:
+                        provider = available_providers[selected_model]
+
+                        # Build conversation context
+                        conversation = "\n".join([
+                            f"{'User' if msg['role'] == 'user' else 'AI'}: {msg['content']}"
+                            for msg in st.session_state.general_chat_history[-10:]  # Last 10 messages for context
+                        ])
+
+                        system_prompt = """You are a helpful AI career and learning advisor.
+Help users make informed decisions about their goals, learning paths, and career choices.
+Be conversational, encouraging, and provide actionable advice.
+Keep responses concise (3-5 sentences) but insightful."""
+
+                        response = provider.generate_text(
+                            prompt=user_message,
+                            system_prompt=system_prompt,
+                            max_tokens=1000
+                        )
+
+                        # Add AI response to history
+                        st.session_state.general_chat_history.append({
+                            'role': 'assistant',
+                            'content': response,
+                            'model': selected_model
+                        })
+
+                        # Auto-read response if enabled
+                        if st.session_state.get('general_chat_auto_read_responses', False):
+                            from utils.voice_handler import text_to_speech
+                            text_to_speech(response)
+
+                        st.rerun()
+
+                    except Exception as e:
+                        st.error(f"Error generating response: {str(e)}")
+            else:
+                st.warning("Please enter a message first!")
+
+    with col_clear:
+        if st.button("🗑️ Clear", use_container_width=True, key="clear_general_chat"):
+            st.session_state.general_chat_history = []
+            st.rerun()
+
+    # Quick action suggestion
+    if len(st.session_state.general_chat_history) >= 4:  # After some conversation
+        st.markdown("---")
+        st.success("💡 **Ready to create a goal plan?** Click '➕ New Learning Path' in the sidebar to get started!")
+
+
 def main():
     """Main application"""
     init_session_state()
@@ -1810,7 +1944,8 @@ def main():
                 st.markdown("---")
                 render_learning_path(st.session_state.generated_path)
         else:
-            st.info("Select a learning path from the sidebar or create a new one!")
+            # Show general AI chat when no goal plan is selected
+            render_general_ai_chat()
 
     except Exception as e:
         st.error(f"Application error: {str(e)}")
