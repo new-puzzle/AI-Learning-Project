@@ -18,7 +18,15 @@ GoalPath AI is not just another to-do list or learning platform. It's a complete
 
 ## ✨ Key Features
 
-### 📋 50+ Goal Templates (NEW!)
+### ⏱️ Time Tracking & AI Coaching (NEW!)
+- **Smart Timer** - Start/stop timer with HH:MM:SS display for focused work sessions
+- **Manual Time Entry** - Add time manually when you forget to track
+- **Actual vs Estimated** - See variance between planned and actual time spent
+- **AI Progress Review** - Get performance analysis, insights, and actionable recommendations
+- **Conversational AI Coach** - Chat naturally with your AI coach about your goals
+- **Voice-Enabled Chat** - Use voice input/output for hands-free coaching conversations
+
+### 📋 50+ Goal Templates
 - **Quick-Start** - Choose from 50+ pre-made templates across all goal types
 - **Fully Customizable** - Templates are smart defaults, all fields remain editable
 - **Smart Search** - Find templates by keywords, tags, or goal type
@@ -230,6 +238,52 @@ GoalPath AI uses **cookie-based password protection** with 24-hour persistent se
 - Add your question
 - AI analyzes and responds based on file content
 
+### Time Tracking & Coaching (NEW!)
+
+**Tracking Your Time:**
+1. Open any goal plan and go to the "📚 Curriculum" tab
+2. Expand any task to see time tracking options
+3. **Using the Timer:**
+   - Click "▶️ Start Timer" to begin tracking
+   - Timer shows elapsed time in HH:MM:SS format
+   - Click "⏸️ Stop & Save" when done
+   - Multiple sessions are tracked automatically
+4. **Manual Time Entry:**
+   - Enter hours spent (e.g., 2.5 hours)
+   - Click "Add Time" to record
+   - Perfect for when you forgot to start the timer
+5. **View Actual vs Estimated:**
+   - See estimated hours vs actual hours spent
+   - Green = under estimate, red = over estimate
+   - Track variance to improve future planning
+
+**Getting AI Coaching:**
+1. Go to "🧠 AI Coach" tab in any goal plan
+2. View your progress metrics and time stats
+3. Click "📊 Get Progress Review & Coaching" button
+4. AI analyzes your:
+   - Tasks completed vs total
+   - Actual time vs estimated time
+   - Days elapsed and pace
+   - Patterns and trends
+5. Review the coaching report with:
+   - Performance Summary
+   - Key Insights
+   - Actionable Recommendations
+6. Past reviews are saved and accessible in the accordion
+
+**Conversational AI Coach:**
+1. Go to "💬 AI Coach Chat" tab
+2. Chat naturally with your AI coach about your goals
+3. Ask questions like:
+   - "How am I doing?"
+   - "I'm feeling overwhelmed, what should I focus on?"
+   - "Should I adjust my timeline?"
+4. Use voice input (🎤) for hands-free conversation
+5. AI responds with context about YOUR specific goal and data
+6. Chat history is saved per goal plan
+7. Use quick prompts for common questions
+
 ### Rescheduling Your Plan (NEW!)
 
 1. Open any goal plan with calendar dates
@@ -264,7 +318,7 @@ AI-Learning-Project/
 │   ├── ai_helpers.py        # Claude API integration
 │   ├── ai_providers.py      # Multi-model AI system
 │   ├── path_generator.py   # Goal planning logic
-│   ├── database.py          # SQLite operations
+│   ├── database.py          # SQLite operations (with time tracking & coaching)
 │   ├── date_scheduler.py    # Calendar date scheduling utilities
 │   ├── templates.py         # 50+ goal templates library
 │   └── voice_handler.py     # Voice input/output interface

@@ -2,13 +2,13 @@
 
 **Generated:** November 16, 2025
 **Development Branch:** `claude/learnpath-ai-setup-014RbK3m8FVjabq96bopm7Ck`
-**Version:** 1.2.0 - Goal Templates & Smart Scheduling
+**Version:** 1.3.0 - Time Tracking & AI Coaching
 
 ---
 
 ## 📊 CURRENT STATUS: Production Ready ✅
 
-GoalPath AI is a fully functional, multi-modal AI-powered universal goal planning platform supporting 5 goal types (Learning, Career, Freelance, Project, Personal) with **50+ pre-made templates**, 6 AI providers, file upload capabilities, comprehensive progress tracking, and **date-aware smart scheduling** with calendar dates and automatic rescheduling.
+GoalPath AI is a fully functional, multi-modal AI-powered universal goal planning platform supporting 5 goal types (Learning, Career, Freelance, Project, Personal) with **50+ pre-made templates**, **smart time tracking**, **AI progress coaching**, **conversational AI coach chat**, 6 AI providers, file upload capabilities, comprehensive progress tracking, and **date-aware smart scheduling** with calendar dates and automatic rescheduling.
 
 ---
 
@@ -140,7 +140,289 @@ GoalPath AI now includes 50+ professionally crafted goal templates to help users
 
 ---
 
-### 2. 🌟 Universal Goal Planning System
+### 2. ⏱️ Time Tracking System (NEW in v1.3.0!)
+**Status:** ✅ Fully Working
+
+**What it does:**
+Track actual time spent on tasks with a built-in timer and manual entry system. Compare estimated vs actual hours to improve future planning and get insights into your working patterns.
+
+**Key Features:**
+
+**⏱️ Session-Based Timer:**
+- **Start/Stop Timer** - Click to start tracking, timer runs in real-time
+- **HH:MM:SS Display** - Live elapsed time display (e.g., "01:23:45")
+- **Multiple Sessions** - Track multiple work sessions per task
+- **Auto-Save** - Sessions saved to database with timestamps
+- **Session History** - View all past sessions with start/end times
+
+**✍️ Manual Time Entry:**
+- **Add Hours Manually** - Enter time when you forgot to start timer
+- **Flexible Input** - Support for decimal hours (e.g., 2.5 hours)
+- **Quick Entry** - Add time with one click
+- **Perfect for Catch-up** - Record time spent offline or before tracking
+
+**📊 Actual vs Estimated:**
+- **Side-by-Side Display** - "⏱️ Estimated: 2 hrs" vs "⏲️ Actual: 2.3 hrs"
+- **Variance Tracking** - Shows +/- difference (e.g., "+0.3 hrs over")
+- **Color Coding** - Green for under estimate, red for over estimate
+- **Per-Task Tracking** - Every task has individual time tracking
+- **Cumulative Stats** - Total actual vs estimated for entire goal plan
+
+**🔍 Time Analytics:**
+- **Total Time Stats** - See total estimated vs actual across all tasks
+- **Completion Percentage** - Track time efficiency
+- **Session Details** - View duration, date, and notes for each session
+- **Pattern Recognition** - AI uses time data for coaching insights
+
+**How to use:**
+1. Open any goal plan → "📚 Curriculum" tab
+2. Expand any task to see time tracking section
+3. **Timer Method:**
+   - Click "▶️ Start Timer" to begin
+   - Work on task while timer runs
+   - Click "⏸️ Stop & Save" when done
+   - Session automatically saved to database
+4. **Manual Method:**
+   - Enter hours in number input (e.g., 1.5)
+   - Click "Add Time" button
+   - Time added to actual hours
+5. **View Stats:**
+   - See "Estimated" vs "Actual" for each task
+   - Expand "Session History" to see all sessions
+   - Check variance to improve estimates
+
+**Benefits:**
+- ✅ Accurate time tracking for productivity insights
+- ✅ Better future time estimates based on actual data
+- ✅ Identify tasks that take longer than expected
+- ✅ Improve planning accuracy over time
+- ✅ Data-driven coaching from AI
+
+**Technical Implementation:**
+- New database table: `time_sessions` with start_time, end_time, duration_minutes
+- New column: `topics.actual_hours` for quick aggregation
+- Timer state management in Streamlit session state
+- Real-time updates with `st.rerun()` for live timer display
+- Automatic duration calculation from session timestamps
+
+---
+
+### 3. 🤖 AI Progress Review & Coaching (NEW in v1.3.0!)
+**Status:** ✅ Fully Working
+
+**What it does:**
+Get intelligent performance analysis and strategic coaching from AI based on your actual progress data. The AI analyzes your time tracking, completion rate, and patterns to provide personalized, actionable recommendations.
+
+**Key Features:**
+
+**📊 Performance Analysis:**
+- **Tasks Analysis** - Completed vs total tasks, completion percentage
+- **Time Analysis** - Actual vs estimated hours, variance tracking
+- **Pace Analysis** - Days elapsed, daily progress rate
+- **Pattern Detection** - AI identifies trends in your working style
+- **Context-Aware** - Uses your specific goal type and data
+
+**🎯 Coaching Report Format:**
+
+**1. Performance Summary (2-3 sentences)**
+- Honest assessment of current progress
+- Highlights strengths and challenges
+- Encouraging but realistic tone
+
+**2. Key Insights (2-3 bullet points)**
+- Important patterns AI noticed
+- Time management observations
+- Pacing insights
+- Specific data-driven observations
+
+**3. Actionable Recommendations (3-4 specific suggestions)**
+- Concrete next steps to improve
+- Timeline adjustments if needed
+- Focus area suggestions
+- Practical strategies tailored to your goal
+
+**💾 Review History:**
+- **Saved Reviews** - All past reviews stored in database
+- **Timestamp Tracking** - See when each review was generated
+- **Review Accordion** - Expand to see past coaching sessions
+- **Last Reviewed Date** - Shows when you last got coaching
+
+**🗣️ Coaching Tone:**
+- Conversational and encouraging
+- Honest but supportive
+- Uses actual data (not generic advice)
+- Feels like chatting with a knowledgeable coach
+- Personalized to your specific goal and situation
+
+**How to use:**
+1. Open any goal plan → "🧠 AI Coach" tab
+2. View current progress metrics displayed at top
+3. Click "📊 Get Progress Review & Coaching"
+4. Wait for AI to analyze your data (5-10 seconds)
+5. Read coaching report with:
+   - Performance Summary
+   - Key Insights
+   - Actionable Recommendations
+6. Expand "📚 Past Reviews" to see history
+7. Act on recommendations to improve
+
+**Example Coaching Output:**
+```
+Performance Summary:
+You're making solid progress on your Python learning goal! You've completed
+8 out of 20 tasks (40%) in 15 days, which is slightly behind the original
+30-day timeline but still very achievable. Your actual time spent (18.5 hours)
+is close to estimated (16 hours), showing good time awareness.
+
+Key Insights:
+• You're spending about 15% more time than estimated on foundational topics
+  - this is normal and shows you're building strong foundations
+• Your completion rate has accelerated in the last week (5 tasks completed)
+  - great momentum!
+• You tend to work in longer sessions (2-3 hours) rather than daily -
+  consider if this is sustainable
+
+Actionable Recommendations:
+1. Focus on the 3 high-priority tasks coming up - these are critical for
+   your job application goal
+2. Consider adjusting your timeline to 40 days to reduce pressure - you're
+   learning well, just need a bit more time
+3. Try 1-hour daily sessions instead of marathon 3-hour sessions - better
+   for retention and prevents burnout
+4. Your data structure knowledge is strong - leverage that in upcoming
+   algorithm tasks
+```
+
+**Benefits:**
+- ✅ Data-driven coaching based on actual performance
+- ✅ Personalized recommendations for YOUR specific goal
+- ✅ Honest assessment helps calibrate expectations
+- ✅ Actionable next steps instead of generic advice
+- ✅ Encouragement when you're doing well, guidance when struggling
+
+**Technical Implementation:**
+- New database table: `coaching_reviews` with full review text
+- Structured prompt engineering for consistent report format
+- Integration with time tracking stats from `get_path_time_stats()`
+- Uses Claude Sonnet 4.5 for intelligent analysis
+- Stores performance_summary, insights, recommendations separately for future features
+
+---
+
+### 4. 💬 Conversational AI Coach Chat (NEW in v1.3.0!)
+**Status:** ✅ Fully Working
+
+**What it does:**
+Have natural, back-and-forth conversations with your AI coach about your goals. Unlike the progress review (which is a one-time analysis), this is an ongoing dialogue where you can ask questions, express concerns, and get personalized guidance anytime.
+
+**Key Features:**
+
+**🗣️ Natural Conversation:**
+- **Warm Welcome** - AI greets you when you open chat
+- **Context-Aware** - AI knows your goal, progress, and time data
+- **Follow-Up Questions** - AI asks what YOU need
+- **Conversational Tone** - Feels like chatting with a friend who's a coach
+- **Short Responses** - Concise 3-4 sentences, not walls of text
+
+**💭 Common Questions You Can Ask:**
+- "How am I doing?" → Progress overview with encouraging feedback
+- "I'm feeling overwhelmed" → Specific strategies to handle stress
+- "Should I adjust my timeline?" → Data-driven recommendation
+- "What should I focus on next?" → Prioritized next steps
+- "I'm stuck on [topic]" → Tailored guidance and resources
+- "Am I on track?" → Honest assessment with context
+
+**🎤 Voice-Enabled:**
+- **Voice Input** - Use microphone button to speak questions
+- **Voice Output** - Listen to AI responses (text-to-speech)
+- **Hands-Free** - Perfect for mobile or while multitasking
+- **Same Voice System** - Uses existing voice handler from app
+
+**💾 Chat History:**
+- **Persistent Conversations** - Chat history saved per goal plan
+- **Recent Context** - AI remembers last 6 messages for continuity
+- **Scroll Through History** - Review past conversations
+- **Clear Chat Option** - Start fresh when needed
+
+**⚡ Quick Prompts:**
+- **Pre-Written Questions** - Tap to ask common questions instantly
+- **One-Click Queries** - No typing needed
+- Examples:
+  - "How's my progress?"
+  - "I'm feeling stuck, what should I do?"
+  - "Should I adjust my schedule?"
+  - "What are my next priorities?"
+
+**🎯 AI Coach Personality:**
+- **Encouraging but Honest** - Won't just say "you're doing great" if you're behind
+- **Specific, Not Generic** - Uses YOUR data (e.g., "You completed 5 tasks this week!")
+- **Action-Oriented** - Gives concrete next steps, not just motivation
+- **Asks Questions** - Checks in on how you're feeling, what you need
+- **Conversational Length** - Short, digestible responses (3-4 sentences max)
+
+**Example Conversation:**
+```
+User: "How am I doing?"
+
+AI Coach: "You're making solid progress! You've completed 40% of tasks in half
+the time, which is actually ahead of schedule. Your time tracking shows you're
+pretty accurate with estimates too. How are you feeling about the pace - is it
+sustainable for you?"
+
+User: "I'm worried I won't finish on time"
+
+AI Coach: "I can see why you might feel that way, but the data tells a
+different story - you're actually 10% ahead of schedule! You've completed 8
+tasks in 15 days when the plan estimated 7.5. That said, if the pace feels
+stressful, we can totally adjust the timeline. What would feel more comfortable?"
+
+User: "Maybe extend by a week?"
+
+AI Coach: "That sounds like a smart move for sustainability! An extra week
+takes you to 37 days total, which gives you breathing room without losing
+momentum. Want me to help you reschedule, or do you want to keep the current
+dates and just adjust your mental deadline?"
+```
+
+**How to use:**
+1. Open any goal plan → "💬 AI Coach Chat" tab
+2. Read AI's welcome message
+3. **Type a Question:**
+   - Use the text area to type naturally
+   - Click "💬 Send" to submit
+4. **Or Use Voice:**
+   - Click 🎤 microphone button
+   - Speak your question
+   - Auto-transcribed and sent
+5. **Or Use Quick Prompts:**
+   - Click any quick prompt button
+   - Question auto-sent to AI
+6. **Read/Listen to Response:**
+   - AI responds in 5-10 seconds
+   - Click 🔊 to hear response aloud
+7. **Continue Conversation:**
+   - Ask follow-ups
+   - AI remembers context
+
+**Benefits:**
+- ✅ Get help exactly when you need it, not just during scheduled reviews
+- ✅ Express concerns and get specific guidance
+- ✅ Natural conversation feels more supportive than reports
+- ✅ Ask clarifying questions and have a dialogue
+- ✅ Perfect for decision-making (timeline adjustments, priority changes)
+- ✅ Hands-free via voice for mobile/multitasking
+
+**Technical Implementation:**
+- New database table: `coaching_chats` with message, role (user/assistant), timestamp
+- Conversation history management (last 6 messages for context)
+- Detailed prompt engineering with GOOD vs BAD response examples
+- Integration with goal data, progress stats, and time tracking
+- Voice integration using existing `voice_handler.py`
+- Chat UI with quick prompts and voice buttons
+
+---
+
+### 5. 🌟 Universal Goal Planning System
 **Status:** ✅ Fully Working
 
 **What it does:**
@@ -590,21 +872,23 @@ GoalPath AI now features calendar-based scheduling with actual dates instead of 
 ### 11. 💾 Database & Persistence
 **Status:** ✅ Fully Working
 
-**SQLite Database with 3 Tables:**
+**SQLite Database with 6 Tables:**
 
 **learning_paths** (now supports all goal types)
 - Stores goals (learning, career, freelance, project, personal)
 - Goal type metadata
 - Timeframe information
 - Status (active/on_hold/archived/deleted)
+- Scheduling data (start_date, hours_per_day, unavailable_dates)
 - Created/updated timestamps
 
-**topics** (enhanced with priority and scheduling)
+**topics** (enhanced with priority, scheduling, and time tracking)
 - Day-by-day action plan breakdown
 - Completion status per topic
-- Time spent tracking
+- Time spent tracking (basic)
 - **Priority levels** (high/medium/low)
-- **Due dates** (optional scheduling)
+- **Due dates** (calendar scheduling)
+- **Actual hours** (from time tracking) - NEW in v1.3.0
 - **Notes** (user annotations)
 - Resources for each topic
 
@@ -613,12 +897,39 @@ GoalPath AI now features calendar-based scheduling with actual dates instead of 
 - Tracks all changes
 - Timestamped events
 
+**time_sessions** (NEW in v1.3.0!)
+- Individual work session tracking
+- Start time and end time timestamps
+- Duration in minutes
+- Session date
+- Optional notes per session
+- Links to topic_id and path_id
+
+**coaching_reviews** (NEW in v1.3.0!)
+- AI-generated coaching reports
+- Full review text
+- Performance summary
+- Key insights
+- Actionable recommendations
+- Timestamp for each review
+- Links to path_id
+
+**coaching_chats** (NEW in v1.3.0!)
+- Conversational chat history
+- Message text
+- Role (user or assistant)
+- Timestamp for each message
+- Links to path_id
+
 **Features:**
 - Multiple goal plans supported (any goal type)
 - Persistent across sessions
 - Fast SQLite performance
 - Easy backup (single .db file)
 - Auto-migration for new columns
+- **NEW:** Time session tracking with granular data
+- **NEW:** Coaching review storage with history
+- **NEW:** Chat conversation persistence
 
 ---
 
@@ -700,20 +1011,25 @@ reportlab>=4.0.0
 ## 💪 STRENGTHS
 
 1. **Universal Goal Planning** - 5 goal types with specialized AI coaching
-2. **Type-Specific AI Prompts** - Each goal type gets optimized guidance
-3. **Multi-Model Support** - 15+ models across 6 providers
-4. **File Upload** - Images, PDFs, docs all supported
-5. **Vision Capabilities** - 4 providers support image analysis
-6. **Silent Failure** - Doesn't crash on missing API keys
-7. **Priority System** - High/medium/low for better focus
-8. **Progress Tracking** - Comprehensive metrics with on-track indicator
-9. **Status Management** - Flexible plan organization
-10. **Chat History** - Persistent per goal plan
-11. **Model Switching** - Compare AI responses easily
-12. **Voice Interface** - Hands-free voice input and output (FREE!)
-13. **YouTube Auto-Embed** - Watch tutorial videos inline without leaving app
-14. **PDF Export** - Download goal plans for offline use or sharing
-15. **Mobile Optimized** - Perfect experience on phones and tablets
+2. **Smart Time Tracking** - Session-based timer + manual entry with actual vs estimated comparison (NEW v1.3.0!)
+3. **AI Progress Coaching** - Data-driven performance analysis and actionable recommendations (NEW v1.3.0!)
+4. **Conversational AI Coach** - Natural dialogue with context-aware AI coach (NEW v1.3.0!)
+5. **50+ Goal Templates** - Pre-made templates for quick-start goal creation (v1.2.0)
+6. **Date-Aware Scheduling** - Calendar dates with automatic rescheduling (v1.1.0)
+7. **Type-Specific AI Prompts** - Each goal type gets optimized guidance
+8. **Multi-Model Support** - 15+ models across 6 providers
+9. **File Upload** - Images, PDFs, docs all supported
+10. **Vision Capabilities** - 4 providers support image analysis
+11. **Silent Failure** - Doesn't crash on missing API keys
+12. **Priority System** - High/medium/low for better focus
+13. **Progress Tracking** - Comprehensive metrics with on-track indicator
+14. **Status Management** - Flexible plan organization
+15. **Chat History** - Persistent per goal plan
+16. **Model Switching** - Compare AI responses easily
+17. **Voice Interface** - Hands-free voice input and output (FREE!)
+18. **YouTube Auto-Embed** - Watch tutorial videos inline without leaving app
+19. **PDF Export** - Download goal plans for offline use or sharing
+20. **Mobile Optimized** - Perfect experience on phones and tablets
 
 ---
 
@@ -755,13 +1071,20 @@ reportlab>=4.0.0
 - Achievement system
 - Social sharing features
 
-### 3. **Time Tracking**
-**Current state:** Basic (manual entry)
-**Could be improved:**
-- Automatic time tracking per session
-- Pomodoro timer integration
-- Study session analytics
-- Time estimation vs actual
+### 3. **Time Tracking** ✅ COMPLETED in v1.3.0!
+**Current state:** Fully featured time tracking system
+**What's implemented:**
+- ✅ Session-based timer with HH:MM:SS display
+- ✅ Manual time entry for catch-up
+- ✅ Actual vs estimated comparison
+- ✅ Session history with timestamps
+- ✅ Time analytics integrated with AI coaching
+
+**Could still be improved:**
+- Pomodoro timer mode (25/5 minute cycles)
+- Break reminders
+- Daily/weekly time reports
+- Time heatmap visualization
 
 ### 4. **Analytics & Visualization**
 **Current state:** Basic stats
@@ -907,20 +1230,25 @@ QWEN_API_KEY=your_qwen_key
 ## 🎯 WHAT MAKES THIS SPECIAL
 
 1. **Universal Goal Planning** - Beyond learning: career, freelance, projects, personal
-2. **Type-Specific AI Coaching** - Each goal type gets specialized guidance
-3. **Most comprehensive multi-model support** - 6 providers, 15+ models
-4. **Vision capabilities** - Upload homework, diagrams, get solutions
-5. **Silent failure design** - Show all options, fail gracefully
-6. **Priority-driven** - AI assigns priorities to keep you focused
-7. **File upload** - PDFs, images, docs all supported
-8. **Goal-focused** - Not just chatbot, structured action planning
-9. **Progress tracking** - Know where you are in journey with on-track indicator
-10. **Model comparison** - Try different AIs for same question
-11. **Voice interface** - Hands-free interaction (FREE browser-native)
-12. **YouTube auto-embed** - Watch tutorials without leaving the app
-13. **PDF export** - Take your goals offline, share with coaches/mentors
-14. **Mobile optimized** - Works perfectly on phones and tablets
-15. **Fully accessible** - Voice support for users with disabilities
+2. **Smart Time Tracking** - Session timer + manual entry with actual vs estimated insights (v1.3.0)
+3. **AI Progress Coaching** - Data-driven performance reviews with actionable recommendations (v1.3.0)
+4. **Conversational AI Coach** - Natural dialogue with context-aware coaching (v1.3.0)
+5. **50+ Goal Templates** - Quick-start with proven goal structures across all types (v1.2.0)
+6. **Date-Aware Scheduling** - Calendar dates with automatic rescheduling around your life (v1.1.0)
+7. **Type-Specific AI Coaching** - Each goal type gets specialized guidance
+8. **Most comprehensive multi-model support** - 6 providers, 15+ models
+9. **Vision capabilities** - Upload homework, diagrams, get solutions
+10. **Silent failure design** - Show all options, fail gracefully
+11. **Priority-driven** - AI assigns priorities to keep you focused
+12. **File upload** - PDFs, images, docs all supported
+13. **Goal-focused** - Not just chatbot, structured action planning
+14. **Progress tracking** - Know where you are in journey with on-track indicator
+15. **Model comparison** - Try different AIs for same question
+16. **Voice interface** - Hands-free interaction (FREE browser-native)
+17. **YouTube auto-embed** - Watch tutorials without leaving the app
+18. **PDF export** - Take your goals offline, share with coaches/mentors
+19. **Mobile optimized** - Works perfectly on phones and tablets
+20. **Fully accessible** - Voice support for users with disabilities
 
 ---
 
@@ -953,6 +1281,11 @@ QWEN_API_KEY=your_qwen_key
 
 **What we built:**
 - ✅ Universal goal planning (5 goal types)
+- ✅ 50+ goal templates for quick-start (v1.2.0)
+- ✅ Date-aware smart scheduling with calendar dates (v1.1.0)
+- ✅ Time tracking with timer & manual entry (v1.3.0)
+- ✅ AI progress coaching with performance reviews (v1.3.0)
+- ✅ Conversational AI coach chat (v1.3.0)
 - ✅ Multi-model AI (15+ models, 6 providers)
 - ✅ Voice interface (input + output)
 - ✅ File upload & vision capabilities
@@ -976,11 +1309,12 @@ QWEN_API_KEY=your_qwen_key
 - Gamification elements
 - Social sharing features
 - Dark mode
-- Advanced analytics
+- Pomodoro timer mode
+- Advanced time analytics & visualizations
 
 ---
 
-**🚀 GoalPath AI is complete and ready to launch!**
+**🚀 GoalPath AI v1.3.0 is complete and ready to launch!**
 
 **Deployment:** See [README.md](README.md) for deployment instructions
 **Mobile Guide:** See [MOBILE_GUIDE.md](MOBILE_GUIDE.md) for mobile optimization details
@@ -989,4 +1323,4 @@ QWEN_API_KEY=your_qwen_key
 
 **End of Report**
 **Last Updated:** November 16, 2025
-**Version:** 1.0.0 - Production Ready
+**Version:** 1.3.0 - Time Tracking & AI Coaching

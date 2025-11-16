@@ -996,8 +996,109 @@ def render_progress_tracker(generator, path_id):
 
     st.markdown("---")
 
+    # AI Progress Review & Coaching Section
+    st.markdown("### 🤖 AI Coaching")
+
+    col_coach1, col_coach2 = st.columns(2)
+
+    with col_coach1:
+        if st.button("📊 Get Progress Review & Coaching", use_container_width=True, type="primary"):
+            with st.spinner("🤖 AI is analyzing your progress..."):
+                # Get comprehensive data for coaching
+                time_stats = generator.db.get_path_time_stats(path_id)
+                from datetime import datetime
+                created_at = path_info.get('created_at', '')
+                days_elapsed = 0
+                if created_at:
+                    try:
+                        created_date = datetime.strptime(created_at.split(' ')[0], '%Y-%m-%d')
+                        days_elapsed = (datetime.now() - created_date).days
+                    except:
+                        pass
+
+                # Create coaching prompt
+                coaching_prompt = f"""You are an encouraging but honest AI coach reviewing someone's goal progress.
+
+**Goal:** {path_info['goal']}
+**Goal Type:** {path_info.get('goal_type', 'learning')}
+**Timeframe:** {timeframe} days
+**Days Elapsed:** {days_elapsed} days
+
+**Progress Data:**
+- Tasks Completed: {stats['completed_topics']}/{stats['total_topics']} ({stats['progress_percentage']:.0f}%)
+- Estimated Total Time: {time_stats['total_estimated_hours']:.1f} hours
+- Actual Time Spent: {time_stats['total_actual_hours']:.1f} hours
+- Time Variance: {time_stats['variance_hours']:.1f} hours ({time_stats['variance_percentage']:.0f}%)
+
+**Analysis Required:**
+1. PERFORMANCE SUMMARY (2-3 sentences) - How are they doing overall?
+2. KEY INSIGHTS (2-3 bullet points) - What patterns do you see?
+3. ACTIONABLE RECOMMENDATIONS (3-4 specific suggestions) - What should they do next?
+
+Write in a conversational, encouraging but honest tone. Be specific with numbers. Give practical advice they can act on TODAY.
+
+Format your response in 3 clear sections with those headers."""
+
+                try:
+                    # Get AI review using Claude
+                    review_text = generator.ai.generate_text(coaching_prompt)
+
+                    # Save review to database
+                    generator.db.save_coaching_review(
+                        path_id=path_id,
+                        review_text=review_text
+                    )
+
+                    # Display review
+                    st.session_state[f'show_review_{path_id}'] = True
+                    st.rerun()
+
+                except Exception as e:
+                    st.error(f"Coaching analysis failed: {str(e)}")
+
+    with col_coach2:
+        # Show last review date if available
+        latest_review = generator.db.get_latest_coaching_review(path_id)
+        if latest_review:
+            st.caption(f"Last reviewed: {latest_review['created_at'][:16]}")
+
+    # Display latest review if available
+    if st.session_state.get(f'show_review_{path_id}', False):
+        latest_review = generator.db.get_latest_coaching_review(path_id)
+        if latest_review:
+            st.markdown("---")
+            st.markdown("#### 🎯 Your Progress Review")
+
+            # Display time stats
+            time_stats = generator.db.get_path_time_stats(path_id)
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Tasks", f"{stats['completed_topics']}/{stats['total_topics']}")
+            with col2:
+                st.metric("Progress", f"{stats['progress_percentage']:.0f}%")
+            with col3:
+                st.metric("Est. Hours", f"{time_stats['total_estimated_hours']:.1f}")
+            with col4:
+                variance_color = "inverse" if time_stats['variance_hours'] > 0 else "normal"
+                st.metric("Actual Hours", f"{time_stats['total_actual_hours']:.1f}",
+                         delta=f"{time_stats['variance_hours']:+.1f}",
+                         delta_color=variance_color)
+
+            # Display AI coaching text
+            st.markdown(latest_review['review_text'])
+
+            # View past reviews
+            with st.expander("📜 View Past Reviews"):
+                all_reviews = generator.db.get_coaching_reviews(path_id)
+                for idx, review in enumerate(all_reviews):
+                    st.markdown(f"**Review #{len(all_reviews) - idx}** - {review['created_at'][:16]}")
+                    st.markdown(review['review_text'])
+                    st.markdown("---")
+
+    st.markdown("---")
+
     # Tabs for Curriculum and AI Tutor
-    tab1, tab2 = st.tabs(["📖 Curriculum", "🤖 AI Tutor"])
+    tab1, tab2, tab3 = st.tabs(["📖 Curriculum", "🤖 AI Tutor", "💬 AI Coach Chat"])
 
     with tab1:
         # Curriculum with checkboxes
@@ -1069,7 +1170,85 @@ def render_progress_tracker(generator, path_id):
                                     else:
                                         st.caption(f"📅 Due in {days_until} day(s)")
 
-                        st.markdown(f"**Estimated Time:** {estimated_hours} hours")
+                        # Time tracking section
+                        actual_hours = topic.get('actual_hours', 0) or 0
+
+                        col_time1, col_time2 = st.columns(2)
+                        with col_time1:
+                            st.markdown(f"**⏱️ Estimated:** {estimated_hours} hrs")
+                        with col_time2:
+                            time_diff = actual_hours - estimated_hours
+                            diff_color = "red" if time_diff > 0 else "green" if time_diff < 0 else "gray"
+                            st.markdown(f"**⏲️ Actual:** {actual_hours:.1f} hrs <span style='color: {diff_color};'>({time_diff:+.1f})</span>", unsafe_allow_html=True)
+
+                        # Timer and manual input
+                        if not is_completed:
+                            st.markdown("---")
+
+                            # Initialize timer state
+                            timer_key = f"timer_{topic_id}"
+                            if timer_key not in st.session_state:
+                                st.session_state[timer_key] = {'running': False, 'start_time': None, 'elapsed': 0}
+
+                            timer_col1, timer_col2 = st.columns(2)
+
+                            with timer_col1:
+                                st.markdown("**⏱️ Track Time**")
+
+                                if not st.session_state[timer_key]['running']:
+                                    if st.button(f"▶️ Start Timer", key=f"start_{topic_id}", use_container_width=True):
+                                        from datetime import datetime
+                                        st.session_state[timer_key]['running'] = True
+                                        st.session_state[timer_key]['start_time'] = datetime.now().isoformat()
+                                        st.rerun()
+                                else:
+                                    # Show elapsed time
+                                    from datetime import datetime
+                                    start = datetime.fromisoformat(st.session_state[timer_key]['start_time'])
+                                    elapsed_seconds = int((datetime.now() - start).total_seconds())
+                                    hours = elapsed_seconds // 3600
+                                    minutes = (elapsed_seconds % 3600) // 60
+                                    seconds = elapsed_seconds % 60
+
+                                    st.markdown(f"⏱️ **{hours:02d}:{minutes:02d}:{seconds:02d}**")
+
+                                    if st.button(f"⏸️ Stop & Save", key=f"stop_{topic_id}", use_container_width=True):
+                                        duration_minutes = elapsed_seconds // 60
+                                        if duration_minutes > 0:
+                                            generator.db.add_time_session(
+                                                topic_id=topic_id,
+                                                path_id=path_id,
+                                                duration_minutes=duration_minutes,
+                                                start_time=st.session_state[timer_key]['start_time'],
+                                                end_time=datetime.now().isoformat()
+                                            )
+                                        st.session_state[timer_key]['running'] = False
+                                        st.session_state[timer_key]['start_time'] = None
+                                        st.success(f"✅ Saved {duration_minutes} minutes!")
+                                        st.rerun()
+
+                            with timer_col2:
+                                st.markdown("**✏️ Add Time Manually**")
+                                manual_hours = st.number_input(
+                                    "Hours",
+                                    min_value=0.0,
+                                    max_value=24.0,
+                                    step=0.5,
+                                    key=f"manual_{topic_id}",
+                                    label_visibility="collapsed"
+                                )
+                                if st.button("Add Time", key=f"add_manual_{topic_id}", use_container_width=True):
+                                    if manual_hours > 0:
+                                        generator.db.add_time_session(
+                                            topic_id=topic_id,
+                                            path_id=path_id,
+                                            duration_minutes=int(manual_hours * 60),
+                                            notes="Manually added"
+                                        )
+                                        st.success(f"✅ Added {manual_hours} hours!")
+                                        st.rerun()
+
+                            st.markdown("---")
 
                         if subtopics:
                             st.markdown("**What you'll learn:**")
@@ -1292,6 +1471,182 @@ def render_progress_tracker(generator, path_id):
 
             if st.button("How does this apply in real-world?", key=f"suggest4_{path_id}"):
                 st.session_state[f'suggested_question_{path_id}'] = "How is this used in real-world applications?"
+
+    with tab3:
+        # Conversational AI Coach Chat
+        st.markdown("#### 💬 Let's Discuss Your Progress")
+        st.caption("Have a natural conversation with your AI coach about your goals, challenges, and progress")
+
+        # Voice settings for coach chat
+        with st.expander("🎙️ Voice Settings", expanded=False):
+            from utils.voice_handler import render_voice_settings
+            render_voice_settings()
+
+        # Initialize coaching chat history
+        if f'coach_chat_{path_id}' not in st.session_state:
+            st.session_state[f'coach_chat_{path_id}'] = []
+            # Add welcome message
+            st.session_state[f'coach_chat_{path_id}'].append({
+                'role': 'assistant',
+                'content': f"Hey! I'm your AI coach for **{path_info['goal']}**. I've been following your progress - you've completed {stats['completed_topics']}/{stats['total_topics']} tasks so far. How's it going? What would you like to discuss?"
+            })
+
+        # Get time stats for context
+        time_stats = generator.db.get_path_time_stats(path_id)
+
+        # Build context for conversational AI
+        from datetime import datetime
+        created_at = path_info.get('created_at', '')
+        days_elapsed = 0
+        if created_at:
+            try:
+                created_date = datetime.strptime(created_at.split(' ')[0], '%Y-%m-%d')
+                days_elapsed = (datetime.now() - created_date).days
+            except:
+                pass
+
+        coach_context = f"""You are a friendly, conversational AI coach. You're having a natural discussion with someone working on their goal.
+
+THEIR GOAL: {path_info['goal']}
+GOAL TYPE: {path_info.get('goal_type', 'learning')}
+TIMEFRAME: {timeframe} days
+DAYS ELAPSED: {days_elapsed}
+
+CURRENT PROGRESS:
+- Tasks: {stats['completed_topics']}/{stats['total_topics']} ({stats['progress_percentage']:.0f}%)
+- Time: {time_stats['total_actual_hours']:.1f} hrs actual vs {time_stats['total_estimated_hours']:.1f} hrs estimated
+- Variance: {time_stats['variance_hours']:+.1f} hrs
+
+CONVERSATION STYLE:
+- Be warm, encouraging, and conversational (like chatting with a friend who's a coach)
+- Ask follow-up questions to understand their situation better
+- Give specific, actionable advice based on their actual data
+- Be honest but supportive - if they're behind, acknowledge it but focus on solutions
+- Use their actual numbers when relevant
+- Keep responses concise (3-4 sentences max unless they ask for detail)
+
+Examples of GOOD responses:
+- "40% complete is solid! How are you feeling about the pace? Is 2 hours a day still working for you?"
+- "I'm noticing you're spending a bit more time than estimated. That's totally normal - it means you're being thorough! Should we talk about adjusting the timeline?"
+- "Let's tackle that overwhelmed feeling. What if we focus on just the next 3 tasks this week? Sometimes breaking it down helps."
+
+Examples of BAD responses:
+- "Your completion rate is 40%." (too clinical)
+- "You should increase daily hours by 0.5." (too robotic)
+- Long analysis without asking what they need (not conversational)
+
+Remember: You're having a CONVERSATION, not delivering a report."""
+
+        # Display coaching chat history
+        for i, message in enumerate(st.session_state[f'coach_chat_{path_id}']):
+            if message['role'] == 'user':
+                st.markdown(f"**You:** {message['content']}")
+            else:
+                st.markdown(f"**Coach:** {message['content']}")
+
+                # Voice output for coach responses
+                col_voice1, col_voice2 = st.columns([1, 4])
+                with col_voice1:
+                    from utils.voice_handler import render_voice_output_button
+                    render_voice_output_button(
+                        text_to_speak=message['content'][:500],
+                        button_text="🔊 Hear",
+                        key_suffix=f"coach_{path_id}_{i}"
+                    )
+            st.markdown("---")
+
+        # Chat input with voice
+        col_input, col_voice = st.columns([4, 1])
+
+        with col_input:
+            coach_question = st.text_area(
+                "What's on your mind?",
+                placeholder="e.g., I'm feeling overwhelmed...\nI have less time this week, what should I do?\nHow am I doing overall?\nShould I adjust my timeline?",
+                height=100,
+                key=f"coach_input_{path_id}"
+            )
+
+        with col_voice:
+            if st.session_state.get('voice_input_enabled', True):
+                st.markdown("<br>", unsafe_allow_html=True)
+                from utils.voice_handler import render_voice_input_button
+                render_voice_input_button(key_suffix=f"coach_{path_id}")
+
+        col1, col2 = st.columns([1, 5])
+        with col1:
+            if st.button("💬 Send", type="primary", key=f"send_coach_{path_id}"):
+                if coach_question.strip():
+                    # Add user message to history
+                    st.session_state[f'coach_chat_{path_id}'].append({
+                        'role': 'user',
+                        'content': coach_question
+                    })
+
+                    # Save to database
+                    generator.db.save_chat_message(path_id, coach_question, 'user')
+
+                    # Build conversation history for context
+                    conversation_history = ""
+                    for msg in st.session_state[f'coach_chat_{path_id}'][-6:]:  # Last 3 exchanges
+                        role_label = "User" if msg['role'] == 'user' else "Coach"
+                        conversation_history += f"{role_label}: {msg['content']}\n\n"
+
+                    # Get AI coaching response
+                    full_prompt = f"""{coach_context}
+
+RECENT CONVERSATION:
+{conversation_history}
+
+User just said: {coach_question}
+
+Respond naturally and conversationally. Keep it to 3-4 sentences unless they explicitly ask for more detail."""
+
+                    with st.spinner("Coach is thinking..."):
+                        try:
+                            coach_response = generator.ai.generate_text(full_prompt)
+
+                            # Add coach response to history
+                            st.session_state[f'coach_chat_{path_id}'].append({
+                                'role': 'assistant',
+                                'content': coach_response
+                            })
+
+                            # Save to database
+                            generator.db.save_chat_message(path_id, coach_response, 'assistant')
+
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Coaching chat failed: {str(e)}")
+                else:
+                    st.warning("Please enter a message")
+
+        with col2:
+            if st.button("Clear Conversation", key=f"clear_coach_{path_id}"):
+                st.session_state[f'coach_chat_{path_id}'] = []
+                generator.db.clear_chat_history(path_id)
+                st.rerun()
+
+        # Quick prompts
+        st.markdown("**💡 Quick Prompts:**")
+        prompt_col1, prompt_col2 = st.columns(2)
+
+        with prompt_col1:
+            if st.button("How am I doing overall?", key=f"prompt1_{path_id}"):
+                st.session_state[f'coach_preset_{path_id}'] = "How am I doing overall?"
+                st.rerun()
+
+            if st.button("I'm feeling overwhelmed", key=f"prompt2_{path_id}"):
+                st.session_state[f'coach_preset_{path_id}'] = "I'm feeling a bit overwhelmed with all these tasks. What should I focus on?"
+                st.rerun()
+
+        with prompt_col2:
+            if st.button("Should I adjust my timeline?", key=f"prompt3_{path_id}"):
+                st.session_state[f'coach_preset_{path_id}'] = "Should I adjust my timeline? Am I on track?"
+                st.rerun()
+
+            if st.button("I have less time this week", key=f"prompt4_{path_id}"):
+                st.session_state[f'coach_preset_{path_id}'] = "I have less time available this week. How should I adapt my plan?"
+                st.rerun()
 
 
 def main():

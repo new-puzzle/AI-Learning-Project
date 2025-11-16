@@ -110,6 +110,53 @@ class Database:
         except sqlite3.OperationalError:
             pass
 
+        try:
+            cursor.execute("ALTER TABLE topics ADD COLUMN actual_hours REAL DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+
+        # Time tracking sessions table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS time_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                topic_id INTEGER NOT NULL,
+                path_id INTEGER NOT NULL,
+                start_time TIMESTAMP,
+                end_time TIMESTAMP,
+                duration_minutes INTEGER,
+                session_date DATE,
+                notes TEXT,
+                FOREIGN KEY (topic_id) REFERENCES topics(id),
+                FOREIGN KEY (path_id) REFERENCES learning_paths(id)
+            )
+        """)
+
+        # AI coaching reviews table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS coaching_reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                path_id INTEGER NOT NULL,
+                review_text TEXT NOT NULL,
+                performance_summary TEXT,
+                insights TEXT,
+                recommendations TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (path_id) REFERENCES learning_paths(id)
+            )
+        """)
+
+        # AI coaching chat history table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS coaching_chats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                path_id INTEGER NOT NULL,
+                message TEXT NOT NULL,
+                role TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (path_id) REFERENCES learning_paths(id)
+            )
+        """)
+
         # Progress tracking table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS progress_log (
@@ -221,7 +268,7 @@ class Database:
         cursor.execute("""
             SELECT id, day_number, topic_name, subtopics, estimated_hours,
                    resources, is_completed, completed_at, time_spent_minutes,
-                   priority, due_date, notes
+                   priority, due_date, notes, actual_hours
             FROM topics
             WHERE path_id = ?
             ORDER BY day_number
@@ -241,7 +288,8 @@ class Database:
                 'time_spent_minutes': row[8],
                 'priority': row[9] if len(row) > 9 else 'medium',
                 'due_date': row[10] if len(row) > 10 else None,
-                'notes': row[11] if len(row) > 11 else ''
+                'notes': row[11] if len(row) > 11 else '',
+                'actual_hours': row[12] if len(row) > 12 else 0
             })
 
         conn.close()
@@ -470,3 +518,224 @@ class Database:
                 'weekly_pattern': row[10] if len(row) > 10 else None
             }
         return None
+
+    # ========================================================================
+    # TIME TRACKING METHODS
+    # ========================================================================
+
+    def add_time_session(self, topic_id: int, path_id: int, duration_minutes: int,
+                        start_time: str = None, end_time: str = None, notes: str = ""):
+        """Add a time tracking session for a topic"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        from datetime import datetime
+        session_date = datetime.now().strftime('%Y-%m-%d')
+
+        cursor.execute("""
+            INSERT INTO time_sessions (topic_id, path_id, start_time, end_time,
+                                      duration_minutes, session_date, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (topic_id, path_id, start_time, end_time, duration_minutes, session_date, notes))
+
+        # Update actual_hours for the topic
+        actual_hours = duration_minutes / 60.0
+        cursor.execute("""
+            UPDATE topics
+            SET actual_hours = COALESCE(actual_hours, 0) + ?
+            WHERE id = ?
+        """, (actual_hours, topic_id))
+
+        conn.commit()
+        conn.close()
+
+    def get_time_sessions(self, topic_id: int) -> List[Dict]:
+        """Get all time sessions for a topic"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT id, start_time, end_time, duration_minutes, session_date, notes
+            FROM time_sessions
+            WHERE topic_id = ?
+            ORDER BY session_date DESC, id DESC
+        """, (topic_id,))
+
+        sessions = []
+        for row in cursor.fetchall():
+            sessions.append({
+                'id': row[0],
+                'start_time': row[1],
+                'end_time': row[2],
+                'duration_minutes': row[3],
+                'session_date': row[4],
+                'notes': row[5]
+            })
+
+        conn.close()
+        return sessions
+
+    def get_topic_actual_hours(self, topic_id: int) -> float:
+        """Get actual hours spent on a topic"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT COALESCE(actual_hours, 0)
+            FROM topics
+            WHERE id = ?
+        """, (topic_id,))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        return row[0] if row else 0.0
+
+    def get_path_time_stats(self, path_id: int) -> Dict:
+        """Get time tracking statistics for a learning path"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT
+                SUM(COALESCE(estimated_hours, 0)) as total_estimated,
+                SUM(COALESCE(actual_hours, 0)) as total_actual,
+                COUNT(*) as total_topics,
+                SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed_topics
+            FROM topics
+            WHERE path_id = ?
+        """, (path_id,))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            total_estimated = row[0] or 0
+            total_actual = row[1] or 0
+            variance = total_actual - total_estimated if total_estimated > 0 else 0
+            variance_pct = (variance / total_estimated * 100) if total_estimated > 0 else 0
+
+            return {
+                'total_estimated_hours': total_estimated,
+                'total_actual_hours': total_actual,
+                'variance_hours': variance,
+                'variance_percentage': variance_pct,
+                'total_topics': row[2] or 0,
+                'completed_topics': row[3] or 0
+            }
+
+        return {
+            'total_estimated_hours': 0,
+            'total_actual_hours': 0,
+            'variance_hours': 0,
+            'variance_percentage': 0,
+            'total_topics': 0,
+            'completed_topics': 0
+        }
+
+    # ========================================================================
+    # AI COACHING METHODS
+    # ========================================================================
+
+    def save_coaching_review(self, path_id: int, review_text: str,
+                           performance_summary: str = "", insights: str = "",
+                           recommendations: str = ""):
+        """Save an AI coaching review"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO coaching_reviews (path_id, review_text, performance_summary,
+                                        insights, recommendations)
+            VALUES (?, ?, ?, ?, ?)
+        """, (path_id, review_text, performance_summary, insights, recommendations))
+
+        conn.commit()
+        conn.close()
+
+    def get_coaching_reviews(self, path_id: int) -> List[Dict]:
+        """Get all coaching reviews for a learning path"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT id, review_text, performance_summary, insights,
+                   recommendations, created_at
+            FROM coaching_reviews
+            WHERE path_id = ?
+            ORDER BY created_at DESC
+        """, (path_id,))
+
+        reviews = []
+        for row in cursor.fetchall():
+            reviews.append({
+                'id': row[0],
+                'review_text': row[1],
+                'performance_summary': row[2],
+                'insights': row[3],
+                'recommendations': row[4],
+                'created_at': row[5]
+            })
+
+        conn.close()
+        return reviews
+
+    def get_latest_coaching_review(self, path_id: int) -> Optional[Dict]:
+        """Get the most recent coaching review"""
+        reviews = self.get_coaching_reviews(path_id)
+        return reviews[0] if reviews else None
+
+    # ========================================================================
+    # AI CHAT METHODS
+    # ========================================================================
+
+    def save_chat_message(self, path_id: int, message: str, role: str):
+        """Save a chat message (role: 'user' or 'assistant')"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO coaching_chats (path_id, message, role)
+            VALUES (?, ?, ?)
+        """, (path_id, message, role))
+
+        conn.commit()
+        conn.close()
+
+    def get_chat_history(self, path_id: int, limit: int = 50) -> List[Dict]:
+        """Get chat history for a learning path"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT id, message, role, created_at
+            FROM coaching_chats
+            WHERE path_id = ?
+            ORDER BY created_at ASC
+            LIMIT ?
+        """, (path_id, limit))
+
+        messages = []
+        for row in cursor.fetchall():
+            messages.append({
+                'id': row[0],
+                'message': row[1],
+                'role': row[2],
+                'created_at': row[3]
+            })
+
+        conn.close()
+        return messages
+
+    def clear_chat_history(self, path_id: int):
+        """Clear all chat history for a learning path"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            DELETE FROM coaching_chats
+            WHERE path_id = ?
+        """, (path_id,))
+
+        conn.commit()
+        conn.close()
