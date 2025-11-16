@@ -758,10 +758,25 @@ def render_progress_tracker(generator, path_id):
     with col2:
         # Status management
         current_status = path_info.get('status', 'active')
+
+        # If plan is deleted, redirect back to main page
+        if current_status == 'deleted':
+            st.error("This learning path has been deleted.")
+            st.session_state.show_generator = True
+            st.session_state.current_path_id = None
+            st.rerun()
+            return
+
+        # Safe index lookup with default to 0 (active)
+        try:
+            status_index = ["active", "on_hold", "archived"].index(current_status)
+        except ValueError:
+            status_index = 0  # Default to active if status not in list
+
         new_status = st.selectbox(
             "Status",
             ["active", "on_hold", "archived"],
-            index=["active", "on_hold", "archived"].index(current_status),
+            index=status_index,
             key=f"status_select_{path_id}",
             label_visibility="collapsed"
         )

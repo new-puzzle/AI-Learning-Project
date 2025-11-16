@@ -406,7 +406,8 @@ class Database:
     def get_paths_by_status(self, status: str = None) -> List[Dict]:
         """
         Get learning paths filtered by status
-        If status is None, return all paths
+        If status is None, return all non-deleted paths
+        Deleted paths are never shown
         """
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -415,13 +416,15 @@ class Database:
             cursor.execute("""
                 SELECT id, goal, timeframe, created_at, updated_at, status
                 FROM learning_paths
-                WHERE status = ?
+                WHERE status = ? AND status != 'deleted'
                 ORDER BY updated_at DESC
             """, (status,))
         else:
+            # When no status filter, show all except deleted
             cursor.execute("""
                 SELECT id, goal, timeframe, created_at, updated_at, status
                 FROM learning_paths
+                WHERE status != 'deleted'
                 ORDER BY updated_at DESC
             """)
 
