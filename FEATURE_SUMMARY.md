@@ -869,7 +869,115 @@ GoalPath AI now features calendar-based scheduling with actual dates instead of 
 
 ---
 
-### 11. 💾 Database & Persistence
+### 11. 📅 Calendar Export (.ics) (NEW in v1.3.0!)
+**Status:** ✅ Fully Working
+
+**What it does:**
+Export your goal plan as a standard iCalendar (.ics) file that can be imported into any calendar application. Transform your goal plan into scheduled calendar events with all task details, making your plan actionable in your daily workflow.
+
+**Key Features:**
+
+**📱 Universal Compatibility:**
+- **Google Calendar** - Import via Settings → Import & Export
+- **Microsoft Outlook** - Import via File → Open & Export
+- **Apple Calendar** - Double-click .ics file or use File → Import
+- **Other calendar apps** - Any app supporting iCalendar standard
+- **Cross-device sync** - Automatically syncs across all your devices
+
+**📆 Event Details:**
+- **Event Title** - Task name (e.g., "Learn Python Basics")
+- **Date & Time** - Based on due_date (default start: 9:00 AM)
+- **Duration** - Converted from estimated_hours (e.g., 2.5 hrs = 2h 30m)
+- **Description** - Includes:
+  - Priority level (🔴 High, 🟡 Medium, 🟢 Low)
+  - All subtopics as bullet points
+  - Resources and links (up to 5)
+  - Estimated time
+  - Actual time spent (if tracked)
+  - User notes
+- **Status** - Completed tasks marked as COMPLETED in calendar
+- **Category** - Tagged with goal type (Learning, Career, etc.)
+
+**🔧 Smart Formatting:**
+- Each task becomes a separate calendar event
+- Events scheduled on their due dates from the plan
+- Duration automatically calculated from estimated hours
+- Tasks with 0 hours default to 1-hour blocks
+- Completed tasks included but marked as done
+- Unique event IDs for calendar app compatibility
+
+**How to use:**
+1. Open any goal plan with calendar dates
+2. Expand "⚙️ Advanced Options"
+3. Click "📅 Export to Calendar (.ics)"
+4. Click "💾 Download Calendar File"
+5. Import into your preferred calendar app
+6. All tasks appear as scheduled events!
+
+**File Format:**
+- Filename: `goalpath_[goal_name]_[date].ics`
+- Example: `goalpath_learn_python_2025-11-16.ics`
+- Standard iCalendar format (RFC 5545 compliant)
+- Compatible with all major calendar applications
+
+**Example Calendar Event:**
+```
+Event: "Master Python Fundamentals"
+Date: Nov 20, 2025
+Time: 9:00 AM - 11:00 AM (2 hours)
+Description:
+  Priority: 🔴 HIGH
+
+  Subtopics:
+    • Variables and data types
+    • Control flow (if/else, loops)
+    • Functions and scope
+
+  Resources:
+    • Python.org official tutorial
+    • Real Python beginner guide
+
+  Estimated Time: 2.0 hours
+  Actual Time: 2.3 hours
+```
+
+**Benefits:**
+- ✅ See your goal plan in daily/weekly calendar view
+- ✅ Get automatic notifications for upcoming tasks
+- ✅ Integrate with your existing workflow and tools
+- ✅ Time blocking made easy - see tasks in calendar slots
+- ✅ Sync across all devices automatically
+- ✅ Share calendar with accountability partners
+- ✅ Perfect for scheduling focused work sessions
+- ✅ No manual calendar entry needed
+
+**Edge Cases Handled:**
+- **No due dates:** Shows helpful message to generate plan with calendar dates first
+- **Missing hours:** Defaults to 1-hour event duration
+- **Completed tasks:** Included and marked as completed
+- **Long goal names:** Filename automatically truncated if too long
+- **Special characters:** Cleaned for safe filename generation
+
+**Technical Implementation:**
+- Uses Python's `icalendar` library for standard compliance
+- Generates RFC 5545 compliant .ics files
+- Proper timezone handling (UTC default)
+- Unique UIDs for each event
+- PRODID identifies as GoalPath AI
+- Calendar metadata includes goal name and description
+
+**Use Cases:**
+- Schedule goal tasks around meetings and commitments
+- Time block your week with specific goal work sessions
+- Get push notifications for upcoming tasks
+- Share your plan timeline with mentors or coaches
+- Track goal work in your time tracking app
+- Coordinate goal work with team calendars
+- Mobile reminders on the go
+
+---
+
+### 12. 💾 Database & Persistence
 **Status:** ✅ Fully Working
 
 **SQLite Database with 6 Tables:**
@@ -933,7 +1041,7 @@ GoalPath AI now features calendar-based scheduling with actual dates instead of 
 
 ---
 
-### 12. 🎨 User Interface
+### 13. 🎨 User Interface
 **Status:** ✅ Fully Working
 
 **Layout:**
@@ -1028,8 +1136,9 @@ reportlab>=4.0.0
 16. **Model Switching** - Compare AI responses easily
 17. **Voice Interface** - Hands-free voice input and output (FREE!)
 18. **YouTube Auto-Embed** - Watch tutorial videos inline without leaving app
-19. **PDF Export** - Download goal plans for offline use or sharing
-20. **Mobile Optimized** - Perfect experience on phones and tablets
+19. **Calendar Export (.ics)** - Import goal plans into Google Calendar, Outlook, Apple Calendar (NEW v1.3.0!)
+20. **PDF Export** - Download goal plans for offline use or sharing
+21. **Mobile Optimized** - Perfect experience on phones and tablets
 
 ---
 
@@ -1246,9 +1355,10 @@ QWEN_API_KEY=your_qwen_key
 15. **Model comparison** - Try different AIs for same question
 16. **Voice interface** - Hands-free interaction (FREE browser-native)
 17. **YouTube auto-embed** - Watch tutorials without leaving the app
-18. **PDF export** - Take your goals offline, share with coaches/mentors
-19. **Mobile optimized** - Works perfectly on phones and tablets
-20. **Fully accessible** - Voice support for users with disabilities
+18. **Calendar export (.ics)** - Import goal plans into any calendar app for daily scheduling (v1.3.0)
+19. **PDF export** - Take your goals offline, share with coaches/mentors
+20. **Mobile optimized** - Works perfectly on phones and tablets
+21. **Fully accessible** - Voice support for users with disabilities
 
 ---
 
@@ -1286,6 +1396,7 @@ QWEN_API_KEY=your_qwen_key
 - ✅ Time tracking with timer & manual entry (v1.3.0)
 - ✅ AI progress coaching with performance reviews (v1.3.0)
 - ✅ Conversational AI coach chat (v1.3.0)
+- ✅ Calendar export (.ics) for Google Calendar, Outlook, Apple Calendar (v1.3.0)
 - ✅ Multi-model AI (15+ models, 6 providers)
 - ✅ Voice interface (input + output)
 - ✅ File upload & vision capabilities

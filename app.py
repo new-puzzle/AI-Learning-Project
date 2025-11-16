@@ -843,6 +843,47 @@ def render_progress_tracker(generator, path_id):
             except Exception as e:
                 st.error(f"PDF generation failed: {str(e)}")
 
+        # Calendar Export
+        st.markdown("---")
+        st.markdown("**📅 Calendar Export**")
+
+        # Check if plan has due dates
+        has_due_dates = any(topic.get('due_date') for topic in curriculum)
+
+        if not has_due_dates:
+            st.info("💡 Generate your plan with calendar dates first to use this feature.")
+        else:
+            if st.button("📅 Export to Calendar (.ics)", key=f"export_calendar_{path_id}"):
+                try:
+                    # Generate .ics file
+                    ics_content = generator.db.generate_ics_calendar(path_id, default_start_time_hour=9)
+
+                    if ics_content:
+                        filename = generator.db.get_calendar_filename(path_id)
+
+                        st.download_button(
+                            label="💾 Download Calendar File",
+                            data=ics_content,
+                            file_name=filename,
+                            mime="text/calendar"
+                        )
+
+                        # Show import instructions
+                        st.success("✅ Calendar file ready!")
+                        st.markdown("""
+**Import into your calendar:**
+- **Google Calendar:** Settings → Import & Export → Import
+- **Outlook:** File → Open & Export → Import/Export
+- **Apple Calendar:** File → Import → Select file
+- **Other apps:** Look for Import or Add Calendar option
+
+Your goal plan tasks will appear as scheduled events with all details!
+                        """)
+                    else:
+                        st.error("Failed to generate calendar file. Please ensure icalendar library is installed.")
+                except Exception as e:
+                    st.error(f"Calendar generation failed: {str(e)}")
+
         st.markdown("---")
         st.warning("Danger Zone")
         if st.button("🗑️ Delete this learning path", key=f"delete_{path_id}"):

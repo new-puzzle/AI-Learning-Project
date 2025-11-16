@@ -739,3 +739,164 @@ class Database:
 
         conn.commit()
         conn.close()
+
+    def generate_ics_calendar(self, path_id: int, default_start_time_hour: int = 9) -> Optional[str]:
+        """
+        Generate an iCalendar (.ics) file for a goal plan
+
+        Args:
+            path_id: ID of the learning path
+            default_start_time_hour: Default hour to start events (default: 9 AM)
+
+        Returns:
+            String containing .ics file content, or None if no due dates
+        """
+        try:
+            from icalendar import Calendar, Event
+            from datetime import datetime, timedelta
+            import pytz
+        except ImportError:
+            # Fallback if icalendar not installed
+            return None
+
+        # Get path info and topics
+        paths = self.get_learning_paths(active_only=False)
+        path_info = next((p for p in paths if p['id'] == path_id), None)
+
+        if not path_info:
+            return None
+
+        topics = self.get_topics(path_id)
+
+        # Check if any topics have due dates
+        has_due_dates = any(topic.get('due_date') for topic in topics)
+        if not has_due_dates:
+            return None
+
+        # Create calendar
+        cal = Calendar()
+        cal.add('prodid', '-//GoalPath AI//Goal Plan Calendar//EN')
+        cal.add('version', '2.0')
+        cal.add('calscale', 'GREGORIAN')
+        cal.add('method', 'PUBLISH')
+        cal.add('x-wr-calname', f"GoalPath AI - {path_info['goal']}")
+        cal.add('x-wr-caldesc', f"Goal plan for: {path_info['goal']} ({path_info['timeframe']} days)")
+
+        # Get local timezone
+        try:
+            local_tz = pytz.timezone('UTC')  # Use UTC as default
+        except:
+            local_tz = pytz.UTC
+
+        # Create events for each topic
+        for topic in topics:
+            due_date_str = topic.get('due_date')
+            if not due_date_str:
+                continue
+
+            # Parse due date
+            try:
+                due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
+            except:
+                continue
+
+            # Create event
+            event = Event()
+
+            # Set event title
+            event.add('summary', topic['topic'])
+
+            # Set start date and time
+            start_datetime = due_date.replace(hour=default_start_time_hour, minute=0, second=0)
+            event.add('dtstart', start_datetime)
+
+            # Calculate duration from estimated hours
+            estimated_hours = topic.get('estimated_hours', 1.0)
+            if estimated_hours == 0 or estimated_hours is None:
+                estimated_hours = 1.0
+
+            duration_hours = int(estimated_hours)
+            duration_minutes = int((estimated_hours - duration_hours) * 60)
+
+            end_datetime = start_datetime + timedelta(hours=duration_hours, minutes=duration_minutes)
+            event.add('dtend', end_datetime)
+
+            # Build description
+            description_parts = []
+
+            # Add priority
+            priority = topic.get('priority', 'medium')
+            if priority:
+                priority_emoji = {'high': '🔴', 'medium': '🟡', 'low': '🟢'}.get(priority.lower(), '')
+                description_parts.append(f"Priority: {priority_emoji} {priority.upper()}")
+
+            # Add subtopics
+            subtopics = topic.get('subtopics', [])
+            if subtopics:
+                description_parts.append("\nSubtopics:")
+                for subtopic in subtopics:
+                    description_parts.append(f"  • {subtopic}")
+
+            # Add resources
+            resources = topic.get('resources', [])
+            if resources:
+                description_parts.append("\nResources:")
+                for resource in resources[:5]:  # Limit to 5 resources for calendar
+                    description_parts.append(f"  • {resource}")
+
+            # Add estimated hours
+            description_parts.append(f"\nEstimated Time: {estimated_hours} hours")
+
+            # Add actual hours if available
+            actual_hours = topic.get('actual_hours', 0)
+            if actual_hours and actual_hours > 0:
+                description_parts.append(f"Actual Time: {actual_hours} hours")
+
+            # Add notes if available
+            notes = topic.get('notes', '')
+            if notes:
+                description_parts.append(f"\nNotes: {notes}")
+
+            event.add('description', '\n'.join(description_parts))
+
+            # Set location/category
+            event.add('categories', [path_info.get('goal_type', 'learning').title()])
+
+            # Set status based on completion
+            if topic.get('is_completed'):
+                event.add('status', 'COMPLETED')
+                if topic.get('completed_at'):
+                    event.add('completed', datetime.strptime(topic['completed_at'], '%Y-%m-%d %H:%M:%S'))
+            else:
+                event.add('status', 'CONFIRMED')
+
+            # Add unique identifier
+            event.add('uid', f"goalpath-{path_id}-topic-{topic['id']}@goalpath.ai")
+
+            # Add created/modified timestamps
+            event.add('dtstamp', datetime.now())
+
+            # Add to calendar
+            cal.add_component(event)
+
+        # Return calendar as string
+        return cal.to_ical().decode('utf-8')
+
+    def get_calendar_filename(self, path_id: int) -> str:
+        """Generate a filename for the calendar export"""
+        paths = self.get_learning_paths(active_only=False)
+        path_info = next((p for p in paths if p['id'] == path_id), None)
+
+        if not path_info:
+            return f"goalpath_plan_{datetime.now().strftime('%Y-%m-%d')}.ics"
+
+        # Clean goal name for filename
+        goal_name = path_info['goal']
+        goal_name = goal_name.lower()
+        goal_name = ''.join(c if c.isalnum() or c in (' ', '_') else '' for c in goal_name)
+        goal_name = goal_name.replace(' ', '_')
+        goal_name = goal_name[:50]  # Limit length
+
+        date_str = datetime.now().strftime('%Y-%m-%d')
+
+        return f"goalpath_{goal_name}_{date_str}.ics"

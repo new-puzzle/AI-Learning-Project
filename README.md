@@ -65,6 +65,7 @@ GoalPath AI is not just another to-do list or learning platform. It's a complete
 - **Activity Metrics** - Time spent, completed topics, active days
 
 ### 📄 Export & Share
+- **Calendar Export (.ics)** - Import your goal plan into Google Calendar, Outlook, Apple Calendar, or any calendar app (NEW!)
 - **PDF Export** - Download goal plans for offline use or sharing with mentors/coaches
 - **Mobile Optimized** - Works perfectly on phones and tablets
 - **Password Protected** - Secure your data with persistent cookie-based authentication
@@ -307,6 +308,48 @@ GoalPath AI uses **cookie-based password protection** with 24-hour persistent se
 3. Click "📥 Download as PDF"
 4. Click "💾 Save PDF"
 5. File downloads as `goalpath_[your_goal].pdf` (now includes calendar dates!)
+
+### Exporting to Calendar (.ics) (NEW!)
+
+**Take your goal plan to your daily calendar!**
+
+1. Open any goal plan with calendar dates
+2. Expand "⚙️ Advanced Options"
+3. Click "📅 Export to Calendar (.ics)"
+4. Click "💾 Download Calendar File"
+5. File downloads as `goalpath_[your_goal]_[date].ics`
+
+**Import into your calendar app:**
+
+- **Google Calendar:**
+  - Go to Settings → Import & Export → Import
+  - Select the downloaded .ics file
+
+- **Microsoft Outlook:**
+  - File → Open & Export → Import/Export
+  - Select "Import an iCalendar (.ics) file"
+
+- **Apple Calendar:**
+  - File → Import → Select .ics file
+  - Or simply double-click the .ics file
+
+- **Other calendar apps:**
+  - Look for Import, Add Calendar, or Subscribe option
+
+**What gets imported:**
+- Each task as a calendar event on its due date
+- Event duration based on estimated hours
+- Full task details including subtopics and resources
+- Priority level in event description
+- Completed tasks marked as done
+- All events categorized by your goal type
+
+**Benefits:**
+- See your goal plan in your daily calendar view
+- Get calendar notifications for upcoming tasks
+- Integrate goal tracking with your existing workflow
+- Sync across all your devices automatically
+- Perfect for time blocking and scheduling
 
 ## 📁 Project Structure
 
