@@ -2,19 +2,111 @@
 
 **Generated:** November 16, 2025
 **Development Branch:** `claude/learnpath-ai-setup-014RbK3m8FVjabq96bopm7Ck`
-**Version:** 1.3.0 - Time Tracking & AI Coaching
+**Version:** 1.4.0 - General AI Chat & UX Improvements
 
 ---
 
 ## 📊 CURRENT STATUS: Production Ready ✅
 
-GoalPath AI is a fully functional, multi-modal AI-powered universal goal planning platform supporting 5 goal types (Learning, Career, Freelance, Project, Personal) with **50+ pre-made templates**, **smart time tracking**, **AI progress coaching**, **conversational AI coach chat**, 6 AI providers, file upload capabilities, comprehensive progress tracking, and **date-aware smart scheduling** with calendar dates and automatic rescheduling.
+GoalPath AI is a fully functional, multi-modal AI-powered universal goal planning platform supporting 5 goal types (Learning, Career, Freelance, Project, Personal) with **50+ pre-made templates**, **general AI chat available from home screen**, **smart time tracking**, **AI progress coaching**, **conversational AI coach chat**, 12 AI providers, voice capabilities, file upload, comprehensive progress tracking, and **date-aware smart scheduling** with calendar dates and automatic rescheduling.
 
 ---
 
 ## 🎯 CORE FEATURES IMPLEMENTED
 
-### 1. 📋 Goal Templates Library (NEW in v1.2.0!)
+### 1. 💬 General AI Chat - Ask Anything (NEW in v1.4.0!)
+**Status:** ✅ Fully Working
+
+**What it does:**
+Talk to AI from the main page BEFORE creating any goal plan! Get expert advice on what to learn, career decisions, goal planning, and more. No commitment required - just open the app and start chatting.
+
+**Key Features:**
+
+**🏠 Always Accessible:**
+- **Available from Home Screen** - Open app → immediately see chat interface
+- **No Prerequisites** - Don't need to create a goal plan first
+- **Pre-Decision Advice** - Get guidance BEFORE committing to a goal
+- **Perfect for Exploration** - Ask questions, explore options, make informed decisions
+
+**💭 Full Conversation Interface:**
+- **Multi-Turn Conversations** - Chat history maintained throughout session
+- **Context-Aware** - AI remembers previous messages in conversation
+- **Natural Language** - Ask questions conversationally, no special commands
+- **Smart Prompting** - Helpful examples shown: "What should I learn to become an AI engineer?"
+
+**🤖 Multi-Model Support:**
+- **Choose Your AI** - Select from all 12 integrated AI models
+- **Model Dropdown** - Easy switcher: Claude, OpenAI, Gemini, DeepSeek, Mistral, Qwen
+- **Per-Message Selection** - Can change models mid-conversation
+- **Best Model for Task** - Use Claude for reasoning, Haiku for speed, etc.
+
+**🎙️ Voice Capabilities:**
+- **Voice Input** - Speak your questions instead of typing
+- **Voice Output** - AI responses read aloud (optional)
+- **Same Voice System** - Integrated with browser Speech Recognition API
+- **Voice Settings** - Toggle auto-read responses, enable/disable voice input
+
+**🔄 Conversation Management:**
+- **Chat History** - Full conversation displayed with clear user/AI labels
+- **Clear Button** - Reset conversation and start fresh
+- **Persistent During Session** - History maintained while using app
+- **Model Attribution** - Shows which AI model provided each response
+
+**💡 Smart Suggestions:**
+- **After 4+ messages** - Suggests creating a goal plan when ready
+- **Seamless Transition** - Easy path from chat → goal creation
+- **Informed Decisions** - Make better goal choices after AI consultation
+
+**Example Questions You Can Ask:**
+- "What should I learn to become an AI engineer?"
+- "Is supervised learning harder than reinforcement learning?"
+- "What job opportunities should I hunt for in tech?"
+- "How long does it take to master Python?"
+- "Should I learn web development or mobile development?"
+- "What's the best way to transition from teaching to tech?"
+- "How much time should I dedicate to learning per day?"
+
+**How to Use:**
+1. Open GoalPath AI (make sure no goal plan is selected)
+2. You'll see "💬 Ask AI Anything" on the main page
+3. **Optional:** Select your preferred AI model from dropdown
+4. **Optional:** Enable voice settings (auto-read, voice input)
+5. Type or speak your question
+6. Click "🚀 Send Message"
+7. AI responds with personalized advice
+8. Continue conversation as needed
+9. When ready, click "➕ New Learning Path" to create goal
+
+**Benefits:**
+- ✅ Get expert advice BEFORE creating goals
+- ✅ Explore options without commitment
+- ✅ Make informed decisions about what to learn
+- ✅ Understand difficulty levels and time requirements
+- ✅ Ask follow-up questions and clarifications
+- ✅ Choose best AI model for your question type
+- ✅ Perfect for career guidance and learning path planning
+
+**Technical Implementation:**
+- Function: `render_general_ai_chat()` in app.py
+- Displayed when: No goal plan selected (home screen)
+- Session state: `general_chat_history` list storing conversation
+- Multi-model integration: `get_available_providers()` from ai_providers.py
+- Voice integration: `render_voice_settings()` and `render_voice_input_button()`
+- System prompt: Career & learning advisor role with concise responses (3-5 sentences)
+- Context window: Last 10 messages for conversation continuity
+
+**Why This Feature Matters:**
+This was a critical UX gap! Previously, users had to commit to creating a goal plan BEFORE getting any AI advice. Now they can:
+1. Ask questions and explore
+2. Get personalized recommendations
+3. Understand what they're getting into
+4. THEN create an informed goal plan
+
+This makes GoalPath AI more approachable and useful, especially for new users who aren't sure what to learn or how to structure their goals.
+
+---
+
+### 2. 📋 Goal Templates Library (v1.2.0)
 **Status:** ✅ Fully Working
 
 **What it does:**
@@ -99,10 +191,12 @@ GoalPath AI now includes 50+ professionally crafted goal templates to help users
 - Descriptive tags
 
 **User Experience:**
-- **Tab Interface** - "📋 Choose Template" vs "✍️ Start from Scratch"
+- **Tab Interface** - "📋 Choose Template" vs "✍️ Create Custom Goal"
+- **Collapsible Categories** (v1.4.0) - Each category expandable to reduce overwhelm
+- **Category Headers** - Shows template count (e.g., "📚 Learning & Skills (10 templates)")
 - **One-Click Selection** - Click "Use This Template" to pre-fill form
 - **All Fields Editable** - Goal text, timeframe, hours/day, dates all customizable
-- **Clear Template Button** - Remove pre-fill and start fresh
+- **❌ Close Button** (v1.4.0) - Easily dismiss template form with prominent close button
 - **Seamless Integration** - Works with all existing features (calendar dates, scheduling, etc.)
 
 **Template Philosophy:**
@@ -1385,26 +1479,89 @@ QWEN_API_KEY=your_qwen_key
 
 ---
 
+## 🔧 BUG FIXES & UX IMPROVEMENTS (v1.4.0)
+
+### Critical Fixes Implemented:
+
+**1. Voice Input Button Key Mismatch**
+- **Issue:** Voice recording worked but didn't fill goal text field
+- **Root Cause:** Voice button key (`goal_input`) didn't match text input key (`{key_prefix}goal_input`)
+- **Fix:** Updated voice button to use `{key_prefix}goal_input` to match form keys
+- **Result:** Voice → text field now works perfectly across template and custom forms
+
+**2. Template Form Persistence**
+- **Issue:** After clicking "Use This Template", form stayed open forever with no clear way to close
+- **User Feedback:** "It remains there forever and nothing changes unless I click another template"
+- **Fix:** Added prominent "❌ Close" button at top of template form
+- **Result:** Easy one-click dismissal of template form, better UX when browsing templates
+
+**3. Missing General AI Chat**
+- **Issue:** Users could only chat with AI AFTER creating a goal plan
+- **User Feedback:** "After I put 12 different AIs, I don't have an option to talk to an AI by chat before setting the goal"
+- **Impact:** Critical UX gap - users couldn't get advice before committing to a goal
+- **Fix:** Added `render_general_ai_chat()` function, displayed on home screen
+- **Result:** Full AI chat now available immediately upon opening app, perfect for pre-decision advice
+
+**4. Delete Bug**
+- **Issue:** Deleted learning paths still appeared in sidebar and caused "'deleted' is not in list" error
+- **Fix:** Updated `get_paths_by_status()` to filter out deleted plans, added safe status handling
+- **Result:** Deleted plans disappear immediately from sidebar
+
+**5. Duplicate Selectbox Keys**
+- **Issue:** Template form and custom form created duplicate selectbox IDs
+- **Fix:** Added `key_prefix` parameter to `render_custom_goal_form()` function
+- **Result:** All form widgets now have unique keys, no more ID conflicts
+
+### Security & Configuration Improvements:
+
+**6. Streamlit Secrets Support**
+- **Issue:** Warning message about storing passwords in secrets
+- **What it means:** Streamlit recommends using `secrets.toml` instead of environment variables for API keys
+- **Implementation:**
+  - Created `.streamlit/secrets.toml.example` template
+  - Updated all API key loading to check `st.secrets` first, then fall back to environment variables
+  - Modified `app.py`, `utils/ai_helpers.py`, and `utils/ai_providers.py`
+  - Added `.streamlit/secrets.toml` to `.gitignore`
+- **Benefits:** More secure API key management, follows Streamlit best practices, easier deployment
+
+### UI/UX Improvements:
+
+**7. Collapsible Template Categories**
+- **Issue:** Showing all 50 templates at once was overwhelming
+- **User Feedback:** "It's overwhelming... maybe it should be collapsible by category"
+- **Fix:** Wrapped each category in `st.expander()` with template count
+- **Result:** Clean, organized UI - expand only categories you want to explore
+
+**8. Tab Renaming for Clarity**
+- **Old:** "Start from Scratch"
+- **New:** "Create Custom Goal"
+- **Reason:** More descriptive, clearly indicates this is where you build from scratch
+
+---
+
 ## ✅ PROJECT COMPLETE - PRODUCTION READY!
 
 **Status:** 🎉 All core features implemented and tested!
 
 **What we built:**
+- ✅ General AI Chat on home screen (v1.4.0)
 - ✅ Universal goal planning (5 goal types)
-- ✅ 50+ goal templates for quick-start (v1.2.0)
+- ✅ 50+ goal templates with collapsible categories (v1.2.0, improved v1.4.0)
 - ✅ Date-aware smart scheduling with calendar dates (v1.1.0)
 - ✅ Time tracking with timer & manual entry (v1.3.0)
 - ✅ AI progress coaching with performance reviews (v1.3.0)
 - ✅ Conversational AI coach chat (v1.3.0)
 - ✅ Calendar export (.ics) for Google Calendar, Outlook, Apple Calendar (v1.3.0)
-- ✅ Multi-model AI (15+ models, 6 providers)
-- ✅ Voice interface (input + output)
+- ✅ Multi-model AI (12 models, 6 providers)
+- ✅ Voice interface with working voice input (v1.4.0 fixed)
 - ✅ File upload & vision capabilities
 - ✅ YouTube auto-embed
 - ✅ PDF export
+- ✅ Streamlit secrets support (v1.4.0)
 - ✅ Password protection & security
 - ✅ Mobile optimization
 - ✅ Complete documentation
+- ✅ All critical bugs fixed (v1.4.0)
 
 **Ready for deployment:**
 - ✅ Streamlit Cloud ready
@@ -1425,13 +1582,13 @@ QWEN_API_KEY=your_qwen_key
 
 ---
 
-**🚀 GoalPath AI v1.3.0 is complete and ready to launch!**
+**🚀 GoalPath AI v1.4.0 is complete and ready to launch!**
 
-**Deployment:** See [README.md](README.md) for deployment instructions
+**Deployment:** See [DEPLOYMENT.md](DEPLOYMENT.md) for deployment instructions
 **Mobile Guide:** See [MOBILE_GUIDE.md](MOBILE_GUIDE.md) for mobile optimization details
 
 ---
 
 **End of Report**
 **Last Updated:** November 16, 2025
-**Version:** 1.3.0 - Time Tracking & AI Coaching
+**Version:** 1.4.0 - General AI Chat & UX Improvements
