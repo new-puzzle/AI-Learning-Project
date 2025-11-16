@@ -1,114 +1,59 @@
-# 🎓 LearnPath AI
+# 🎯 GoalPath AI
 
-An AI-powered learning path planner and progress tracker that helps you structure your learning journey with personalized curriculum generation, milestone tracking, and intelligent resource recommendations.
+An AI-powered universal goal planning platform that helps you achieve any goal - from learning new skills to career transitions, freelancing success, project completion, and personal achievements.
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.31.0-red.svg)
-![Anthropic](https://img.shields.io/badge/Claude-API-orange.svg)
+![Multi--Model](https://img.shields.io/badge/AI-Multi--Model-orange.svg)
 
-## 🌟 Features
+## 🌟 What Makes GoalPath AI Special
 
-### Core Learning Features
-- **🚀 AI Learning Path Generator**
-  - Input your learning goal and timeframe
-  - AI generates a complete day-by-day curriculum
-  - Structured breakdown with topics, subtopics, and time estimates
-  - Curated learning resources for each topic
-  - Visual timeline and roadmap view
+GoalPath AI is not just another to-do list or learning platform. It's a complete goal achievement system powered by multiple AI models that understands **5 different types of goals** and provides specialized guidance for each:
 
-- **📊 Progress Tracker**
-  - Check off topics as you complete them
-  - Visual progress bar showing completion percentage
-  - Track time spent on each topic
-  - Learning streak counter
-  - Status management (Active, On Hold, Archived, Deleted)
+- 📚 **Learning & Skills** - Master new subjects with structured curricula
+- 💼 **Career Transition** - Land your dream job with targeted action plans
+- 💰 **Freelance & Business** - Build your income streams strategically
+- 🚀 **Project Completion** - Ship your projects from idea to launch
+- 🎯 **Personal Achievement** - Reach personal milestones with proven strategies
 
-- **💾 Database Storage**
-  - Save multiple learning paths
-  - Persistent progress tracking
-  - Filter paths by status
-  - View and manage all your learning journeys
+## ✨ Key Features
 
-### 🤖 Multi-Model AI Tutor (NEW!)
+### 🌟 Universal Goal Planning
+- **5 Goal Types** with specialized AI coaching for each
+- **Type-Specific Prompts** - Career goals get job search tactics, freelance goals get client acquisition strategies, etc.
+- **Priority System** - AI assigns high/medium/low priorities (🔴🟡🟢) to keep you focused
+- **Progress Tracking** - Know if you're on track with expected vs. actual progress
 
-**15+ AI Models Across 6 Providers:**
-- **Claude** (Anthropic)
-  - Claude Sonnet 4.5 👁️ (vision)
-  - Claude Sonnet 3.5 👁️ (vision)
-  - Claude Haiku 👁️ (vision)
+### 🤖 Multi-Model AI Tutor
+- **15+ AI Models** across 6 providers (Claude, OpenAI, Google Gemini, DeepSeek, Mistral, Qwen)
+- **Vision Capabilities** - Upload homework, diagrams, screenshots for instant analysis
+- **Model Switching** - Compare responses from different AI models
+- **Chat History** - Persistent conversations per goal plan
 
-- **OpenAI**
-  - GPT-4 Turbo 👁️ (vision)
-  - GPT-4 👁️ (vision)
-  - GPT-3.5 Turbo
-  - GPT-4 Vision 👁️
+### 📎 File Upload & Analysis
+- **Images** - Solve problems, explain diagrams, OCR handwritten notes
+- **PDFs** - Extract text, answer questions, summarize
+- **Documents** - Analyze Word docs, text files
+- **YouTube Auto-Embed** - Watch tutorial videos inline without leaving the app
 
-- **Google Gemini**
-  - Gemini Pro
-  - Gemini Pro Vision 👁️
+### 📊 Smart Progress Tracking
+- **On-Track Indicator** - See if you're ahead or behind schedule (✅⚠️)
+- **Visual Progress** - Completion percentage, streak counters
+- **Status Management** - Active, On Hold, Archived, Deleted
+- **Activity Metrics** - Time spent, completed topics, active days
 
-- **DeepSeek**
-  - DeepSeek Chat
-  - DeepSeek Coder
-  - OCR support for image analysis
-
-- **Mistral AI**
-  - Mistral Large
-  - Mistral Medium
-  - Mistral Small
-
-- **Qwen** (Alibaba)
-  - Qwen Plus
-  - Qwen Turbo
-  - Qwen Max
-
-**Features:**
-- Switch between models mid-conversation
-- Compare responses from different AI models
-- Silent failure: All models shown even if API not configured
-- Visual indicators for configured/unconfigured models
-- Vision models can analyze images
-
-### 📎 File Upload & Analysis (NEW!)
-
-**Upload and Analyze:**
-- **Images** (PNG, JPG, JPEG)
-  - Solve math problems from photos
-  - Explain diagrams and charts
-  - Read handwritten notes
-  - Analyze screenshots
-
-- **PDFs**
-  - Extract and analyze text
-  - Answer questions about documents
-  - Summarize content
-
-- **Text Files** (TXT)
-  - Read and understand content
-  - Answer questions about the file
-
-- **Word Documents** (DOCX)
-  - Parse and analyze
-  - Q&A on document content
-
-**Supported by:**
-- Claude (native vision)
-- OpenAI GPT-4 Vision (native vision)
-- Google Gemini Pro Vision (native vision)
-- DeepSeek (OCR-based image analysis)
+### 📄 Export & Share
+- **PDF Export** - Download goal plans for offline use or sharing with mentors/coaches
+- **Mobile Optimized** - Works perfectly on phones and tablets
+- **Password Protected** - Secure your data with persistent cookie-based authentication
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - Python 3.8 or higher
-- At least ONE AI provider API key:
-  - **Claude** ([Get key](https://console.anthropic.com/)) - Recommended
-  - **OpenAI** ([Get key](https://platform.openai.com/))
-  - **Google Gemini** ([Get key](https://makersuite.google.com/app/apikey))
-  - **DeepSeek** ([Get key](https://platform.deepseek.com/))
-  - **Mistral** ([Get key](https://console.mistral.ai/))
-  - **Qwen** ([Get key](https://dashscope.console.aliyun.com/))
+- At least ONE AI provider API key (Claude recommended)
+- A strong password for securing your instance
 
 ### Installation
 
@@ -123,156 +68,378 @@ An AI-powered learning path planner and progress tracker that helps you structur
    pip install -r requirements.txt
    ```
 
-3. **Set up your API keys**
+3. **Set up environment variables**
    ```bash
    # Copy the example environment file
    cp .env.example .env
 
-   # Edit .env and add API keys for the providers you want to use
-   # You only need ONE provider to get started, but can add more later
-
-   # Example .env file:
-   ANTHROPIC_API_KEY=your_claude_key_here
-   OPENAI_API_KEY=your_openai_key_here
-   DEEPSEEK_API_KEY=your_deepseek_key_here
-   # ... add others as needed
+   # Edit .env and add your credentials
+   nano .env  # or use your preferred editor
    ```
 
-4. **Run the application**
+4. **Configure .env file**
+   ```env
+   # REQUIRED: Set a strong password
+   APP_PASSWORD=your_secure_password_here
+
+   # Add at least ONE AI provider API key
+   ANTHROPIC_API_KEY=your_claude_key_here
+   # OPENAI_API_KEY=your_openai_key_here
+   # DEEPSEEK_API_KEY=your_deepseek_key_here
+   # GOOGLE_API_KEY=your_gemini_key_here
+   # MISTRAL_API_KEY=your_mistral_key_here
+   # QWEN_API_KEY=your_qwen_key_here
+   ```
+
+5. **Run the application**
    ```bash
    streamlit run app.py
    ```
 
-5. **Access the app**
+6. **Access the app**
    - Open your browser to `http://localhost:8501`
-   - Start creating your learning path!
+   - Enter your password (set in APP_PASSWORD)
+   - Start planning your goals!
 
-## 📖 Usage Guide
+## 🔐 Security & Authentication
 
-### Creating Your First Learning Path
+### Password Protection
 
-1. **Enter Your Goal**
-   - Be specific about what you want to learn
-   - Examples: "Learn Python programming", "Master Machine Learning", "Become a Web Developer"
+GoalPath AI uses **cookie-based password protection** with 24-hour persistent sessions:
 
-2. **Set Your Timeframe**
-   - Choose how many days you want to dedicate (1-365 days)
-   - The AI will create a day-by-day plan that fits your schedule
+- **Local Development**: Set `APP_PASSWORD` in your `.env` file
+- **Streamlit Cloud**: Set `APP_PASSWORD` in Secrets (see deployment section below)
+- **Session Duration**: 24 hours (stays logged in even after closing browser)
+- **Logout**: Use the 🚪 Logout button in the sidebar
 
-3. **Generate Path**
-   - Click "Generate Learning Path"
-   - Wait for Claude AI to create your personalized curriculum
-   - Review the generated plan with topics, subtopics, and resources
+### Changing Your Password
 
-4. **Track Progress**
-   - Check off topics as you complete them
-   - Monitor your progress with visual indicators
-   - Track your learning streak
+**Local:**
+1. Update `APP_PASSWORD` in your `.env` file
+2. Restart the app
+3. All users will need to login again with the new password
 
-### Managing Multiple Paths
+**Streamlit Cloud:**
+1. Go to your app settings on Streamlit Cloud
+2. Navigate to Secrets section
+3. Update `APP_PASSWORD` value
+4. Save (app will automatically restart)
 
-- View all your learning paths in the sidebar
-- Switch between different learning journeys
-- Track progress across multiple goals simultaneously
+### Security Best Practices
 
-## 🏗️ Project Structure
+- ✅ Use a strong, unique password
+- ✅ Never commit `.env` file to git (already in `.gitignore`)
+- ✅ Don't share your password publicly
+- ✅ Rotate password periodically for production deployments
+- ✅ Use different passwords for development and production
+
+## 🎯 Usage Guide
+
+### Creating Your First Goal Plan
+
+1. **Select Goal Type**
+   - Choose from: Learning & Skills, Career Transition, Freelance & Business, Project Completion, or Personal Achievement
+
+2. **Enter Your Goal**
+   - Examples:
+     - 📚 "Learn Prompt Engineering"
+     - 💼 "Get hired as AI engineer"
+     - 💰 "Get 5 Fiverr clients"
+     - 🚀 "Build portfolio website"
+     - 🎯 "Run a 10K race"
+
+3. **Set Your Timeframe**
+   - Choose 1-365 days based on your goal complexity
+
+4. **Generate Goal Plan**
+   - AI creates type-specific action plan
+   - Review priorities, milestones, and resources
+   - Plan is automatically saved
+
+5. **Execute & Track**
+   - Check off tasks as you complete them
+   - Monitor your on-track status
+   - Use AI Tutor for questions
+   - Export to PDF when needed
+
+### Using the AI Tutor
+
+1. Open any goal plan
+2. Click the "🤖 AI Tutor" tab
+3. Select your preferred AI model
+4. Ask questions or upload files for analysis
+5. Switch models to compare responses
+
+### Uploading Files
+
+- Click "Upload Image or File"
+- Supported: PNG, JPG, PDF, TXT, DOCX
+- Add your question
+- AI analyzes and responds based on file content
+
+### Exporting to PDF
+
+1. Open a goal plan
+2. Expand "⚙️ Advanced Options"
+3. Click "📥 Download as PDF"
+4. Click "💾 Save PDF"
+5. File downloads as `goalpath_[your_goal].pdf`
+
+## 📁 Project Structure
 
 ```
 AI-Learning-Project/
-├── app.py                  # Main Streamlit application
+├── app.py                    # Main Streamlit application
 ├── utils/
-│   ├── ai_helpers.py      # Claude API integration
-│   ├── path_generator.py  # Learning path logic
-│   └── database.py        # SQLite operations
-├── requirements.txt       # Python dependencies
-├── .env.example          # Environment variables template
-├── .gitignore           # Git ignore rules
-└── README.md            # This file
+│   ├── auth.py              # Password authentication system
+│   ├── ai_helpers.py        # Claude API integration
+│   ├── ai_providers.py      # Multi-model AI system
+│   ├── path_generator.py   # Goal planning logic
+│   └── database.py          # SQLite operations
+├── requirements.txt         # Python dependencies
+├── .env.example            # Environment template
+├── .gitignore              # Git ignore rules
+└── README.md               # This file
 ```
-
-## 🔧 Technology Stack
-
-- **Frontend**: Streamlit (Python web framework)
-- **AI**: Claude API (Anthropic)
-- **Database**: SQLite
-- **Language**: Python 3.8+
-
-## 💡 How It Works
-
-1. **User Input**: You provide a learning goal and timeframe
-2. **AI Generation**: Claude AI analyzes your goal and creates a structured curriculum
-3. **Database Storage**: The learning path is saved to SQLite for persistence
-4. **Progress Tracking**: As you learn, mark topics complete and track your progress
-5. **Visualization**: See your progress through intuitive charts and progress bars
-
-## 🎯 Example Learning Goals
-
-Try these examples to get started:
-
-- "Learn Python in 14 days"
-- "Master React.js in 30 days"
-- "Understand Machine Learning fundamentals in 21 days"
-- "Become proficient in SQL in 10 days"
-- "Learn Data Science with Python in 60 days"
-
-## 📊 Database Schema
-
-The application uses SQLite with three main tables:
-
-- **learning_paths**: Stores learning goals and metadata
-- **topics**: Stores curriculum breakdown with topics and resources
-- **progress_log**: Tracks completion and time spent
-
-## 🔐 API Key Setup
-
-### Getting Your Anthropic API Key
-
-1. Go to [Anthropic Console](https://console.anthropic.com/)
-2. Sign up or log in
-3. Navigate to API Keys section
-4. Create a new API key
-5. Copy the key to your `.env` file
-
-### Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-ANTHROPIC_API_KEY=your_api_key_here
-```
-
-**Important**: Never commit your `.env` file to version control. It's already included in `.gitignore`.
 
 ## 🚀 Deployment
 
-### Streamlit Cloud
+### Option 1: Streamlit Cloud (Recommended)
 
-1. Push your code to GitHub
-2. Go to [Streamlit Cloud](https://streamlit.io/cloud)
-3. Connect your repository
-4. Add your `ANTHROPIC_API_KEY` in the Secrets section
-5. Deploy!
+1. **Prepare Your Repository**
+   ```bash
+   # Ensure .env is NOT committed
+   git status
 
-### Local Production
+   # Commit your changes
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+2. **Deploy on Streamlit Cloud**
+   - Go to [share.streamlit.io](https://share.streamlit.io)
+   - Click "New app"
+   - Connect your GitHub repository
+   - Select the repository and branch
+   - Set main file path: `app.py`
+
+3. **Configure Secrets**
+
+   In the Streamlit Cloud app settings, go to "Secrets" and add:
+
+   ```toml
+   # REQUIRED: Your app password
+   APP_PASSWORD = "your_secure_password_here"
+
+   # Add your AI provider API keys
+   ANTHROPIC_API_KEY = "your_claude_key"
+   OPENAI_API_KEY = "your_openai_key"
+   DEEPSEEK_API_KEY = "your_deepseek_key"
+   GOOGLE_API_KEY = "your_gemini_key"
+   MISTRAL_API_KEY = "your_mistral_key"
+   QWEN_API_KEY = "your_qwen_key"
+
+   # Optional: Cookie encryption key (random string)
+   COOKIE_SECRET_KEY = "some-random-secret-key-for-cookies"
+   ```
+
+4. **Deploy!**
+   - Click "Deploy"
+   - Wait for deployment to complete
+   - Access your app at `https://your-app-name.streamlit.app`
+
+### Option 2: Local Production Server
 
 ```bash
 # Install dependencies
 pip install -r requirements.txt
 
+# Set up .env file with credentials
+cp .env.example .env
+nano .env  # Add APP_PASSWORD and API keys
+
 # Run with production settings
 streamlit run app.py --server.port 8501 --server.address 0.0.0.0
 ```
 
+### Option 3: Docker Deployment
+
+```dockerfile
+# Dockerfile
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+
+EXPOSE 8501
+
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+```
+
+```bash
+# Build and run
+docker build -t goalpath-ai .
+docker run -p 8501:8501 --env-file .env goalpath-ai
+```
+
+## 🔧 Technology Stack
+
+- **Frontend**: Streamlit (Python web framework)
+- **AI Providers**: Claude, OpenAI, Google Gemini, DeepSeek, Mistral, Qwen
+- **Authentication**: streamlit-cookies-manager with encrypted cookies
+- **Database**: SQLite
+- **File Processing**: PyPDF2, python-docx, Pillow, pytesseract
+- **PDF Generation**: ReportLab
+- **Language**: Python 3.8+
+
+## 🔑 Getting API Keys
+
+### Anthropic Claude (Recommended)
+1. Go to [console.anthropic.com](https://console.anthropic.com/)
+2. Sign up and create API key
+3. Add to `.env`: `ANTHROPIC_API_KEY=sk-ant-...`
+
+### OpenAI
+1. Go to [platform.openai.com](https://platform.openai.com/)
+2. Create API key
+3. Add to `.env`: `OPENAI_API_KEY=sk-...`
+
+### Google Gemini
+1. Go to [makersuite.google.com/app/apikey](https://makersuite.google.com/app/apikey)
+2. Create API key
+3. Add to `.env`: `GOOGLE_API_KEY=...`
+
+### DeepSeek
+1. Go to [platform.deepseek.com](https://platform.deepseek.com/)
+2. Create API key
+3. Add to `.env`: `DEEPSEEK_API_KEY=...`
+
+### Mistral AI
+1. Go to [console.mistral.ai](https://console.mistral.ai/)
+2. Create API key
+3. Add to `.env`: `MISTRAL_API_KEY=...`
+
+### Qwen (Alibaba Cloud)
+1. Go to [dashscope.console.aliyun.com](https://dashscope.console.aliyun.com/)
+2. Create API key
+3. Add to `.env`: `QWEN_API_KEY=...`
+
+## 📱 Mobile Optimization
+
+GoalPath AI is fully optimized for mobile devices:
+
+- ✅ Touch-friendly buttons (44px minimum)
+- ✅ Responsive text inputs (16px font prevents zoom)
+- ✅ Mobile-optimized spacing and layouts
+- ✅ Hamburger sidebar menu
+- ✅ Responsive YouTube embeds
+- ✅ File upload works on mobile cameras
+
+Test on mobile by visiting your deployed URL from your phone!
+
+## 🐛 Troubleshooting
+
+### Authentication Issues
+
+**Problem**: Can't login / "Incorrect password"
+- Check `APP_PASSWORD` in `.env` (local) or Secrets (cloud)
+- Ensure no extra spaces in password
+- Try resetting cookies: Clear browser data for the site
+
+**Problem**: Logged out too quickly
+- Check system time is correct
+- Cookie expiration is 24 hours - may need to login daily
+
+### API Key Issues
+
+**Problem**: "API key not configured"
+- Ensure API key is in `.env` (local) or Secrets (cloud)
+- Restart app after adding keys
+- Check for typos in environment variable names
+
+### File Upload Issues
+
+**Problem**: Can't upload images on mobile
+- Grant browser camera/file permissions
+- Try different browser (Chrome/Safari)
+- Check file size (<10MB recommended)
+
+### Deployment Issues
+
+**Problem**: App crashes on Streamlit Cloud
+- Check all secrets are properly formatted in TOML
+- Ensure `requirements.txt` includes all dependencies
+- Check logs in Streamlit Cloud dashboard
+
+**Problem**: Password not working after deployment
+- Verify `APP_PASSWORD` is in Secrets (not .env)
+- Secrets must use TOML format: `APP_PASSWORD = "value"`
+- Redeploy app after changing secrets
+
+## 💡 Best Practices
+
+### For Goal Planning
+- Be specific with goals ("Learn Python for data analysis" vs "Learn Python")
+- Choose realistic timeframes
+- Review AI-assigned priorities - high priority items first
+- Check your on-track indicator daily
+
+### For Security
+- Use strong passwords (12+ characters, mixed case, numbers, symbols)
+- Don't share passwords in screenshots or videos
+- Keep API keys secret
+- Rotate passwords quarterly for production use
+
+### For Performance
+- Configure only the AI providers you need
+- Close unused goal plans
+- Archive completed goals
+- Export to PDF for long-term storage
+
+## 🎯 Example Goals by Type
+
+### 📚 Learning & Skills
+- "Master Prompt Engineering in 14 days"
+- "Learn Python for Data Science in 30 days"
+- "Become proficient in SQL in 21 days"
+
+### 💼 Career Transition
+- "Get hired as AI Engineer in 60 days"
+- "Land remote software job in 90 days"
+- "Transition from marketing to UX design in 120 days"
+
+### 💰 Freelance & Business
+- "Get first 5 Fiverr clients in 30 days"
+- "Earn $1000/month freelancing in 60 days"
+- "Launch SaaS MVP in 90 days"
+
+### 🚀 Project Completion
+- "Build and deploy portfolio website in 14 days"
+- "Launch mobile app to App Store in 60 days"
+- "Complete YouTube course series in 30 days"
+
+### 🎯 Personal Achievement
+- "Run a 10K race in 90 days"
+- "Learn guitar basics in 60 days"
+- "Lose 10 pounds in 45 days"
+
 ## 🤝 Contributing
 
-Contributions are welcome! Here are some areas where you can help:
+Contributions are welcome! Areas for improvement:
 
-- Add new features from the roadmap
-- Improve UI/UX
-- Add more AI capabilities
-- Enhance analytics
-- Write tests
-- Improve documentation
+- [ ] Voice interface for hands-free planning
+- [ ] Interactive quiz generation
+- [ ] Resource rating system
+- [ ] Social features (share goal plans)
+- [ ] Calendar integration
+- [ ] Notification system
+- [ ] Dark mode
+- [ ] Multi-language support
 
 ## 📝 License
 
@@ -281,58 +448,19 @@ This project is open source and available under the MIT License.
 ## 🙏 Acknowledgments
 
 - Built with [Streamlit](https://streamlit.io/)
-- Powered by [Claude AI](https://www.anthropic.com/claude)
-- Inspired by modern learning platforms
+- Powered by multiple AI providers
+- Cookie auth via [streamlit-cookies-manager](https://github.com/ktosiek/streamlit-cookies-manager)
+- Inspired by modern productivity and learning platforms
 
 ## 📧 Support
 
-If you encounter any issues or have questions:
-
-1. Check the troubleshooting section below
-2. Open an issue on GitHub
-3. Review the documentation
-
-## 🐛 Troubleshooting
-
-### API Key Issues
-- Ensure your API key is correctly set in `.env`
-- Verify the key is valid in the Anthropic Console
-- Restart the application after updating `.env`
-
-### Database Issues
-- Delete `learnpath.db` to reset the database
-- Check file permissions in the project directory
-
-### Installation Issues
-- Ensure Python 3.8+ is installed
-- Try creating a virtual environment:
-  ```bash
-  python -m venv venv
-  source venv/bin/activate  # On Windows: venv\Scripts\activate
-  pip install -r requirements.txt
-  ```
-
-## 🎓 Learning Tips
-
-- **Be Consistent**: Try to complete at least one topic per day
-- **Take Notes**: Keep a learning journal alongside the tracker
-- **Practice**: Don't just read - implement what you learn
-- **Review**: Regularly review completed topics to reinforce learning
-- **Ask Questions**: Use the resources provided for each topic
-
-## 🔮 Future Enhancements
-
-- Spaced repetition system
-- Quiz generation
-- Certificate generation
-- Social features (share paths)
-- Mobile app
-- Integration with YouTube, Coursera, etc.
-- Gamification elements
-- Collaborative learning paths
+For issues, questions, or feature requests:
+1. Check this README and troubleshooting section
+2. Review the [FEATURE_SUMMARY.md](FEATURE_SUMMARY.md) for detailed feature documentation
+3. Open an issue on GitHub
 
 ---
 
-**Made with ❤️ for learners everywhere**
+**Made with ❤️ for goal achievers everywhere**
 
-Happy Learning! 🚀
+Start achieving your goals today! 🚀🎯

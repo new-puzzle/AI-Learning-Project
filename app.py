@@ -1,5 +1,5 @@
 """
-LearnPath AI - AI-Powered Learning Path Planner
+GoalPath AI - Universal Goal Planning Platform
 Main Streamlit Application
 """
 
@@ -8,21 +8,31 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 from utils.path_generator import LearningPathGenerator
+from utils.auth import init_cookie_manager, check_password, render_login_screen, logout
 
 # Load environment variables
 load_dotenv()
 
+# Initialize cookie manager for authentication
+cookies = init_cookie_manager()
+
+# Check authentication before showing app
+if not check_password(cookies):
+    render_login_screen(cookies)
+    st.stop()
+
 # Page configuration
 st.set_page_config(
-    page_title="LearnPath AI",
-    page_icon="🎓",
+    page_title="GoalPath AI",
+    page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# Custom CSS for better styling and mobile optimization
 st.markdown("""
     <style>
+    /* Desktop styles */
     .main-header {
         font-size: 3rem;
         font-weight: bold;
@@ -56,6 +66,60 @@ st.markdown("""
     .resource-link {
         color: #1E88E5;
         text-decoration: none;
+    }
+
+    /* Mobile optimization */
+    @media only screen and (max-width: 768px) {
+        .main-header {
+            font-size: 2rem;
+            margin-bottom: 0.3rem;
+        }
+        .sub-header {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .topic-card {
+            padding: 1rem;
+        }
+        .stat-box {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+        /* Make buttons touch-friendly */
+        .stButton > button {
+            min-height: 44px;
+            font-size: 1rem;
+            padding: 12px 20px;
+        }
+        /* Improve form input sizes */
+        .stTextInput > div > div > input,
+        .stTextArea > div > div > textarea,
+        .stSelectbox > div > div > select {
+            font-size: 16px !important;
+            min-height: 44px;
+        }
+        /* Better spacing on mobile */
+        .block-container {
+            padding: 1rem 0.5rem;
+        }
+        /* Optimize file uploader for mobile */
+        .stFileUploader {
+            font-size: 0.9rem;
+        }
+        /* Make YouTube embeds responsive */
+        iframe {
+            max-width: 100%;
+        }
+    }
+
+    /* Extra small devices */
+    @media only screen and (max-width: 480px) {
+        .main-header {
+            font-size: 1.5rem;
+        }
+        .sub-header {
+            font-size: 0.9rem;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -739,7 +803,12 @@ def main():
 
             st.markdown("---")
             st.markdown("### ℹ️ About")
-            st.caption("LearnPath AI helps you create structured learning paths with AI-powered curriculum generation and progress tracking.")
+            st.caption("GoalPath AI helps you create structured goal plans with AI-powered planning and progress tracking.")
+
+            # Logout button
+            st.markdown("---")
+            if st.button("🚪 Logout", use_container_width=True, type="secondary"):
+                logout(cookies)
 
         # Main content
         if st.session_state.current_path_id:
