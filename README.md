@@ -18,7 +18,16 @@ GoalPath AI is not just another to-do list or learning platform. It's a complete
 
 ## ✨ Key Features
 
-### ⏱️ Time Tracking & AI Coaching (NEW!)
+### 💬 General AI Chat - Ask Anything (NEW in v1.4.0!)
+- **Available from Home Screen** - Chat with AI immediately upon opening the app
+- **Pre-Decision Advice** - Get guidance BEFORE creating a goal plan
+- **12 AI Models** - Choose from Claude, OpenAI, Gemini, DeepSeek, Mistral, Qwen
+- **Voice-Enabled** - Use voice input/output for natural conversations
+- **Career Guidance** - Ask about learning paths, job opportunities, skill difficulty
+- **Full Conversation** - Multi-turn chat with context awareness
+- **Example Questions:** "What should I learn to become an AI engineer?", "Is supervised learning harder than reinforcement learning?"
+
+### ⏱️ Time Tracking & AI Coaching
 - **Smart Timer** - Start/stop timer with HH:MM:SS display for focused work sessions
 - **Manual Time Entry** - Add time manually when you forget to track
 - **Actual vs Estimated** - See variance between planned and actual time spent
