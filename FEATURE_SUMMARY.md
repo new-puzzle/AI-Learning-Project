@@ -2,19 +2,145 @@
 
 **Generated:** November 16, 2025
 **Development Branch:** `claude/learnpath-ai-setup-014RbK3m8FVjabq96bopm7Ck`
-**Version:** 1.1.0 - Date-Aware Planning Update
+**Version:** 1.2.0 - Goal Templates & Smart Scheduling
 
 ---
 
 ## 📊 CURRENT STATUS: Production Ready ✅
 
-GoalPath AI is a fully functional, multi-modal AI-powered universal goal planning platform supporting 5 goal types (Learning, Career, Freelance, Project, Personal) with 6 AI providers, file upload capabilities, comprehensive progress tracking, and **date-aware smart scheduling** with calendar dates and automatic rescheduling.
+GoalPath AI is a fully functional, multi-modal AI-powered universal goal planning platform supporting 5 goal types (Learning, Career, Freelance, Project, Personal) with **50+ pre-made templates**, 6 AI providers, file upload capabilities, comprehensive progress tracking, and **date-aware smart scheduling** with calendar dates and automatic rescheduling.
 
 ---
 
 ## 🎯 CORE FEATURES IMPLEMENTED
 
-### 1. 🌟 Universal Goal Planning System (NEW!)
+### 1. 📋 Goal Templates Library (NEW in v1.2.0!)
+**Status:** ✅ Fully Working
+
+**What it does:**
+GoalPath AI now includes 50+ professionally crafted goal templates to help users quick-start their goals with proven structures. Templates are fully customizable - they're smart defaults, not restrictions.
+
+**Template Categories & Count:**
+
+**📚 Learning & Skills (10 templates)**
+- Master Prompt Engineering (30 days)
+- Python for Data Science (60 days)
+- Full-Stack Web Development - MERN (90 days)
+- AI/ML Fundamentals for Career Switchers (45 days)
+- No-Code App Builder Mastery (21 days)
+- FastAPI & Modern Python Backend (30 days)
+- Google Cloud Professional Certification (60 days)
+- DevOps for Python Developers (45 days)
+- Technical Writing for Remote Work (21 days)
+- LangChain & AI Application Development (30 days)
+
+**💼 Career Transition (10 templates)**
+- Land Remote AI Engineering Role (International) (90 days)
+- Transition from Teaching to EdTech Product Role (75 days)
+- Break Into Developer Relations (Remote) (60 days)
+- Get Hired as Remote Python Developer (90 days)
+- Become AI Prompt Engineer (Emerging Role) (60 days)
+- Land Remote Technical Writer Role (45 days)
+- Transition to Remote Data Analyst (60 days)
+- Get Hired at Global SaaS Startup (75 days)
+- Become Remote Solutions Architect (90 days)
+- Break Into AI Safety/Alignment Research (90 days)
+
+**💰 Freelance & Business (10 templates)**
+- First 5 Fiverr Clients in 30 Days (30 days)
+- Earn $1000/Month on Upwork (International Clients) (60 days)
+- Launch AI Consulting Practice (45 days)
+- Build $500/Month Online Tutoring Business (30 days)
+- Start No-Code Development Agency (60 days)
+- Launch SaaS Product MVP (90 days)
+- Get Accepted to Toptal (Top 3%) (45 days)
+- Earn First $500 from Digital Products (30 days)
+- Start Technical Content Writing Business (30 days)
+- Build Passive Income Stream ($200/Month) (60 days)
+
+**🚀 Project Completion (10 templates)**
+- Build & Launch Developer Portfolio Website (14 days)
+- Create & Launch Course on Udemy (45 days)
+- Build & Launch AI-Powered SaaS Tool (60 days)
+- Write & Publish Technical eBook (30 days)
+- Build Chrome Extension (10K Users) (21 days)
+- Launch YouTube Channel (First 1000 Subscribers) (90 days)
+- Launch Open Source Project (100 Stars) (45 days)
+- Build & Launch API Service (45 days)
+- Create Premium Notion Template Business (21 days)
+- Develop Mobile App & Launch on Stores (60 days)
+
+**🎯 Personal Achievement (10 templates)**
+- Run Your First 5K Race (30 days)
+- Build Bulletproof Morning Routine (21 days)
+- Learn Guitar (Play 10 Songs) (60 days)
+- Lose 10 Pounds Sustainably (45 days)
+- Master Daily Meditation Practice (30 days)
+- Read 12 Books in 90 Days (90 days)
+- Achieve Conversational Spanish Fluency (90 days)
+- Complete 30-Day Strength Training Challenge (30 days)
+- Establish Daily Writing Habit (500 Words) (21 days)
+- Improve Public Speaking (10 Presentations) (45 days)
+
+**Key Features:**
+
+**Smart Discovery:**
+- **Search Bar** - Search by keywords (e.g., "remote", "AI", "freelance", "fitness")
+- **Type Filter** - Filter by goal category (Learning, Career, Freelance, Project, Personal)
+- **Template Cards** - Beautiful cards showing timeframe, hours/day, difficulty, description
+- **Tags** - Smart tags like Remote-Friendly, Income-Generating, Beginner-Friendly, Portfolio-Building
+
+**Template Metadata:**
+- Pre-filled goal text (fully editable)
+- Suggested timeframe in days (adjustable)
+- Recommended hours per day (customizable)
+- Difficulty level (Beginner/Intermediate/Advanced)
+- Prerequisites (if any)
+- Descriptive tags
+
+**User Experience:**
+- **Tab Interface** - "📋 Choose Template" vs "✍️ Start from Scratch"
+- **One-Click Selection** - Click "Use This Template" to pre-fill form
+- **All Fields Editable** - Goal text, timeframe, hours/day, dates all customizable
+- **Clear Template Button** - Remove pre-fill and start fresh
+- **Seamless Integration** - Works with all existing features (calendar dates, scheduling, etc.)
+
+**Template Philosophy:**
+- Templates are **starting points**, not rigid plans
+- Every field remains **fully editable**
+- Users can tweak timeframe, hours, goal wording
+- AI still generates **custom plan** based on final inputs
+- No restrictions - templates just save time
+
+**How to use:**
+1. Click "🚀 Create Your Goal Plan"
+2. Choose "📋 Choose Template" tab
+3. Browse or search for templates
+4. Click "Use This Template" on desired template
+5. Customize any fields (goal text, timeframe, hours/day)
+6. Add schedule details (start date, unavailable dates)
+7. Click "Generate Goal Plan"
+8. AI creates personalized plan based on YOUR customizations
+
+**Benefits:**
+- ✅ Eliminates decision paralysis
+- ✅ Shows realistic timeframes for common goals
+- ✅ Suggests appropriate hours/day commitment
+- ✅ Saves time with proven goal structures
+- ✅ Still 100% customizable
+- ✅ Especially helpful for new users
+
+**Technical Implementation:**
+- New module: `utils/templates.py` with 50 GoalTemplate objects
+- Template class stores: name, goal_type, goal_text, timeframe, hours_per_day, description, tags, difficulty, prerequisites
+- Utility functions: `get_all_templates()`, `search_templates()`, `get_templates_by_type()`, `get_templates_by_tag()`
+- UI integration: Tab system in `render_learning_path_generator()`
+- Form pre-fill: `render_custom_goal_form()` accepts optional template parameter
+- Session state: Tracks selected template, clears after generation
+
+---
+
+### 2. 🌟 Universal Goal Planning System
 **Status:** ✅ Fully Working
 
 **What it does:**

@@ -302,8 +302,147 @@ def render_header():
 
 
 def render_learning_path_generator(generator):
-    """Render the goal plan generator form"""
+    """Render the goal plan generator form with template support"""
     st.markdown("### 🚀 Create Your Goal Plan")
+
+    # Initialize session state for selected template
+    if 'selected_template' not in st.session_state:
+        st.session_state.selected_template = None
+
+    # Tabs for template vs custom
+    tab1, tab2 = st.tabs(["📋 Choose Template", "✍️ Start from Scratch"])
+
+    with tab1:
+        # TEMPLATE SELECTION TAB
+        render_template_selector(generator)
+
+    with tab2:
+        # CUSTOM GOAL TAB (original form)
+        render_custom_goal_form(generator, template=None)
+
+
+def render_template_selector(generator):
+    """Render template selection interface"""
+    from utils.templates import get_all_templates, get_templates_by_type, search_templates, get_all_tags
+
+    st.markdown("#### 🎯 Browse Goal Templates")
+    st.caption("Quick-start with proven goal structures. All fields are customizable!")
+
+    # Search and filters
+    col_search, col_filter = st.columns([2, 1])
+
+    with col_search:
+        search_query = st.text_input(
+            "🔍 Search templates",
+            placeholder="e.g., remote jobs, AI, freelance income, fitness",
+            label_visibility="collapsed"
+        )
+
+    with col_filter:
+        goal_type_filter = st.selectbox(
+            "Filter by type",
+            ["All Types", "📚 Learning & Skills", "💼 Career Transition",
+             "💰 Freelance & Business", "🚀 Project Completion", "🎯 Personal Achievement"],
+            label_visibility="collapsed"
+        )
+
+    # Get templates based on filters
+    all_templates = get_all_templates()
+
+    if search_query:
+        templates = search_templates(search_query)
+    else:
+        templates = all_templates
+
+    # Filter by type if selected
+    if goal_type_filter != "All Types":
+        goal_type_map = {
+            "📚 Learning & Skills": "learning",
+            "💼 Career Transition": "career",
+            "💰 Freelance & Business": "freelance",
+            "🚀 Project Completion": "project",
+            "🎯 Personal Achievement": "personal"
+        }
+        filter_type = goal_type_map[goal_type_filter]
+        templates = [t for t in templates if t.goal_type == filter_type]
+
+    # Display template count
+    st.caption(f"Showing {len(templates)} template(s)")
+
+    # Display templates as cards
+    if not templates:
+        st.info("No templates found. Try different search terms or filters.")
+    else:
+        # Group templates by category for better organization
+        templates_by_type = {}
+        for template in templates:
+            if template.goal_type not in templates_by_type:
+                templates_by_type[template.goal_type] = []
+            templates_by_type[template.goal_type].append(template)
+
+        # Category icons
+        category_icons = {
+            "learning": "📚",
+            "career": "💼",
+            "freelance": "💰",
+            "project": "🚀",
+            "personal": "🎯"
+        }
+
+        category_names = {
+            "learning": "Learning & Skills",
+            "career": "Career Transition",
+            "freelance": "Freelance & Business",
+            "project": "Project Completion",
+            "personal": "Personal Achievement"
+        }
+
+        for goal_type, templates_list in templates_by_type.items():
+            st.markdown(f"#### {category_icons[goal_type]} {category_names[goal_type]}")
+
+            # Display templates in rows of 2
+            for i in range(0, len(templates_list), 2):
+                cols = st.columns(2)
+
+                for j, col in enumerate(cols):
+                    if i + j < len(templates_list):
+                        template = templates_list[i + j]
+
+                        with col:
+                            with st.container():
+                                st.markdown(f"""
+                                <div style='padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;'>
+                                    <h4 style='margin-top: 0;'>{template.name}</h4>
+                                    <p style='color: #666; font-size: 0.9em;'>{template.description}</p>
+                                    <p style='margin: 5px 0;'>
+                                        ⏱️ {template.timeframe} days |
+                                        ⏰ {template.hours_per_day} hrs/day |
+                                        📊 {template.difficulty}
+                                    </p>
+                                </div>
+                                """, unsafe_allow_html=True)
+
+                                # Tags
+                                if template.tags:
+                                    tag_html = " ".join([f"<span style='background: #e8f4f8; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-right: 5px;'>{tag}</span>" for tag in template.tags[:4]])
+                                    st.markdown(tag_html, unsafe_allow_html=True)
+
+                                if st.button(f"Use This Template", key=f"template_{template.name}", use_container_width=True):
+                                    st.session_state.selected_template = template
+                                    st.rerun()
+
+    # If template selected, show the custom form with pre-filled values
+    if st.session_state.selected_template:
+        st.markdown("---")
+        st.markdown("#### ✏️ Customize Your Template")
+        st.info(f"**Template:** {st.session_state.selected_template.name} - All fields below are editable!")
+
+        render_custom_goal_form(generator, template=st.session_state.selected_template)
+
+
+def render_custom_goal_form(generator, template=None):
+    """Render the custom goal form (optionally pre-filled with template)"""
+    from datetime import date as dt_date
 
     # Goal type selector
     goal_type_options = {
@@ -314,9 +453,17 @@ def render_learning_path_generator(generator):
         "🎯 Personal Achievement": "personal"
     }
 
+    # Pre-select goal type if template provided
+    default_goal_type_index = 0
+    if template:
+        goal_type_to_label = {v: k for k, v in goal_type_options.items()}
+        default_label = goal_type_to_label.get(template.goal_type, list(goal_type_options.keys())[0])
+        default_goal_type_index = list(goal_type_options.keys()).index(default_label)
+
     selected_type = st.selectbox(
         "Goal Type",
         list(goal_type_options.keys()),
+        index=default_goal_type_index,
         help="Select the type of goal you want to achieve"
     )
     goal_type = goal_type_options[selected_type]
@@ -335,6 +482,7 @@ def render_learning_path_generator(generator):
     with col1:
         goal = st.text_input(
             "What do you want to achieve?",
+            value=template.goal_text if template else "",
             placeholder=placeholders.get(goal_type, "Enter your goal"),
             help="Enter your goal in a clear, specific way"
         )
@@ -344,7 +492,7 @@ def render_learning_path_generator(generator):
             "Timeframe (days)",
             min_value=1,
             max_value=365,
-            value=30,
+            value=template.timeframe if template else 30,
             help="How many days do you want to dedicate to this goal?"
         )
 
@@ -356,7 +504,6 @@ def render_learning_path_generator(generator):
     # Date and time planning inputs
     st.markdown("#### 📅 Schedule Your Goal")
 
-    from datetime import date as dt_date
     col_date, col_hours = st.columns(2)
 
     with col_date:
@@ -371,7 +518,7 @@ def render_learning_path_generator(generator):
             "Hours per day",
             min_value=0.5,
             max_value=24.0,
-            value=2.0,
+            value=template.hours_per_day if template else 2.0,
             step=0.5,
             help="How many hours per day can you dedicate?"
         )
@@ -408,7 +555,17 @@ def render_learning_path_generator(generator):
         if skip_friday:
             skip_weekdays.append(4)  # Friday
 
-    if st.button("Generate Goal Plan", type="primary", use_container_width=True):
+    # Generate button
+    button_cols = st.columns([3, 1])
+    with button_cols[0]:
+        generate_button = st.button("Generate Goal Plan", type="primary", use_container_width=True)
+
+    with button_cols[1]:
+        if template and st.button("Clear Template", use_container_width=True):
+            st.session_state.selected_template = None
+            st.rerun()
+
+    if generate_button:
         if not goal:
             st.error("Please enter a goal!")
             return
@@ -431,6 +588,7 @@ def render_learning_path_generator(generator):
                 st.session_state.generated_path = learning_path
                 st.session_state.current_path_id = learning_path['path_id']
                 st.session_state.show_generator = False
+                st.session_state.selected_template = None  # Clear template after generation
 
                 st.success(f"✅ {selected_type} plan generated successfully!")
                 st.rerun()

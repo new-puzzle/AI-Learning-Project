@@ -18,6 +18,13 @@ GoalPath AI is not just another to-do list or learning platform. It's a complete
 
 ## ✨ Key Features
 
+### 📋 50+ Goal Templates (NEW!)
+- **Quick-Start** - Choose from 50+ pre-made templates across all goal types
+- **Fully Customizable** - Templates are smart defaults, all fields remain editable
+- **Smart Search** - Find templates by keywords, tags, or goal type
+- **Proven Structures** - Realistic timeframes and hours/day based on real achievements
+- **Special Tags** - Remote-Friendly, Income-Generating, Beginner-Friendly, Portfolio-Building, etc.
+
 ### 🌟 Universal Goal Planning
 - **5 Goal Types** with specialized AI coaching for each
 - **Type-Specific Prompts** - Career goals get job search tactics, freelance goals get client acquisition strategies, etc.
@@ -142,7 +149,35 @@ GoalPath AI uses **cookie-based password protection** with 24-hour persistent se
 
 ## 🎯 Usage Guide
 
-### Creating Your First Goal Plan
+### Using Goal Templates (Quick Start!)
+
+**NEW:** GoalPath AI now includes 50+ pre-made templates to quick-start your goals!
+
+1. **Click "📋 Choose Template" tab**
+2. **Browse or search** for templates:
+   - Search by keywords (e.g., "remote jobs", "AI", "freelance", "fitness")
+   - Filter by goal type (Learning, Career, Freelance, Project, Personal)
+3. **Click "Use This Template"** on any template
+4. **Customize all fields** - goal text, timeframe, hours/day all editable!
+5. **Generate** - AI creates personalized plan based on your customizations
+
+**Popular Templates:**
+- 💼 Land Remote AI Engineering Role (International)
+- 💰 First 5 Fiverr Clients in 30 Days
+- 📚 Master Prompt Engineering
+- 🚀 Build & Launch Developer Portfolio Website
+- 🎯 Run Your First 5K Race
+
+**All templates include:**
+- Proven goal structure
+- Realistic timeframes
+- Suggested hours/day
+- Difficulty level
+- Smart tags (Remote-Friendly, Income-Generating, etc.)
+
+**Remember:** Templates are starting points - every field is fully customizable!
+
+### Creating Your First Goal Plan (From Scratch)
 
 1. **Select Goal Type**
    - Choose from: Learning & Skills, Career Transition, Freelance & Business, Project Completion, or Personal Achievement
@@ -231,6 +266,7 @@ AI-Learning-Project/
 │   ├── path_generator.py   # Goal planning logic
 │   ├── database.py          # SQLite operations
 │   ├── date_scheduler.py    # Calendar date scheduling utilities
+│   ├── templates.py         # 50+ goal templates library
 │   └── voice_handler.py     # Voice input/output interface
 ├── requirements.txt         # Python dependencies
 ├── .env.example            # Environment template
