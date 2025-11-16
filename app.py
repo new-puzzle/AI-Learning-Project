@@ -318,7 +318,7 @@ def render_learning_path_generator(generator):
 
     with tab2:
         # CUSTOM GOAL TAB (original form)
-        render_custom_goal_form(generator, template=None)
+        render_custom_goal_form(generator, template=None, key_prefix="custom_")
 
 
 def render_template_selector(generator):
@@ -437,10 +437,10 @@ def render_template_selector(generator):
         st.markdown("#### ✏️ Customize Your Template")
         st.info(f"**Template:** {st.session_state.selected_template.name} - All fields below are editable!")
 
-        render_custom_goal_form(generator, template=st.session_state.selected_template)
+        render_custom_goal_form(generator, template=st.session_state.selected_template, key_prefix="template_")
 
 
-def render_custom_goal_form(generator, template=None):
+def render_custom_goal_form(generator, template=None, key_prefix=""):
     """Render the custom goal form (optionally pre-filled with template)"""
     from datetime import date as dt_date
 
@@ -464,6 +464,7 @@ def render_custom_goal_form(generator, template=None):
         "Goal Type",
         list(goal_type_options.keys()),
         index=default_goal_type_index,
+        key=f"{key_prefix}goal_type",
         help="Select the type of goal you want to achieve"
     )
     goal_type = goal_type_options[selected_type]
@@ -484,6 +485,7 @@ def render_custom_goal_form(generator, template=None):
             "What do you want to achieve?",
             value=template.goal_text if template else "",
             placeholder=placeholders.get(goal_type, "Enter your goal"),
+            key=f"{key_prefix}goal_input",
             help="Enter your goal in a clear, specific way"
         )
 
@@ -493,6 +495,7 @@ def render_custom_goal_form(generator, template=None):
             min_value=1,
             max_value=365,
             value=template.timeframe if template else 30,
+            key=f"{key_prefix}timeframe",
             help="How many days do you want to dedicate to this goal?"
         )
 
@@ -510,6 +513,7 @@ def render_custom_goal_form(generator, template=None):
         start_date = st.date_input(
             "Start Date",
             value=dt_date.today(),
+            key=f"{key_prefix}start_date",
             help="When do you want to start working on this goal?"
         )
 
@@ -520,6 +524,7 @@ def render_custom_goal_form(generator, template=None):
             max_value=24.0,
             value=template.hours_per_day if template else 2.0,
             step=0.5,
+            key=f"{key_prefix}hours_per_day",
             help="How many hours per day can you dedicate?"
         )
 
@@ -531,6 +536,7 @@ def render_custom_goal_form(generator, template=None):
         unavailable_dates_input = st.text_input(
             "Unavailable Dates (Optional)",
             placeholder="e.g., Nov 20-22, Dec 1, Dec 25",
+            key=f"{key_prefix}unavailable_dates",
             help="Enter specific dates you're unavailable (supports ranges)"
         )
 
@@ -539,12 +545,12 @@ def render_custom_goal_form(generator, template=None):
         col_skip1, col_skip2 = st.columns(2)
 
         with col_skip1:
-            skip_weekends = st.checkbox("Skip weekends", value=False)
-            skip_wednesday = st.checkbox("Skip Wednesdays", value=False)
+            skip_weekends = st.checkbox("Skip weekends", value=False, key=f"{key_prefix}skip_weekends")
+            skip_wednesday = st.checkbox("Skip Wednesdays", value=False, key=f"{key_prefix}skip_wednesday")
 
         with col_skip2:
-            skip_thursday = st.checkbox("Skip Thursdays", value=False)
-            skip_friday = st.checkbox("Skip Fridays", value=False)
+            skip_thursday = st.checkbox("Skip Thursdays", value=False, key=f"{key_prefix}skip_thursday")
+            skip_friday = st.checkbox("Skip Fridays", value=False, key=f"{key_prefix}skip_friday")
 
         # Build skip_weekdays list
         skip_weekdays = []
@@ -558,10 +564,10 @@ def render_custom_goal_form(generator, template=None):
     # Generate button
     button_cols = st.columns([3, 1])
     with button_cols[0]:
-        generate_button = st.button("Generate Goal Plan", type="primary", use_container_width=True)
+        generate_button = st.button("Generate Goal Plan", type="primary", use_container_width=True, key=f"{key_prefix}generate_btn")
 
     with button_cols[1]:
-        if template and st.button("Clear Template", use_container_width=True):
+        if template and st.button("Clear Template", use_container_width=True, key=f"{key_prefix}clear_template_btn"):
             st.session_state.selected_template = None
             st.rerun()
 
