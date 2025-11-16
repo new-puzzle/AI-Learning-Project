@@ -29,10 +29,31 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Add viewport meta tag for mobile optimization
+st.markdown("""
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+""", unsafe_allow_html=True)
+
 # Custom CSS for better styling and mobile optimization
 st.markdown("""
     <style>
-    /* Desktop styles */
+    /* === GLOBAL MOBILE FIXES === */
+    * {
+        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Prevent horizontal scroll */
+    body {
+        overflow-x: hidden;
+    }
+
+    .main .block-container {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* === DESKTOP STYLES === */
     .main-header {
         font-size: 3rem;
         font-weight: bold;
@@ -62,63 +83,186 @@ st.markdown("""
         padding: 1rem;
         border-radius: 8px;
         text-align: center;
+        margin-bottom: 0.5rem;
     }
     .resource-link {
         color: #1E88E5;
         text-decoration: none;
     }
 
-    /* Mobile optimization */
+    /* === MOBILE OPTIMIZATION (TABLETS & PHONES) === */
     @media only screen and (max-width: 768px) {
+        /* Headers */
         .main-header {
             font-size: 2rem;
             margin-bottom: 0.3rem;
+            padding: 0 0.5rem;
         }
         .sub-header {
             font-size: 1rem;
             margin-bottom: 1rem;
+            padding: 0 0.5rem;
         }
+
+        /* Cards and containers */
         .topic-card {
-            padding: 1rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
         }
         .stat-box {
             padding: 0.75rem;
             font-size: 0.9rem;
+            margin-bottom: 0.5rem;
         }
-        /* Make buttons touch-friendly */
+
+        /* Buttons - Touch friendly (44px minimum) */
         .stButton > button {
-            min-height: 44px;
-            font-size: 1rem;
-            padding: 12px 20px;
+            min-height: 48px !important;
+            font-size: 1rem !important;
+            padding: 12px 24px !important;
+            width: 100%;
+            margin-bottom: 0.5rem;
         }
-        /* Improve form input sizes */
+
+        /* Form inputs - Prevent zoom on iOS */
         .stTextInput > div > div > input,
         .stTextArea > div > div > textarea,
-        .stSelectbox > div > div > select {
+        .stSelectbox > div > div > select,
+        .stNumberInput > div > div > input {
             font-size: 16px !important;
-            min-height: 44px;
+            min-height: 48px !important;
+            padding: 12px !important;
         }
-        /* Better spacing on mobile */
+
+        /* Spacing */
         .block-container {
-            padding: 1rem 0.5rem;
+            padding: 1rem 0.75rem !important;
+            max-width: 100% !important;
         }
-        /* Optimize file uploader for mobile */
+
+        /* File uploader */
         .stFileUploader {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
-        /* Make YouTube embeds responsive */
+        .stFileUploader > div {
+            padding: 1rem !important;
+        }
+
+        /* YouTube embeds - Responsive */
         iframe {
-            max-width: 100%;
+            max-width: 100% !important;
+            height: auto;
+            aspect-ratio: 16/9;
+        }
+
+        /* Expanders - Better spacing */
+        .streamlit-expanderHeader {
+            font-size: 1rem !important;
+            padding: 0.75rem !important;
+        }
+        .streamlit-expanderContent {
+            padding: 0.75rem !important;
+        }
+
+        /* Tabs - Mobile friendly */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 0.5rem;
+        }
+        .stTabs [data-baseweb="tab"] {
+            padding: 12px 16px !important;
+            font-size: 1rem !important;
+        }
+
+        /* Progress bars */
+        .stProgress > div > div {
+            height: 8px;
+        }
+
+        /* Columns - Stack on mobile */
+        [data-testid="column"] {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+        }
+
+        /* Metrics - Better mobile display */
+        [data-testid="stMetricValue"] {
+            font-size: 1.5rem !important;
+        }
+        [data-testid="stMetricLabel"] {
+            font-size: 0.9rem !important;
+        }
+
+        /* Chat/AI Tutor */
+        .stChatMessage {
+            padding: 0.75rem !important;
+        }
+
+        /* Sidebar - Better mobile */
+        section[data-testid="stSidebar"] {
+            min-width: 260px !important;
+        }
+
+        /* Prevent text overflow */
+        p, span, div {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* Better link spacing */
+        a {
+            padding: 4px 0;
+            display: inline-block;
         }
     }
 
-    /* Extra small devices */
+    /* === EXTRA SMALL DEVICES (PHONES) === */
     @media only screen and (max-width: 480px) {
         .main-header {
+            font-size: 1.75rem;
+            line-height: 1.2;
+        }
+        .sub-header {
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+
+        /* Even more compact */
+        .block-container {
+            padding: 0.75rem 0.5rem !important;
+        }
+
+        /* Smaller stat boxes */
+        .stat-box {
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        /* Compact buttons */
+        .stButton > button {
+            padding: 10px 16px !important;
+            font-size: 0.95rem !important;
+        }
+
+        /* Reduce expander padding */
+        .streamlit-expanderHeader,
+        .streamlit-expanderContent {
+            padding: 0.5rem !important;
+        }
+    }
+
+    /* === LANDSCAPE MODE ON MOBILE === */
+    @media only screen and (max-height: 500px) and (orientation: landscape) {
+        .main-header {
             font-size: 1.5rem;
+            margin-bottom: 0.25rem;
         }
         .sub-header {
             font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat-box {
+            padding: 0.5rem;
         }
     }
     </style>
