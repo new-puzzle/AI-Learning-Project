@@ -1,13 +1,14 @@
 # GoalPath AI - Complete Feature Summary & Status Report
 
-**Generated:** November 15, 2025
+**Generated:** November 16, 2025
 **Development Branch:** `claude/learnpath-ai-setup-014RbK3m8FVjabq96bopm7Ck`
+**Version:** 1.1.0 - Date-Aware Planning Update
 
 ---
 
 ## 📊 CURRENT STATUS: Production Ready ✅
 
-GoalPath AI is a fully functional, multi-modal AI-powered universal goal planning platform supporting 5 goal types (Learning, Career, Freelance, Project, Personal) with 6 AI providers, file upload capabilities, and comprehensive progress tracking.
+GoalPath AI is a fully functional, multi-modal AI-powered universal goal planning platform supporting 5 goal types (Learning, Career, Freelance, Project, Personal) with 6 AI providers, file upload capabilities, comprehensive progress tracking, and **date-aware smart scheduling** with calendar dates and automatic rescheduling.
 
 ---
 
@@ -74,7 +75,89 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 2. 🚀 AI Goal Plan Generator
+### 2. 📅 Date-Aware Smart Scheduling (NEW in v1.1.0!)
+**Status:** ✅ Fully Working
+
+**What it does:**
+GoalPath AI now features calendar-based scheduling with actual dates instead of abstract "Day 1, Day 2" labels. Plans are automatically adjusted around your availability and time constraints.
+
+**Key Features:**
+
+**📆 Calendar Dates:**
+- Display: "📅 Nov 16, 2025: Topic Name" instead of "Day 1: Topic Name"
+- Real due dates for every task
+- Dates persist in database for long-term planning
+- PDF exports include calendar dates
+
+**⏰ Flexible Time Planning:**
+- **Simple Mode (Default):**
+  - Set hours per day (0.5-24 hours, default: 2)
+  - AI calculates realistic due dates based on estimated time
+  - Clean, quick setup - just 2 inputs (start date + hours/day)
+
+- **Advanced Mode (Optional):**
+  - Mark unavailable dates (e.g., "Nov 20-22, Dec 1, Dec 25")
+  - Supports date ranges and multiple dates
+  - Skip recurring days (weekends, Wednesdays, Thursdays, Fridays)
+  - System auto-adjusts calendar dates around constraints
+
+**🔄 Automatic Rescheduling:**
+- Reschedule incomplete tasks without losing completed progress
+- Update start date, hours per day, and unavailable dates
+- AI recalculates due dates for remaining topics only
+- Completed tasks keep original completion dates
+- Perfect for handling life changes, vacations, or getting back on track
+
+**🎨 Color-Coded Status Indicators:**
+- 🔴 **Overdue** - Past due date, not yet completed (red warning)
+- 🟡 **Due Today** - Due date is today (yellow alert)
+- ✅ **Completed** - Task finished (green checkmark)
+- ⚪ **Upcoming** - Future tasks (gray, neutral)
+
+**📊 Smart Due Date Alerts:**
+- "⚠️ Overdue by X days" for late tasks
+- "📌 Due today!" for tasks due now
+- "📅 Due in X days" for upcoming tasks
+- Auto-expand overdue and due-today tasks in UI
+
+**How to use:**
+1. **Creating a Plan:**
+   - Set start date (defaults to today)
+   - Set hours per day (defaults to 2)
+   - Optionally expand "⚙️ Advanced Schedule" for unavailable dates
+   - Generate plan - calendar dates auto-calculated
+
+2. **Viewing Calendar Dates:**
+   - Each topic shows: "📅 Nov 16, 2025: Topic Name"
+   - Color emoji indicates status (🔴🟡✅⚪)
+   - Expand topic to see days until due
+
+3. **Rescheduling:**
+   - Open any plan with calendar dates
+   - Expand "📅 Reschedule Plan"
+   - Set new start date and hours/day
+   - Update unavailable dates if needed
+   - Click "Reschedule Incomplete Topics"
+   - Only incomplete tasks get new dates
+
+**Technical Implementation:**
+- New database columns: `start_date`, `hours_per_day`, `unavailable_dates`, `weekly_pattern`
+- Topics table already had `due_date` column (now populated)
+- New module: `utils/date_scheduler.py` with calendar logic
+- Date parsing supports: "Nov 20-22", "2025-11-20", "Dec 1", ranges
+- Smart date calculation skips unavailable dates automatically
+
+**Benefits:**
+- ✅ Realistic planning with actual calendar dates
+- ✅ Flexible scheduling around life events
+- ✅ Easy to reschedule without starting over
+- ✅ Visual feedback on what's overdue vs upcoming
+- ✅ Simple by default, detailed when needed
+- ✅ No manual date calculations required
+
+---
+
+### 3. 🚀 AI Goal Plan Generator
 **Status:** ✅ Fully Working
 
 **What it does:**
@@ -101,7 +184,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 3. 📊 Progress Tracking System
+### 4. 📊 Progress Tracking System
 **Status:** ✅ Fully Working
 
 **What it does:**
@@ -123,7 +206,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 4. 🗂️ Goal Plan Status Management
+### 5. 🗂️ Goal Plan Status Management
 **Status:** ✅ Fully Working
 
 **Available statuses:**
@@ -145,7 +228,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 5. 🤖 Multi-Model AI Tutor (MAJOR FEATURE)
+### 6. 🤖 Multi-Model AI Tutor (MAJOR FEATURE)
 **Status:** ✅ Fully Working
 
 **15+ AI Models Available:**
@@ -197,7 +280,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 6. 📎 File Upload & Multi-Modal Analysis
+### 7. 📎 File Upload & Multi-Modal Analysis
 **Status:** ✅ Fully Working
 
 **Supported File Types:**
@@ -240,7 +323,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 9. 🎥 YouTube Auto-Embed (NEW!)
+### 8. 🎥 YouTube Auto-Embed
 **Status:** ✅ Fully Working
 
 **What it does:**
@@ -266,7 +349,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 10. 🎤 Voice Interface (NEW!)
+### 9. 🎤 Voice Interface
 **Status:** ✅ Fully Working
 
 **What it does:**
@@ -345,7 +428,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 11. 📄 PDF Export (NEW!)
+### 10. 📄 PDF Export
 **Status:** ✅ Fully Working
 
 **What it does:**
@@ -378,7 +461,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 12. 💾 Database & Persistence
+### 11. 💾 Database & Persistence
 **Status:** ✅ Fully Working
 
 **SQLite Database with 3 Tables:**
@@ -413,7 +496,7 @@ Each goal type uses a specialized AI prompt template that understands the unique
 
 ---
 
-### 13. 🎨 User Interface
+### 12. 🎨 User Interface
 **Status:** ✅ Fully Working
 
 **Layout:**

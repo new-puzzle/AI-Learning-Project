@@ -4,9 +4,17 @@ Combines AI generation with database storage and retrieval
 """
 
 from typing import Dict, List, Optional
+from datetime import datetime
+import json
 from .ai_helpers import ClaudeAI
 from .ai_providers import AIProviderManager
 from .database import Database
+from .date_scheduler import (
+    parse_unavailable_dates,
+    calculate_calendar_dates,
+    format_date_display,
+    get_date_status
+)
 
 
 class LearningPathGenerator:
@@ -16,7 +24,11 @@ class LearningPathGenerator:
         self.ai_manager = AIProviderManager()  # New multi-model manager
         self.db = Database()
 
-    def create_learning_path(self, goal: str, timeframe: int, goal_type: str = 'learning') -> Dict:
+    def create_learning_path(self, goal: str, timeframe: int, goal_type: str = 'learning',
+                           start_date: str = None, hours_per_day: float = 2.0,
+                           unavailable_dates_input: str = None,
+                           skip_weekends: bool = False,
+                           skip_weekdays: List[int] = None) -> Dict:
         """
         Create a complete goal plan with AI generation and database storage
 
@@ -24,6 +36,11 @@ class LearningPathGenerator:
             goal: The goal to achieve
             timeframe: Number of days for completion
             goal_type: Type of goal (learning, career, freelance, project, personal)
+            start_date: Start date in 'YYYY-MM-DD' format
+            hours_per_day: Hours available per day
+            unavailable_dates_input: String of unavailable dates
+            skip_weekends: Whether to skip weekends
+            skip_weekdays: List of weekdays to skip (0=Monday, 6=Sunday)
 
         Returns:
             Dictionary containing the goal plan with path_id
@@ -31,12 +48,47 @@ class LearningPathGenerator:
         # Generate goal plan using AI
         learning_path = self.ai.generate_learning_path(goal, timeframe, goal_type)
 
-        # Save to database
-        path_id = self.db.save_learning_path(goal, timeframe, goal_type)
+        # Parse unavailable dates
+        unavailable_dates = []
+        if unavailable_dates_input:
+            unavailable_dates = parse_unavailable_dates(unavailable_dates_input)
 
-        # Save action items/milestones
+        # Calculate calendar dates for curriculum
         curriculum = learning_path.get('curriculum', [])
-        self.db.save_topics(path_id, curriculum)
+
+        if start_date:
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+
+            # Calculate calendar dates for all topics
+            curriculum_with_dates = calculate_calendar_dates(
+                start_date_obj,
+                curriculum,
+                hours_per_day,
+                unavailable_dates,
+                weekly_pattern=None,
+                skip_weekends=skip_weekends,
+                skip_weekdays=skip_weekdays
+            )
+
+            learning_path['curriculum'] = curriculum_with_dates
+
+        # Convert unavailable_dates list to JSON for storage
+        unavailable_dates_json = None
+        if unavailable_dates:
+            unavailable_dates_json = json.dumps([d.strftime('%Y-%m-%d') for d in unavailable_dates])
+
+        # Save to database
+        path_id = self.db.save_learning_path(
+            goal,
+            timeframe,
+            goal_type,
+            start_date=start_date,
+            hours_per_day=hours_per_day,
+            unavailable_dates=unavailable_dates_json
+        )
+
+        # Save action items/milestones with due dates
+        self.db.save_topics(path_id, learning_path.get('curriculum', []))
 
         # Add path_id and goal_type to the response
         learning_path['path_id'] = path_id

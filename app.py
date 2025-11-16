@@ -353,6 +353,61 @@ def render_learning_path_generator(generator):
         from utils.voice_handler import render_voice_input_button
         render_voice_input_button(key_suffix="goal_input")
 
+    # Date and time planning inputs
+    st.markdown("#### 📅 Schedule Your Goal")
+
+    from datetime import date as dt_date
+    col_date, col_hours = st.columns(2)
+
+    with col_date:
+        start_date = st.date_input(
+            "Start Date",
+            value=dt_date.today(),
+            help="When do you want to start working on this goal?"
+        )
+
+    with col_hours:
+        hours_per_day = st.number_input(
+            "Hours per day",
+            min_value=0.5,
+            max_value=24.0,
+            value=2.0,
+            step=0.5,
+            help="How many hours per day can you dedicate?"
+        )
+
+    # Optional advanced scheduling
+    with st.expander("⚙️ Advanced Schedule (Optional)"):
+        st.caption("Customize your availability for more realistic planning")
+
+        # Unavailable dates
+        unavailable_dates_input = st.text_input(
+            "Unavailable Dates (Optional)",
+            placeholder="e.g., Nov 20-22, Dec 1, Dec 25",
+            help="Enter specific dates you're unavailable (supports ranges)"
+        )
+
+        # Quick skip options
+        st.markdown("**Skip recurring days:**")
+        col_skip1, col_skip2 = st.columns(2)
+
+        with col_skip1:
+            skip_weekends = st.checkbox("Skip weekends", value=False)
+            skip_wednesday = st.checkbox("Skip Wednesdays", value=False)
+
+        with col_skip2:
+            skip_thursday = st.checkbox("Skip Thursdays", value=False)
+            skip_friday = st.checkbox("Skip Fridays", value=False)
+
+        # Build skip_weekdays list
+        skip_weekdays = []
+        if skip_wednesday:
+            skip_weekdays.append(2)  # Wednesday
+        if skip_thursday:
+            skip_weekdays.append(3)  # Thursday
+        if skip_friday:
+            skip_weekdays.append(4)  # Friday
+
     if st.button("Generate Goal Plan", type="primary", use_container_width=True):
         if not goal:
             st.error("Please enter a goal!")
@@ -360,8 +415,17 @@ def render_learning_path_generator(generator):
 
         with st.spinner(f"🤖 AI is creating your personalized {selected_type.split()[0].lower()} plan..."):
             try:
-                # Generate goal plan
-                learning_path = generator.create_learning_path(goal, timeframe, goal_type)
+                # Generate goal plan with scheduling parameters
+                learning_path = generator.create_learning_path(
+                    goal,
+                    timeframe,
+                    goal_type,
+                    start_date=start_date.strftime('%Y-%m-%d'),
+                    hours_per_day=hours_per_day,
+                    unavailable_dates_input=unavailable_dates_input if unavailable_dates_input.strip() else None,
+                    skip_weekends=skip_weekends,
+                    skip_weekdays=skip_weekdays if skip_weekdays else None
+                )
 
                 # Store in session state
                 st.session_state.generated_path = learning_path
@@ -402,8 +466,17 @@ def render_learning_path(path_data):
         subtopics = topic.get('subtopics', [])
         estimated_hours = topic.get('estimated_hours', 0)
         resources = topic.get('resources', [])
+        due_date_str = topic.get('due_date', None)
 
-        with st.expander(f"📅 Day {day_num}: {topic_name}", expanded=(day_num == 1)):
+        # Format title with calendar date if available
+        from utils.date_scheduler import format_date_display
+        if due_date_str:
+            date_display = format_date_display(due_date_str)
+            title = f"{date_display}: {topic_name}"
+        else:
+            title = f"📅 Day {day_num}: {topic_name}"
+
+        with st.expander(title, expanded=(day_num == 1)):
             col1, col2 = st.columns([3, 1])
 
             with col1:
@@ -573,8 +646,17 @@ def render_progress_tracker(generator, path_id):
                 story.append(Spacer(1, 0.3*inch))
 
                 # Curriculum
+                from utils.date_scheduler import format_date_display
                 for topic in curriculum:
-                    day_text = Paragraph(f"<b>Day {topic['day']}: {topic['topic']}</b>", styles['Heading2'])
+                    # Use calendar date if available
+                    due_date_str = topic.get('due_date', None)
+                    if due_date_str:
+                        date_display = format_date_display(due_date_str)
+                        day_header = f"{date_display}: {topic['topic']}"
+                    else:
+                        day_header = f"Day {topic['day']}: {topic['topic']}"
+
+                    day_text = Paragraph(f"<b>{day_header}</b>", styles['Heading2'])
                     story.append(day_text)
                     story.append(Spacer(1, 0.1*inch))
 
@@ -677,6 +759,83 @@ def render_progress_tracker(generator, path_id):
         except:
             pass  # Skip if date parsing fails
 
+    # Reschedule button (only show if plan has calendar dates)
+    start_date = path_info.get('start_date')
+    if start_date:
+        st.markdown("---")
+
+        with st.expander("📅 Reschedule Plan"):
+            st.caption("Adjust your schedule for incomplete topics while keeping completed ones unchanged")
+
+            from datetime import date as dt_date
+
+            col_new_start, col_new_hours = st.columns(2)
+
+            with col_new_start:
+                new_start_date = st.date_input(
+                    "New Start Date for Remaining Topics",
+                    value=dt_date.today(),
+                    help="When do you want to reschedule remaining topics to?"
+                )
+
+            with col_new_hours:
+                current_hours = path_info.get('hours_per_day', 2.0)
+                new_hours_per_day = st.number_input(
+                    "New Hours per Day",
+                    min_value=0.5,
+                    max_value=24.0,
+                    value=current_hours,
+                    step=0.5,
+                    help="Update your daily time commitment"
+                )
+
+            # Optional: Update unavailable dates
+            new_unavailable_dates = st.text_input(
+                "Update Unavailable Dates (Optional)",
+                placeholder="e.g., Nov 20-22, Dec 1",
+                help="Enter any new dates you're unavailable"
+            )
+
+            if st.button("Reschedule Incomplete Topics", type="primary"):
+                from utils.date_scheduler import parse_unavailable_dates, reschedule_incomplete_topics
+                import json
+
+                # Parse new unavailable dates
+                unavailable_dates_list = []
+                if new_unavailable_dates and new_unavailable_dates.strip():
+                    unavailable_dates_list = parse_unavailable_dates(new_unavailable_dates)
+
+                # Reschedule incomplete topics
+                rescheduled_topics = reschedule_incomplete_topics(
+                    curriculum,
+                    new_start_date,
+                    new_hours_per_day,
+                    unavailable_dates_list,
+                    weekly_pattern=None,
+                    skip_weekends=False,
+                    skip_weekdays=None
+                )
+
+                # Update database
+                for topic in rescheduled_topics:
+                    if not topic.get('is_completed', False):
+                        generator.db.update_topic_due_date(topic['id'], topic['due_date'])
+
+                # Update path schedule in database
+                unavailable_json = None
+                if unavailable_dates_list:
+                    unavailable_json = json.dumps([d.strftime('%Y-%m-%d') for d in unavailable_dates_list])
+
+                generator.db.update_path_schedule(
+                    path_id,
+                    start_date=new_start_date.strftime('%Y-%m-%d'),
+                    hours_per_day=new_hours_per_day,
+                    unavailable_dates=unavailable_json
+                )
+
+                st.success("✅ Plan rescheduled successfully!")
+                st.rerun()
+
     st.markdown("---")
 
     # Tabs for Curriculum and AI Tutor
@@ -724,7 +883,34 @@ def render_progress_tracker(generator, path_id):
                         st.rerun()
 
                 with col2:
-                    with st.expander(f"{priority_emoji} {'✅' if is_completed else '⭐'} Day {day_num}: {topic_name}", expanded=not is_completed):
+                    # Display with calendar date and color coding
+                    from utils.date_scheduler import format_date_display, get_date_status
+
+                    due_date_str = topic.get('due_date', None)
+                    date_status = get_date_status(due_date_str, is_completed)
+
+                    # Format display title
+                    if due_date_str:
+                        date_display = format_date_display(due_date_str)
+                        title = f"{date_status['emoji']} {priority_emoji} {date_display}: {topic_name}"
+                    else:
+                        title = f"{priority_emoji} {'✅' if is_completed else '⭐'} Day {day_num}: {topic_name}"
+
+                    with st.expander(title, expanded=not is_completed and date_status.get('status') != 'upcoming'):
+                        # Show date status if available
+                        if due_date_str:
+                            from utils.date_scheduler import get_days_until
+                            days_until = get_days_until(due_date_str)
+
+                            if not is_completed:
+                                if days_until is not None:
+                                    if days_until < 0:
+                                        st.warning(f"⚠️ Overdue by {abs(days_until)} day(s)")
+                                    elif days_until == 0:
+                                        st.info(f"📌 Due today!")
+                                    else:
+                                        st.caption(f"📅 Due in {days_until} day(s)")
+
                         st.markdown(f"**Estimated Time:** {estimated_hours} hours")
 
                         if subtopics:

@@ -24,6 +24,13 @@ GoalPath AI is not just another to-do list or learning platform. It's a complete
 - **Priority System** - AI assigns high/medium/low priorities (🔴🟡🟢) to keep you focused
 - **Progress Tracking** - Know if you're on track with expected vs. actual progress
 
+### 📅 Date-Aware Smart Scheduling
+- **Calendar Dates** - See actual due dates (e.g., "📅 Nov 16, 2025") instead of abstract "Day 1, Day 2"
+- **Flexible Time Planning** - Set hours per day (default 2 hours), easily customizable
+- **Unavailable Dates** - Mark specific dates or recurring days you can't work
+- **Automatic Rescheduling** - Adjust remaining tasks without losing completed progress
+- **Color-Coded Status** - 🔴 Overdue, 🟡 Due Today, ✅ Completed, ⚪ Upcoming
+
 ### 🤖 Multi-Model AI Tutor
 - **15+ AI Models** across 6 providers (Claude, OpenAI, Google Gemini, DeepSeek, Mistral, Qwen)
 - **Vision Capabilities** - Upload homework, diagrams, screenshots for instant analysis
@@ -151,14 +158,25 @@ GoalPath AI uses **cookie-based password protection** with 24-hour persistent se
 3. **Set Your Timeframe**
    - Choose 1-365 days based on your goal complexity
 
-4. **Generate Goal Plan**
-   - AI creates type-specific action plan
+4. **Schedule Your Goal (NEW!)**
+   - **Start Date**: When you want to begin (default: today)
+   - **Hours per Day**: How much time you can dedicate (default: 2 hours)
+   - **Advanced Scheduling (Optional)**:
+     - Mark unavailable dates (e.g., "Nov 20-22, Dec 1")
+     - Skip specific weekdays (Wednesdays, Thursdays, weekends)
+     - System automatically adjusts calendar dates around your availability
+
+5. **Generate Goal Plan**
+   - AI creates type-specific action plan with calendar dates
    - Review priorities, milestones, and resources
+   - See actual due dates (📅 Nov 16, 2025) for each task
    - Plan is automatically saved
 
-5. **Execute & Track**
+6. **Execute & Track**
    - Check off tasks as you complete them
+   - See color-coded status: 🔴 Overdue, 🟡 Due Today, ⚪ Upcoming
    - Monitor your on-track status
+   - Use **Reschedule Plan** if you need to adjust dates
    - Use AI Tutor for questions
    - Export to PDF when needed
 
@@ -177,13 +195,29 @@ GoalPath AI uses **cookie-based password protection** with 24-hour persistent se
 - Add your question
 - AI analyzes and responds based on file content
 
+### Rescheduling Your Plan (NEW!)
+
+1. Open any goal plan with calendar dates
+2. Expand "📅 Reschedule Plan" section
+3. Set new start date for remaining (incomplete) topics
+4. Adjust hours per day if needed
+5. Optionally update unavailable dates
+6. Click "Reschedule Incomplete Topics"
+7. Completed tasks keep their original dates - only incomplete tasks are rescheduled
+
+**Why Reschedule?**
+- Life happens - vacations, emergencies, schedule changes
+- Adjust your time commitment up or down
+- Get back on track after falling behind
+- Completed work is never lost or changed
+
 ### Exporting to PDF
 
 1. Open a goal plan
 2. Expand "⚙️ Advanced Options"
 3. Click "📥 Download as PDF"
 4. Click "💾 Save PDF"
-5. File downloads as `goalpath_[your_goal].pdf`
+5. File downloads as `goalpath_[your_goal].pdf` (now includes calendar dates!)
 
 ## 📁 Project Structure
 
@@ -195,10 +229,14 @@ AI-Learning-Project/
 │   ├── ai_helpers.py        # Claude API integration
 │   ├── ai_providers.py      # Multi-model AI system
 │   ├── path_generator.py   # Goal planning logic
-│   └── database.py          # SQLite operations
+│   ├── database.py          # SQLite operations
+│   ├── date_scheduler.py    # Calendar date scheduling utilities
+│   └── voice_handler.py     # Voice input/output interface
 ├── requirements.txt         # Python dependencies
 ├── .env.example            # Environment template
 ├── .gitignore              # Git ignore rules
+├── MOBILE_GUIDE.md         # Mobile optimization documentation
+├── FEATURE_SUMMARY.md      # Complete feature documentation
 └── README.md               # This file
 ```
 

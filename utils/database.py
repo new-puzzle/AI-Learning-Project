@@ -34,7 +34,11 @@ class Database:
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_active BOOLEAN DEFAULT 1,
                 status TEXT DEFAULT 'active',
-                goal_type TEXT DEFAULT 'learning'
+                goal_type TEXT DEFAULT 'learning',
+                start_date DATE,
+                hours_per_day REAL DEFAULT 2.0,
+                unavailable_dates TEXT,
+                weekly_pattern TEXT
             )
         """)
 
@@ -46,6 +50,27 @@ class Database:
 
         try:
             cursor.execute("ALTER TABLE learning_paths ADD COLUMN goal_type TEXT DEFAULT 'learning'")
+        except sqlite3.OperationalError:
+            pass
+
+        # Add new date/time planning columns
+        try:
+            cursor.execute("ALTER TABLE learning_paths ADD COLUMN start_date DATE")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE learning_paths ADD COLUMN hours_per_day REAL DEFAULT 2.0")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE learning_paths ADD COLUMN unavailable_dates TEXT")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE learning_paths ADD COLUMN weekly_pattern TEXT")
         except sqlite3.OperationalError:
             pass
 
@@ -102,15 +127,18 @@ class Database:
         conn.commit()
         conn.close()
 
-    def save_learning_path(self, goal: str, timeframe: int, goal_type: str = 'learning') -> int:
+    def save_learning_path(self, goal: str, timeframe: int, goal_type: str = 'learning',
+                          start_date: str = None, hours_per_day: float = 2.0,
+                          unavailable_dates: str = None, weekly_pattern: str = None) -> int:
         """Save a new goal plan and return its ID"""
         conn = self.get_connection()
         cursor = conn.cursor()
 
         cursor.execute("""
-            INSERT INTO learning_paths (goal, timeframe, goal_type)
-            VALUES (?, ?, ?)
-        """, (goal, timeframe, goal_type))
+            INSERT INTO learning_paths (goal, timeframe, goal_type, start_date, hours_per_day,
+                                       unavailable_dates, weekly_pattern)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (goal, timeframe, goal_type, start_date, hours_per_day, unavailable_dates, weekly_pattern))
 
         path_id = cursor.lastrowid
         conn.commit()
@@ -152,14 +180,16 @@ class Database:
 
         if active_only:
             cursor.execute("""
-                SELECT id, goal, timeframe, created_at, updated_at, status, goal_type
+                SELECT id, goal, timeframe, created_at, updated_at, status, goal_type,
+                       start_date, hours_per_day, unavailable_dates, weekly_pattern
                 FROM learning_paths
                 WHERE is_active = 1
                 ORDER BY created_at DESC
             """)
         else:
             cursor.execute("""
-                SELECT id, goal, timeframe, created_at, updated_at, status, goal_type
+                SELECT id, goal, timeframe, created_at, updated_at, status, goal_type,
+                       start_date, hours_per_day, unavailable_dates, weekly_pattern
                 FROM learning_paths
                 ORDER BY created_at DESC
             """)
@@ -173,7 +203,11 @@ class Database:
                 'created_at': row[3],
                 'updated_at': row[4],
                 'status': row[5] if len(row) > 5 else 'active',
-                'goal_type': row[6] if len(row) > 6 else 'learning'
+                'goal_type': row[6] if len(row) > 6 else 'learning',
+                'start_date': row[7] if len(row) > 7 else None,
+                'hours_per_day': row[8] if len(row) > 8 else 2.0,
+                'unavailable_dates': row[9] if len(row) > 9 else None,
+                'weekly_pattern': row[10] if len(row) > 10 else None
             })
 
         conn.close()
@@ -350,3 +384,89 @@ class Database:
 
         conn.close()
         return paths
+
+    def update_topic_due_date(self, topic_id: int, due_date: str):
+        """Update the due date for a specific topic"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE topics
+            SET due_date = ?
+            WHERE id = ?
+        """, (due_date, topic_id))
+
+        conn.commit()
+        conn.close()
+
+    def update_path_schedule(self, path_id: int, start_date: str = None,
+                           hours_per_day: float = None, unavailable_dates: str = None,
+                           weekly_pattern: str = None):
+        """Update the scheduling parameters for a learning path"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        updates = []
+        params = []
+
+        if start_date is not None:
+            updates.append("start_date = ?")
+            params.append(start_date)
+
+        if hours_per_day is not None:
+            updates.append("hours_per_day = ?")
+            params.append(hours_per_day)
+
+        if unavailable_dates is not None:
+            updates.append("unavailable_dates = ?")
+            params.append(unavailable_dates)
+
+        if weekly_pattern is not None:
+            updates.append("weekly_pattern = ?")
+            params.append(weekly_pattern)
+
+        if updates:
+            updates.append("updated_at = CURRENT_TIMESTAMP")
+            params.append(path_id)
+
+            query = f"""
+                UPDATE learning_paths
+                SET {', '.join(updates)}
+                WHERE id = ?
+            """
+
+            cursor.execute(query, params)
+            conn.commit()
+
+        conn.close()
+
+    def get_path_details(self, path_id: int) -> Optional[Dict]:
+        """Get detailed information about a specific learning path"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT id, goal, timeframe, created_at, updated_at, status, goal_type,
+                   start_date, hours_per_day, unavailable_dates, weekly_pattern
+            FROM learning_paths
+            WHERE id = ?
+        """, (path_id,))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            return {
+                'id': row[0],
+                'goal': row[1],
+                'timeframe': row[2],
+                'created_at': row[3],
+                'updated_at': row[4],
+                'status': row[5] if len(row) > 5 else 'active',
+                'goal_type': row[6] if len(row) > 6 else 'learning',
+                'start_date': row[7] if len(row) > 7 else None,
+                'hours_per_day': row[8] if len(row) > 8 else 2.0,
+                'unavailable_dates': row[9] if len(row) > 9 else None,
+                'weekly_pattern': row[10] if len(row) > 10 else None
+            }
+        return None
