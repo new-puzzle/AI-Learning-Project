@@ -281,15 +281,29 @@ def init_session_state():
 
 def check_api_key():
     """Check if API key is configured"""
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    # Check Streamlit secrets first (recommended), then fall back to environment variable
+    api_key = None
+    try:
+        api_key = st.secrets.get("ANTHROPIC_API_KEY")
+    except:
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+
     if not api_key or api_key == "your_api_key_here":
         st.error("⚠️ Anthropic API Key not configured!")
         st.info("""
-        **To use LearnPath AI:**
+        **To use GoalPath AI, configure your API key using ONE of these methods:**
+
+        **Method 1: Streamlit Secrets (Recommended)**
+        1. Create file: `.streamlit/secrets.toml`
+        2. Add: `ANTHROPIC_API_KEY = "sk-ant-your-key-here"`
+        3. Restart the app
+
+        **Method 2: Environment Variable**
         1. Copy `.env.example` to `.env`
         2. Add your Anthropic API key to the `.env` file
-        3. Get your API key from: https://console.anthropic.com/
-        4. Restart the application
+        3. Restart the app
+
+        **Get your API key:** https://console.anthropic.com/
         """)
         return False
     return True
@@ -310,7 +324,7 @@ def render_learning_path_generator(generator):
         st.session_state.selected_template = None
 
     # Tabs for template vs custom
-    tab1, tab2 = st.tabs(["📋 Choose Template", "✍️ Start from Scratch"])
+    tab1, tab2 = st.tabs(["📋 Choose Template", "✍️ Create Custom Goal"])
 
     with tab1:
         # TEMPLATE SELECTION TAB
@@ -398,38 +412,38 @@ def render_template_selector(generator):
         }
 
         for goal_type, templates_list in templates_by_type.items():
-            st.markdown(f"#### {category_icons[goal_type]} {category_names[goal_type]}")
+            # Make each category collapsible with expander
+            with st.expander(f"{category_icons[goal_type]} {category_names[goal_type]} ({len(templates_list)} templates)", expanded=False):
+                # Display templates in rows of 2
+                for i in range(0, len(templates_list), 2):
+                    cols = st.columns(2)
 
-            # Display templates in rows of 2
-            for i in range(0, len(templates_list), 2):
-                cols = st.columns(2)
+                    for j, col in enumerate(cols):
+                        if i + j < len(templates_list):
+                            template = templates_list[i + j]
 
-                for j, col in enumerate(cols):
-                    if i + j < len(templates_list):
-                        template = templates_list[i + j]
+                            with col:
+                                with st.container():
+                                    st.markdown(f"""
+                                    <div style='padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;'>
+                                        <h4 style='margin-top: 0;'>{template.name}</h4>
+                                        <p style='color: #666; font-size: 0.9em;'>{template.description}</p>
+                                        <p style='margin: 5px 0;'>
+                                            ⏱️ {template.timeframe} days |
+                                            ⏰ {template.hours_per_day} hrs/day |
+                                            📊 {template.difficulty}
+                                        </p>
+                                    </div>
+                                    """, unsafe_allow_html=True)
 
-                        with col:
-                            with st.container():
-                                st.markdown(f"""
-                                <div style='padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;'>
-                                    <h4 style='margin-top: 0;'>{template.name}</h4>
-                                    <p style='color: #666; font-size: 0.9em;'>{template.description}</p>
-                                    <p style='margin: 5px 0;'>
-                                        ⏱️ {template.timeframe} days |
-                                        ⏰ {template.hours_per_day} hrs/day |
-                                        📊 {template.difficulty}
-                                    </p>
-                                </div>
-                                """, unsafe_allow_html=True)
+                                    # Tags
+                                    if template.tags:
+                                        tag_html = " ".join([f"<span style='background: #e8f4f8; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-right: 5px;'>{tag}</span>" for tag in template.tags[:4]])
+                                        st.markdown(tag_html, unsafe_allow_html=True)
 
-                                # Tags
-                                if template.tags:
-                                    tag_html = " ".join([f"<span style='background: #e8f4f8; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-right: 5px;'>{tag}</span>" for tag in template.tags[:4]])
-                                    st.markdown(tag_html, unsafe_allow_html=True)
-
-                                if st.button(f"Use This Template", key=f"template_{template.name}", use_container_width=True):
-                                    st.session_state.selected_template = template
-                                    st.rerun()
+                                    if st.button(f"Use This Template", key=f"template_{template.name}", use_container_width=True):
+                                        st.session_state.selected_template = template
+                                        st.rerun()
 
     # If template selected, show the custom form with pre-filled values
     if st.session_state.selected_template:

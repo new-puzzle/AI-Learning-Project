@@ -48,7 +48,14 @@ class ClaudeProvider(AIProvider):
 
     def __init__(self, api_key: Optional[str] = None, model_name: str = "Claude Sonnet 4.5"):
         self.model_name = model_name
-        super().__init__(api_key or os.getenv("ANTHROPIC_API_KEY"))
+        # Try to get API key from: 1) parameter, 2) streamlit secrets, 3) environment variable
+        if not api_key:
+            try:
+                import streamlit as st
+                api_key = st.secrets.get("ANTHROPIC_API_KEY")
+            except:
+                api_key = os.getenv("ANTHROPIC_API_KEY")
+        super().__init__(api_key)
 
     def check_configuration(self) -> bool:
         return bool(self.api_key and self.api_key != "your_api_key_here")

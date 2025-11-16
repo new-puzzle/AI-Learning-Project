@@ -18,9 +18,18 @@ class ClaudeAI:
 
     def __init__(self, api_key: str = None, model_name: str = "Claude Sonnet 4.5"):
         """Initialize Claude AI client"""
-        self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
+        # Try to get API key from: 1) parameter, 2) streamlit secrets, 3) environment variable
+        if api_key:
+            self.api_key = api_key
+        else:
+            try:
+                import streamlit as st
+                self.api_key = st.secrets.get("ANTHROPIC_API_KEY")
+            except:
+                self.api_key = os.getenv("ANTHROPIC_API_KEY")
+
         if not self.api_key:
-            raise ValueError("Anthropic API key not found. Please set ANTHROPIC_API_KEY environment variable.")
+            raise ValueError("Anthropic API key not found. Please set ANTHROPIC_API_KEY in .streamlit/secrets.toml or as environment variable.")
 
         self.client = anthropic.Anthropic(api_key=self.api_key)
         self.set_model(model_name)

@@ -118,3 +118,6 @@ dmypy.json
 
 # VSCode
 .vscode/
+
+# Streamlit secrets (contains API keys)
+.streamlit/secrets.toml
