@@ -212,11 +212,13 @@ class GeminiProvider(AIProvider):
     """Google Gemini provider"""
 
     MODELS = {
-        "Gemini Pro": "gemini-pro",
-        "Gemini Pro Vision": "gemini-pro-vision"
+        "Gemini 2.5 Pro": "gemini-2.5-pro",
+        "Gemini 2.5 Flash": "gemini-2.5-flash",
+        "Gemini 3.0 Pro (Preview)": "gemini-3-pro-preview",
+        "Gemini 2.5 Flash Lite": "gemini-2.5-flash-lite"
     }
 
-    def __init__(self, api_key: Optional[str] = None, model_name: str = "Gemini Pro"):
+    def __init__(self, api_key: Optional[str] = None, model_name: str = "Gemini 2.5 Flash"):
         self.model_name = model_name
         super().__init__(api_key or os.getenv("GOOGLE_API_KEY"))
 
@@ -233,7 +235,7 @@ class GeminiProvider(AIProvider):
             raise ImportError("Google Generative AI package not installed. Run: pip install google-generativeai")
 
         genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel(self.MODELS.get(self.model_name, self.MODELS["Gemini Pro"]))
+        model = genai.GenerativeModel(self.MODELS.get(self.model_name, self.MODELS["Gemini 2.5 Flash"]))
 
         full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
         response = model.generate_content(full_prompt)
@@ -252,7 +254,8 @@ class GeminiProvider(AIProvider):
             raise ImportError("Required packages not installed. Run: pip install google-generativeai pillow")
 
         genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel('gemini-pro-vision')
+        # Gemini 2.5 models support vision natively
+        model = genai.GenerativeModel(self.MODELS.get(self.model_name, self.MODELS["Gemini 2.5 Flash"]))
 
         # Convert bytes to PIL Image
         image = Image.open(io.BytesIO(image_data))
@@ -445,7 +448,7 @@ class AIProviderManager:
         },
         "Google Gemini": {
             "class": GeminiProvider,
-            "models": ["Gemini Pro", "Gemini Pro Vision"],
+            "models": ["Gemini 2.5 Flash", "Gemini 2.5 Pro", "Gemini 3.0 Pro (Preview)", "Gemini 2.5 Flash Lite"],
             "supports_vision": True
         },
         "DeepSeek": {
@@ -535,3 +538,13 @@ class AIProviderManager:
             raise ValueError(f"{provider_name} does not support image analysis")
 
         return provider.analyze_image(image_data, prompt)
+
+
+def get_available_providers() -> Dict[str, Any]:
+    """Get a dictionary of all available providers with their instances"""
+    manager = AIProviderManager()
+    providers = {}
+    for provider_name, data in manager.providers.items():
+        if data["configured"]:
+            providers[provider_name] = data["instance"]
+    return providers

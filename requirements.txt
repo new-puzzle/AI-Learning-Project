@@ -3,7 +3,7 @@ anthropic>=0.39.0
 python-dotenv>=1.0.0
 pandas>=2.0.0
 plotly>=5.18.0
-streamlit-cookies-manager>=0.2.0
+streamlit-cookies-manager-v2>=0.2.0
 
 # Multi-model AI providers (install as needed)
 openai>=1.0.0
