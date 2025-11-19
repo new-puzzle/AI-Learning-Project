@@ -531,7 +531,7 @@ def render_custom_goal_form(generator, template=None, key_prefix=""):
     with col3:
         st.markdown("<br>", unsafe_allow_html=True)
         from utils.voice_handler import render_voice_input_button
-        render_voice_input_button(key_suffix=f"{key_prefix}goal_input")
+        render_voice_input_button(key_suffix=f"{key_prefix}goal_input", widget_key=f"{key_prefix}goal_input")
 
     # Date and time planning inputs
     st.markdown("#### 📅 Schedule Your Goal")
@@ -1505,7 +1505,7 @@ Format your response in 3 clear sections with those headers."""
             if st.session_state.get('voice_input_enabled', True):
                 st.markdown("<br>", unsafe_allow_html=True)
                 from utils.voice_handler import render_voice_input_button
-                render_voice_input_button(key_suffix=f"tutor_{path_id}")
+                render_voice_input_button(key_suffix=f"tutor_{path_id}", widget_key=f"chat_input_{path_id}")
 
         col1, col2 = st.columns([1, 5])
         with col1:
@@ -1699,7 +1699,7 @@ Remember: You're having a CONVERSATION, not delivering a report."""
             if st.session_state.get('voice_input_enabled', True):
                 st.markdown("<br>", unsafe_allow_html=True)
                 from utils.voice_handler import render_voice_input_button
-                render_voice_input_button(key_suffix=f"coach_{path_id}")
+                render_voice_input_button(key_suffix=f"coach_{path_id}", widget_key=f"coach_input_{path_id}")
 
         col1, col2 = st.columns([1, 5])
         with col1:
@@ -1846,7 +1846,7 @@ def render_general_ai_chat():
     with col_voice:
         if st.session_state.get('general_chat_voice_input_enabled', True):
             from utils.voice_handler import render_voice_input_button
-            render_voice_input_button(key_suffix="general_chat_input")
+            render_voice_input_button(key_suffix="general_chat_input", widget_key="general_chat_input")
 
     with col_send:
         if st.button("🚀 Send Message", type="primary", use_container_width=True, key="send_general_chat"):

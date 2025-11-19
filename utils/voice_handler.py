@@ -8,11 +8,14 @@ import streamlit as st
 from streamlit.components.v1 import html
 
 
-def render_voice_input_button(key_suffix=""):
+def render_voice_input_button(key_suffix="", widget_key=None):
     """
     Render a microphone button that enables voice input
     Uses Web Speech API for speech-to-text
     """
+    if widget_key is None:
+        widget_key = key_suffix
+    
     html_code = f"""
     <div id="voice-container-{key_suffix}" style="margin: 10px 0;">
         <button id="voice-btn-{key_suffix}" style="
@@ -74,22 +77,91 @@ def render_voice_input_button(key_suffix=""):
 
         recognition.onresult = function(event) {{
             const transcript = event.results[0][0].transcript;
-            const confidence = event.results[0][0].confidence;
 
-            // Find the textarea or input field and populate it
-            const textAreas = window.parent.document.querySelectorAll('textarea');
-            if (textAreas.length > 0) {{
-                // Find the most recently focused or empty textarea
-                for (let i = textAreas.length - 1; i >= 0; i--) {{
-                    if (!textAreas[i].value || textAreas[i] === document.activeElement) {{
-                        textAreas[i].value = transcript;
-                        textAreas[i].dispatchEvent(new Event('input', {{ bubbles: true }}));
-                        break;
-                    }}
+            // Update status
+            document.getElementById('voice-status-{key_suffix}').innerHTML = `✅ Got it: "${{transcript.substring(0, 50)}}..."`;
+            
+            // Helper to set value safely for React
+            function setNativeValue(element, value) {{
+                const valueDescriptor = Object.getOwnPropertyDescriptor(element, 'value');
+                const prototype = Object.getPrototypeOf(element);
+                const prototypeValueDescriptor = Object.getOwnPropertyDescriptor(prototype, 'value');
+                
+                let setter = null;
+                if (prototypeValueDescriptor && prototypeValueDescriptor.set && valueDescriptor !== prototypeValueDescriptor) {{
+                    setter = prototypeValueDescriptor.set;
+                }} else if (valueDescriptor && valueDescriptor.set) {{
+                    setter = valueDescriptor.set;
+                }}
+                
+                if (setter) {{
+                    setter.call(element, value);
+                }} else {{
+                    element.value = value;
                 }}
             }}
 
-            document.getElementById('voice-status-{key_suffix}').innerHTML = `✅ Got it: "${{transcript.substring(0, 50)}}..."`;
+            // Find target element
+            const doc = window.parent.document;
+            let target = null;
+            
+            // 1. Try active element
+            if (doc.activeElement && (doc.activeElement.tagName === 'TEXTAREA' || (doc.activeElement.tagName === 'INPUT' && doc.activeElement.type === 'text'))) {{
+                target = doc.activeElement;
+            }}
+            
+            // 2. If no active element, find the most likely input
+            if (!target) {{
+                // Get all text inputs and textareas
+                const inputs = Array.from(doc.querySelectorAll('textarea, input[type="text"]'));
+                
+                // Filter out hidden or disabled ones
+                const visibleInputs = inputs.filter(el => {{
+                    const style = window.parent.getComputedStyle(el);
+                    return style.display !== 'none' && style.visibility !== 'hidden' && !el.disabled;
+                }});
+                
+                if (visibleInputs.length > 0) {{
+                    // Prefer empty ones, or the last one (common for chat inputs)
+                    // Reverse search for empty
+                    for (let i = visibleInputs.length - 1; i >= 0; i--) {{
+                        if (!visibleInputs[i].value) {{
+                            target = visibleInputs[i];
+                            break;
+                        }}
+                    }}
+                    // If all have text, just take the last one
+                    if (!target) target = visibleInputs[visibleInputs.length - 1];
+                }}
+            }}
+
+            if (target) {{
+                target.focus();
+                
+                // 1. Set value using native setter to bypass React's shadowing
+                setNativeValue(target, transcript);
+                
+                // 2. Dispatch events using parent window's constructors
+                const InputEvent = window.parent.InputEvent || window.InputEvent;
+                const Event = window.parent.Event || window.Event;
+                
+                target.dispatchEvent(new InputEvent('input', {{ bubbles: true, composed: true }}));
+                target.dispatchEvent(new Event('change', {{ bubbles: true }}));
+                
+                // 3. Direct React Internal Handler Call (Robustness Fix)
+                // This finds the internal React props attached to the DOM node and calls onChange directly
+                try {{
+                    const key = Object.keys(target).find(k => k.startsWith('__reactProps') || k.startsWith('__reactEventHandlers'));
+                    if (key && target[key] && target[key].onChange) {{
+                        target[key].onChange({{ target: target, currentTarget: target, bubbles: true }});
+                    }}
+                }} catch (e) {{
+                    console.error('React internal handler error:', e);
+                }}
+                
+                // 4. Blur to ensure state commit
+                target.blur();
+            }}
         }};
 
         recognition.onerror = function(event) {{
