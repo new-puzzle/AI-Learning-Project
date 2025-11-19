@@ -331,3 +331,220 @@ Provide 5-8 high-quality, reputable resources."""
 
         except Exception as e:
             raise Exception(f"Error finding resources: {str(e)}")
+
+    def get_ai_suggestions_for_focus_areas(self, template: Dict, proficiency: str) -> List[str]:
+        """Get AI-suggested focus areas based on the template and user's proficiency."""
+        # Build template context from available fields
+        subdivisions_text = ""
+        if template.get('subdivisions') and len(template['subdivisions']) > 0:
+            subdivisions_text = f"- **Subdivisions:** {', '.join(template['subdivisions'])}\n"
+        
+        subdivision_category_text = ""
+        if template.get('subdivision_category'):
+            subdivision_category_text = f"- **Category:** {template['subdivision_category']}\n"
+        
+        tags_text = ""
+        if template.get('tags') and len(template['tags']) > 0:
+            tags_text = f"- **Tags:** {', '.join(template['tags'])}\n"
+        
+        prompt = f"""You are an expert learning designer. A user has selected a goal template and specified their proficiency level. Your task is to suggest a list of 5-7 key focus areas (sub-topics) that are most relevant to their proficiency level.
+
+**Template Information:**
+- **Goal Name:** {template['name']}
+- **Goal Description:** {template.get('description', '')}
+{subdivision_category_text}{subdivisions_text}{tags_text}- **Difficulty:** {template.get('difficulty', 'Intermediate')}
+- **Timeframe:** {template.get('timeframe', 30)} days
+
+**User's Proficiency Level:** {proficiency}
+
+**Your Task:**
+Analyze the template information and the user's proficiency to recommend a list of specific, actionable focus areas that will help them achieve this goal. 
+- If the user is a **Beginner**, suggest foundational topics, basics, and entry-level concepts.
+- If the user is **Intermediate**, suggest more advanced, practical topics, and real-world applications.
+- If the user is an **Expert**, suggest highly advanced, specialized, or strategic topics, and mastery-level concepts.
+
+Make the suggestions specific and actionable. Consider the goal type, description, and category when generating suggestions.
+
+**Output Format:**
+Return a simple JSON array of strings (5-7 focus areas).
+
+**Example:**
+```json
+[
+  "Core Topic A for their level",
+  "Practical Application B for their level",
+  "Advanced Concept C for their level"
+]
+```"""
+
+        try:
+            message = self.client.messages.create(
+                model=self.model,
+                max_tokens=1000,
+                temperature=0.6,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            response_text = message.content[0].text
+
+            # Extract JSON
+            import json
+            if "```json" in response_text:
+                json_start = response_text.find("```json") + 7
+                json_end = response_text.find("```", json_start)
+                json_text = response_text[json_start:json_end].strip()
+            elif "```" in response_text:
+                json_start = response_text.find("```") + 3
+                json_end = response_text.find("```", json_start)
+                json_text = response_text[json_start:json_end].strip()
+            else:
+                json_text = response_text
+
+            suggestions = json.loads(json_text)
+            return suggestions
+
+        except Exception as e:
+            # Fallback: generate basic suggestions from description or return empty list
+            if template.get('subdivisions') and len(template['subdivisions']) > 0:
+                return template['subdivisions']
+            # If no subdivisions, create basic suggestions from description
+            description = template.get('description', '')
+            if description:
+                # Split description by commas and take first few items
+                parts = [p.strip() for p in description.split(',')[:5]]
+                return parts if parts else ["Focus area 1", "Focus area 2", "Focus area 3"]
+            return ["Focus area 1", "Focus area 2", "Focus area 3"]
+
+    def generate_plan_from_template(self, template: Dict, proficiency: str, timeframe: int, focus_areas: List[str], other_requests: str) -> Dict:
+        """Generate a personalized learning plan from a template and user inputs."""
+        # Build template context
+        subdivisions_text = ""
+        if template.get('subdivisions') and len(template['subdivisions']) > 0:
+            subdivisions_text = f"- **Subdivisions:** {', '.join(template['subdivisions'])}\n"
+        
+        subdivision_category_text = ""
+        if template.get('subdivision_category'):
+            subdivision_category_text = f"- **Category:** {template['subdivision_category']}\n"
+        
+        tags_text = ""
+        if template.get('tags') and len(template['tags']) > 0:
+            tags_text = f"- **Tags:** {', '.join(template['tags'])}\n"
+        
+        prompt = f"""You are an expert learning path designer. A user has selected a goal template and provided their personal preferences. Your task is to create a highly personalized, day-by-day learning plan based on this information.
+
+**Template Information:**
+- **Goal Name:** {template['name']}
+- **Original Description:** {template.get('description', '')}
+- **Goal Type:** {template.get('goal_type', 'learning')}
+- **Standard Timeframe:** {template.get('timeframe', 30)} days
+{subdivision_category_text}{subdivisions_text}{tags_text}- **Difficulty:** {template.get('difficulty', 'Intermediate')}
+
+**User's Personalization:**
+- **Proficiency Level:** {proficiency}
+- **Desired Timeframe:** {timeframe} days
+- **Focus Areas:** {', '.join(focus_areas) if focus_areas else 'None specified'}
+- **Other Requests:** {other_requests if other_requests else 'None'}
+
+**Your Task:**
+Generate a detailed, day-by-day curriculum for the user. The plan should be:
+1.  **Tailored:** Adjust the content difficulty and pace based on the user's proficiency.
+2.  **Focused:** Prioritize the user's chosen focus areas.
+3.  **Comprehensive:** Incorporate the user's other requests.
+4.  **Structured:** Provide a clear, actionable, and motivating plan.
+
+**Output Format:**
+Return the plan in the following JSON format:
+
+```json
+{{
+    "overview": "A brief, encouraging overview of the personalized plan and what the user will achieve.",
+    "milestones": [
+        "Personalized Milestone 1 based on user input",
+        "Personalized Milestone 2 based on user input",
+        "Personalized Milestone 3 based on user input"
+    ],
+    "curriculum": [
+        {{
+            "day": 1,
+            "topic": "Topic tailored to user's proficiency and focus",
+            "subtopics": [
+                "Actionable sub-topic 1",
+                "Actionable sub-topic 2"
+            ],
+            "estimated_hours": 2.0,
+            "priority": "high",
+            "resources": [
+                {{
+                    "type": "video",
+                    "name": "Relevant Video Title",
+                    "url": "https://youtube.com/example"
+                }}
+            ]
+        }}
+    ]
+}}
+```
+"""
+        try:
+            message = self.client.messages.create(
+                model=self.model,
+                max_tokens=4000,
+                temperature=0.7,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            response_text = message.content[0].text
+            import json
+            if "```json" in response_text:
+                json_start = response_text.find("```json") + 7
+                json_end = response_text.find("```", json_start)
+                json_text = response_text[json_start:json_end].strip()
+            else:
+                json_text = response_text
+            
+            return json.loads(json_text)
+        except Exception as e:
+            raise Exception(f"Error generating personalized plan from template: {str(e)}")
+
+    def generate_personalized_goal(self, proficiency: str, objectives: str, interests: str) -> Dict:
+        """Generate a personalized goal using AI"""
+        prompt = f"""As an expert goal designer, create a personalized goal based on the user's profile.
+
+User Profile:
+- Proficiency: {proficiency}
+- Objectives: {objectives}
+- Interests: {interests}
+
+Generate a goal that is specific, measurable, achievable, relevant, and time-bound (SMART). 
+Output in this JSON format:
+{{
+    "goal_text": "Your detailed, personalized goal here",
+    "timeframe": 30, 
+    "hours_per_day": 1.5,
+    "description": "A brief summary of the goal and why it's relevant for the user."
+}}
+"""
+        try:
+            message = self.client.messages.create(
+                model=self.model,
+                max_tokens=1000,
+                temperature=0.8,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            response_text = message.content[0].text
+            import json
+            if "```json" in response_text:
+                json_start = response_text.find("```json") + 7
+                json_end = response_text.find("```", json_start)
+                json_text = response_text[json_start:json_end].strip()
+            else:
+                json_text = response_text
+            
+            return json.loads(json_text)
+        except Exception as e:
+            raise Exception(f"Error generating personalized goal: {str(e)}")

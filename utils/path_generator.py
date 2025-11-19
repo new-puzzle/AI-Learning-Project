@@ -24,6 +24,10 @@ class LearningPathGenerator:
         self.ai_manager = AIProviderManager()  # New multi-model manager
         self.db = Database()
 
+    def get_ai_client(self) -> ClaudeAI:
+        """Returns the underlying AI client."""
+        return self.ai
+
     def create_learning_path(self, goal: str, timeframe: int, goal_type: str = 'learning',
                            start_date: str = None, hours_per_day: float = 2.0,
                            unavailable_dates_input: str = None,
@@ -95,6 +99,67 @@ class LearningPathGenerator:
         learning_path['goal_type'] = goal_type
 
         return learning_path
+
+    def save_plan_from_template(self, plan: Dict, goal_name: str, timeframe: int, goal_type: str = 'learning',
+                                start_date: str = None, hours_per_day: float = 2.0,
+                                unavailable_dates_input: str = None, skip_weekends: bool = False,
+                                skip_weekdays: List[int] = None) -> int:
+        """
+        Save a plan generated from a template to the database
+        
+        Args:
+            plan: The generated plan dict with curriculum, overview, milestones
+            goal_name: The goal name/title
+            timeframe: Number of days
+            goal_type: Type of goal
+            start_date: Start date in 'YYYY-MM-DD' format
+            hours_per_day: Hours per day
+            unavailable_dates_input: String with unavailable dates (e.g., "Nov 20-22, Dec 1")
+            skip_weekends: Whether to skip weekends
+            skip_weekdays: List of weekday numbers to skip (0=Monday, 6=Sunday)
+            
+        Returns:
+            path_id: The ID of the saved learning path
+        """
+        # Parse unavailable dates if provided
+        unavailable_dates = []
+        unavailable_dates_json = None
+        if unavailable_dates_input and unavailable_dates_input.strip():
+            from utils.date_scheduler import parse_unavailable_dates
+            unavailable_dates = parse_unavailable_dates(unavailable_dates_input)
+            if unavailable_dates:
+                unavailable_dates_json = json.dumps([d.strftime('%Y-%m-%d') for d in unavailable_dates])
+        
+        # Save learning path to database
+        path_id = self.db.save_learning_path(
+            goal=goal_name,
+            timeframe=timeframe,
+            goal_type=goal_type,
+            start_date=start_date,
+            hours_per_day=hours_per_day,
+            unavailable_dates=unavailable_dates_json,
+            weekly_pattern=None
+        )
+        
+        # Calculate calendar dates if start_date provided
+        curriculum = plan.get('curriculum', [])
+        if start_date:
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+            curriculum_with_dates = calculate_calendar_dates(
+                start_date_obj,
+                curriculum,
+                hours_per_day,
+                unavailable_dates=unavailable_dates,
+                weekly_pattern=None,
+                skip_weekends=skip_weekends,
+                skip_weekdays=skip_weekdays
+            )
+            curriculum = curriculum_with_dates
+        
+        # Save topics/curriculum
+        self.db.save_topics(path_id, curriculum)
+        
+        return path_id
 
     def get_learning_path(self, path_id: int) -> Optional[Dict]:
         """

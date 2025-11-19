@@ -322,32 +322,43 @@ def render_learning_path_generator(generator):
     with col1:
         if st.button("← Back to Chat", key="back_to_chat"):
             st.session_state.show_generator = False
+            st.session_state.selected_template = None
+            st.session_state.template_conversation_step = None
             st.rerun()
     
     st.markdown("### 🚀 Create Your Goal Plan")
 
-    # Initialize session state for selected template
+    # Initialize session state for template flow
     if 'selected_template' not in st.session_state:
         st.session_state.selected_template = None
+    if 'template_conversation_step' not in st.session_state:
+        st.session_state.template_conversation_step = None
 
     # Tabs for template vs custom
-    tab1, tab2 = st.tabs(["📋 Choose Template", "✍️ Create Custom Goal"])
+    tab1, tab2, tab3 = st.tabs(["📋 Choose Template", "✨ Let AI Help", "✍️ Create Custom Goal"])
 
     with tab1:
-        # TEMPLATE SELECTION TAB
-        render_template_selector(generator)
-
+        # TEMPLATE SELECTION & CUSTOMIZATION FLOW
+        if st.session_state.selected_template is None:
+            render_template_selector(generator)
+        else:
+            render_template_conversation(generator)
+    
     with tab2:
+        # AI-ASSISTED GOAL GENERATION
+        render_ai_assisted_goal_form(generator)
+
+    with tab3:
         # CUSTOM GOAL TAB (original form)
         render_custom_goal_form(generator, template=None, key_prefix="custom_")
 
 
 def render_template_selector(generator):
-    """Render template selection interface"""
-    from utils.templates import get_all_templates, get_templates_by_type, search_templates, get_all_tags
+    """Render template selection interface with a compact, expander-based layout."""
+    from utils.templates import get_all_templates, search_templates
 
     st.markdown("#### 🎯 Browse Goal Templates")
-    st.caption("Quick-start with proven goal structures. All fields are customizable!")
+    st.caption("Quick-start with proven goal structures. Select a goal to begin personalizing it with AI.")
 
     # Search and filters
     col_search, col_filter = st.columns([2, 1])
@@ -355,7 +366,7 @@ def render_template_selector(generator):
     with col_search:
         search_query = st.text_input(
             "🔍 Search templates",
-            placeholder="e.g., remote jobs, AI, freelance income, fitness",
+            placeholder="e.g., remote jobs, AI, freelance income, fitness, yoga, guitar",
             label_visibility="collapsed"
         )
 
@@ -387,17 +398,512 @@ def render_template_selector(generator):
         filter_type = goal_type_map[goal_type_filter]
         templates = [t for t in templates if t.goal_type == filter_type]
 
-    # Display template count
     st.caption(f"Showing {len(templates)} template(s)")
 
-    # Display templates as cards
     if not templates:
         st.info("No templates found. Try different search terms or filters.")
     else:
-        # Group templates by category for better organization
+        # Group templates by type, then by subdivision
         templates_by_type = {}
         for template in templates:
             if template.goal_type not in templates_by_type:
+                templates_by_type[template.goal_type] = {}
+            
+            # Use subdivision_category if available, otherwise use "General"
+            subdivision = template.subdivision_category if hasattr(template, 'subdivision_category') and template.subdivision_category else "General"
+            if subdivision not in templates_by_type[template.goal_type]:
+                templates_by_type[template.goal_type][subdivision] = []
+            templates_by_type[template.goal_type][subdivision].append(template)
+
+        # Sort goal types for consistent order
+        goal_type_order = ["learning", "career", "freelance", "project", "personal"]
+        sorted_goal_types = sorted(templates_by_type.keys(), key=lambda x: goal_type_order.index(x) if x in goal_type_order else len(goal_type_order))
+
+        # Category icons and names
+        category_icons = {
+            "learning": "📚",
+            "career": "💼",
+            "freelance": "💰",
+            "project": "🚀",
+            "personal": "🎯"
+        }
+        
+        category_names = {
+            "learning": "Learning & Skills",
+            "career": "Career Transition",
+            "freelance": "Freelance & Business",
+            "project": "Project Completion",
+            "personal": "Personal Achievement"
+        }
+
+        for goal_type in sorted_goal_types:
+            type_dict = templates_by_type[goal_type]
+            total_count = sum(len(templates) for templates in type_dict.values())
+            type_icon = category_icons.get(goal_type, "📋")
+            type_name = category_names.get(goal_type, goal_type.replace("_", " ").title())
+            
+            with st.expander(f"**{type_icon} {type_name} ({total_count} templates)**", expanded=False):
+                # Sort subdivisions alphabetically
+                sorted_subdivisions = sorted(type_dict.keys())
+                
+                # Show each subdivision as its own collapsible card
+                for subdivision in sorted_subdivisions:
+                    template_list = type_dict[subdivision]
+                    subdivision_name = subdivision if subdivision and subdivision != "General" else "General Templates"
+                    
+                    # Nested expander for each subdivision
+                    with st.expander(f"**{subdivision_name}** ({len(template_list)} templates)", expanded=False):
+                        # Display templates in a cleaner grid format
+                        for i, template in enumerate(template_list):
+                            with st.container():
+                                col1, col2 = st.columns([4, 1])
+                    with col1:
+                        st.markdown(f"**{template.name}**")
+                        st.markdown(f"<small>_{template.description}_</small>", unsafe_allow_html=True)
+                                    difficulty_emoji = {"Beginner": "🟢", "Intermediate": "🟡", "Advanced": "🔴"}.get(template.difficulty, "⚪")
+                                    st.markdown(f"<small>⏱️ {template.timeframe} days | {difficulty_emoji} {template.difficulty}</small>", unsafe_allow_html=True)
+                    with col2:
+                                    if st.button("Select", key=f"select_template_{template.name}_{i}", use_container_width=True):
+                            st.session_state.selected_template = template
+                            st.session_state.template_conversation_step = 1
+                            st.rerun()
+                                
+                                # Add spacing between templates (except last one)
+                                if i < len(template_list) - 1:
+                                    st.markdown("<br>", unsafe_allow_html=True)
+
+def render_template_conversation(generator):
+    """Render template customization card with all fields visible immediately."""
+    template = st.session_state.selected_template
+    state_key = f"template_customize_{template.name}"
+
+    # Initialize customization state
+    if state_key not in st.session_state:
+        st.session_state[state_key] = {
+            'proficiency': template.difficulty if template.difficulty in ["Beginner", "Intermediate", "Advanced"] else "Intermediate",
+            'timeframe': template.timeframe,
+            'hours_per_day': template.hours_per_day,
+            'focus_areas': [],
+            'other_requests': "",
+            'ai_suggestions': None,
+            'show_ai_suggestions': False
+        }
+
+    custom_state = st.session_state[state_key]
+
+    # Template Card Header
+    st.markdown("---")
+    col_header, col_close = st.columns([5, 1])
+    with col_header:
+        st.markdown(f"### ✏️ Customize: {template.name}")
+        st.caption(f"_{template.description}_")
+    with col_close:
+        if st.button("❌ Close", key=f"{state_key}_close", use_container_width=True):
+        st.session_state.selected_template = None
+        st.session_state.template_conversation_step = None
+        if state_key in st.session_state:
+            del st.session_state[state_key]
+        st.rerun()
+
+    st.markdown("---")
+
+    # All fields visible in a single card
+    with st.container():
+        # Basic Settings Row
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            proficiency = st.selectbox(
+                "🎯 Proficiency Level",
+            ["Beginner", "Intermediate", "Expert"],
+                index=["Beginner", "Intermediate", "Expert"].index(custom_state['proficiency']) if custom_state['proficiency'] in ["Beginner", "Intermediate", "Expert"] else 1,
+            key=f"{state_key}_proficiency",
+                help="Your current skill level in this area"
+            )
+        
+        with col2:
+            from datetime import date as dt_date
+            start_date = st.date_input(
+                "📅 Start Date",
+                value=dt_date.today(),
+                key=f"{state_key}_start_date",
+                help="When do you want to start?"
+            )
+        
+        with col3:
+            timeframe = st.number_input(
+                "⏱️ Timeframe (days)",
+                min_value=1,
+                max_value=365,
+                value=custom_state['timeframe'],
+                key=f"{state_key}_timeframe",
+                help="How many days to complete this goal"
+            )
+        
+        with col4:
+            hours_per_day = st.number_input(
+                "⏰ Hours per day",
+                min_value=0.5,
+                max_value=12.0,
+                value=custom_state['hours_per_day'],
+                step=0.5,
+                key=f"{state_key}_hours_per_day",
+                help="Daily time commitment"
+            )
+
+        st.markdown("---")
+
+        # Focus Areas Section - Context-aware labeling
+        goal_type = template.goal_type
+        section_labels = {
+            'learning': ('🎯 Learning Focus Areas', 'What topics do you want to focus on?'),
+            'personal': ('🎯 Focus Areas', 'What aspects do you want to prioritize?'),
+            'career': ('🎯 Skill Focus Areas', 'What skills/areas do you want to develop?'),
+            'project': ('🎯 Project Components', 'What components/phases do you want to focus on?'),
+            'freelance': ('🎯 Business Focus Areas', 'What areas do you want to prioritize?')
+        }
+        section_title, section_caption = section_labels.get(goal_type, ('🎯 Focus Areas', 'What do you want to focus on?'))
+        
+        st.markdown(f"#### {section_title}")
+        st.caption(f"{section_caption} Get AI suggestions or use the defaults below.")
+        
+        # AI Suggestions Toggle
+        col_ai_toggle, col_ai_btn = st.columns([3, 1])
+        with col_ai_toggle:
+            use_ai_suggestions = st.checkbox(
+                "🤖 Get AI suggestions based on my proficiency",
+                value=custom_state['show_ai_suggestions'],
+                key=f"{state_key}_use_ai"
+            )
+        
+        with col_ai_btn:
+            if use_ai_suggestions and st.button("Generate Suggestions", key=f"{state_key}_generate_ai"):
+                with st.spinner("🧠 AI is analyzing and generating personalized focus areas..."):
+                    try:
+                        ai_client = generator.get_ai_client()
+                        suggestions = ai_client.get_ai_suggestions_for_focus_areas(template.to_dict(), proficiency)
+                        custom_state['ai_suggestions'] = suggestions
+                        custom_state['show_ai_suggestions'] = True
+                st.rerun()
+                    except Exception as e:
+                        st.error(f"Error generating suggestions: {e}")
+
+        # Show AI suggestions if available, otherwise use intelligent defaults
+        focus_options = []
+        if custom_state['ai_suggestions'] and use_ai_suggestions:
+            st.info(f"💡 AI suggests these focus areas for a **{proficiency}** level:")
+            focus_options = custom_state['ai_suggestions']
+        else:
+            # Use template subdivisions if defined, otherwise generate intelligent ones
+            if template.subdivisions and len(template.subdivisions) > 0:
+                focus_options = template.subdivisions
+            else:
+                # Generate intelligent subdivisions based on goal type, name, description, and proficiency
+                from utils.template_helpers import generate_intelligent_subdivisions
+                focus_options = generate_intelligent_subdivisions(
+                    template.to_dict(), 
+                    proficiency=proficiency
+                )
+                st.caption(f"💡 Suggested for **{proficiency}** level (you can mix levels if needed):")
+        
+        # Focus areas with checkboxes (readable list format)
+        selection_labels = {
+            'learning': 'Select topics to focus on:',
+            'personal': 'Select aspects to prioritize:',
+            'career': 'Select skills/areas to develop:',
+            'project': 'Select components to focus on:',
+            'freelance': 'Select areas to prioritize:'
+        }
+        selection_label = selection_labels.get(goal_type, 'Select your focus areas:')
+        st.markdown(f"**{selection_label}**")
+        
+        # Get default selections
+        default_selections = custom_state.get('focus_areas', [])
+        if not default_selections and focus_options:
+            # Pre-select first 3 if available
+            default_selections = focus_options[:3] if len(focus_options) >= 3 else focus_options
+        
+        # Display as checkboxes in a clean list
+        focus_areas = []
+        for option in focus_options:
+            checkbox_key = f"{state_key}_focus_checkbox_{option}"
+            # Check if this was previously selected
+            is_checked = option in default_selections
+            if checkbox_key in st.session_state:
+                is_checked = st.session_state[checkbox_key]
+            
+            # Display checkbox
+            checked = st.checkbox(option, value=is_checked, key=checkbox_key)
+            if checked:
+                focus_areas.append(option)
+
+        # Show custom focus areas as checkboxes too
+        if 'custom_focus_areas' in custom_state and custom_state['custom_focus_areas']:
+            st.markdown("**Custom focus areas:**")
+            for custom_focus in custom_state['custom_focus_areas']:
+                custom_checkbox_key = f"{state_key}_focus_checkbox_{custom_focus}"
+                is_checked = st.session_state.get(custom_checkbox_key, True)  # Default to checked when added
+                checked = st.checkbox(custom_focus, value=is_checked, key=custom_checkbox_key)
+                if checked:
+                    if custom_focus not in focus_areas:
+                        focus_areas.append(custom_focus)
+        
+        # Allow manual focus area entry
+        with st.expander("➕ Add Custom Focus Area"):
+            custom_focus = st.text_input(
+                "Enter a custom focus area",
+                key=f"{state_key}_custom_focus",
+                placeholder="e.g., Advanced techniques, Real-world projects, Certification prep"
+            )
+            if st.button("Add", key=f"{state_key}_add_custom") and custom_focus.strip():
+                custom_text = custom_focus.strip()
+                # Update custom state
+                if 'custom_focus_areas' not in custom_state:
+                    custom_state['custom_focus_areas'] = []
+                if custom_text not in custom_state['custom_focus_areas']:
+                    custom_state['custom_focus_areas'].append(custom_text)
+                    # Set checkbox to checked by default
+                    custom_checkbox_key = f"{state_key}_focus_checkbox_{custom_text}"
+                    st.session_state[custom_checkbox_key] = True
+                    st.rerun()
+
+        st.markdown("---")
+
+        # Additional Requests
+        st.markdown("#### 📝 Additional Preferences")
+        other_requests = st.text_area(
+            "Any specific requests, preferences, or requirements?",
+            value=custom_state['other_requests'],
+            key=f"{state_key}_other_requests",
+            placeholder="e.g., I prefer video tutorials over reading, I want to focus on practical projects, I have access to specific tools, I want certification prep included...",
+            help="Optional: Add any specific requirements or preferences for your plan"
+        )
+
+        st.markdown("---")
+
+        # Advanced Schedule (Optional)
+        st.markdown("#### ⚙️ Advanced Schedule (Optional)")
+        with st.expander("Customize your availability for more realistic planning", expanded=False):
+            # Unavailable dates
+            unavailable_dates_input = st.text_input(
+                "Unavailable Dates (Optional)",
+                value=custom_state.get('unavailable_dates', ''),
+                placeholder="e.g., Nov 20-22, Dec 1, Dec 25",
+                key=f"{state_key}_unavailable_dates",
+                help="Enter specific dates you're unavailable (supports ranges)"
+            )
+
+            # Quick skip options
+            st.markdown("**Skip recurring days:**")
+            col_skip1, col_skip2 = st.columns(2)
+
+            with col_skip1:
+                skip_weekends = st.checkbox(
+                    "Skip weekends", 
+                    value=custom_state.get('skip_weekends', False), 
+                    key=f"{state_key}_skip_weekends"
+                )
+                skip_wednesday = st.checkbox(
+                    "Skip Wednesdays", 
+                    value=custom_state.get('skip_wednesday', False), 
+                    key=f"{state_key}_skip_wednesday"
+                )
+
+            with col_skip2:
+                skip_thursday = st.checkbox(
+                    "Skip Thursdays", 
+                    value=custom_state.get('skip_thursday', False), 
+                    key=f"{state_key}_skip_thursday"
+                )
+                skip_friday = st.checkbox(
+                    "Skip Fridays", 
+                    value=custom_state.get('skip_friday', False), 
+                    key=f"{state_key}_skip_friday"
+                )
+
+            # Build skip_weekdays list
+            skip_weekdays = []
+            if skip_wednesday:
+                skip_weekdays.append(2)  # Wednesday
+            if skip_thursday:
+                skip_weekdays.append(3)  # Thursday
+            if skip_friday:
+                skip_weekdays.append(4)  # Friday
+
+        st.markdown("---")
+
+        # Action Buttons
+        col_clear, col_generate = st.columns([1, 3])
+        with col_clear:
+            if st.button("🔄 Reset to Defaults", key=f"{state_key}_reset"):
+                st.session_state[state_key] = {
+                    'proficiency': template.difficulty if template.difficulty in ["Beginner", "Intermediate", "Advanced"] else "Intermediate",
+                    'timeframe': template.timeframe,
+                    'hours_per_day': template.hours_per_day,
+                    'focus_areas': [],
+                    'other_requests': "",
+                    'ai_suggestions': None,
+                    'show_ai_suggestions': False,
+                    'unavailable_dates': '',
+                    'skip_weekends': False,
+                    'skip_wednesday': False,
+                    'skip_thursday': False,
+                    'skip_friday': False
+                }
+                st.rerun()
+        
+        with col_generate:
+            if st.button("🚀 Generate My Personalized Plan", key=f"{state_key}_generate", type="primary", use_container_width=True):
+                # Save current state
+                custom_state['proficiency'] = proficiency
+                custom_state['timeframe'] = timeframe
+                custom_state['hours_per_day'] = hours_per_day
+                custom_state['focus_areas'] = focus_areas
+                custom_state['other_requests'] = other_requests
+                custom_state['unavailable_dates'] = unavailable_dates_input
+                custom_state['skip_weekends'] = skip_weekends
+                custom_state['skip_wednesday'] = skip_wednesday
+                custom_state['skip_thursday'] = skip_thursday
+                custom_state['skip_friday'] = skip_friday
+                
+                if not focus_areas:
+                    st.warning("⚠️ Please select at least one focus area before generating your plan.")
+                else:
+                with st.spinner("✨ Your personalized plan is being crafted by the AI..."):
+                    try:
+                        ai_client = generator.get_ai_client()
+                        plan = ai_client.generate_plan_from_template(
+                            template=template.to_dict(),
+                                proficiency=proficiency,
+                                timeframe=timeframe,
+                                focus_areas=focus_areas,
+                                other_requests=other_requests
+                            )
+                            
+                            # Save and display the plan with scheduling options
+                            path_id = generator.save_plan_from_template(
+                                plan=plan,
+                                goal_name=template.goal_text,
+                                timeframe=timeframe,
+                                goal_type=template.goal_type,
+                                start_date=start_date.strftime('%Y-%m-%d'),
+                                hours_per_day=hours_per_day,
+                                unavailable_dates_input=unavailable_dates_input if unavailable_dates_input.strip() else None,
+                                skip_weekends=skip_weekends,
+                                skip_weekdays=skip_weekdays if skip_weekdays else None
+                            )
+                        st.session_state.current_path_id = path_id
+                        st.session_state.show_generator = False
+                        st.session_state.selected_template = None
+                        st.session_state.template_conversation_step = None
+                            if state_key in st.session_state:
+                                del st.session_state[state_key]
+                        st.rerun()
+
+                    except Exception as e:
+                        st.error(f"An error occurred while generating the plan: {e}")
+                        st.rerun()
+
+def render_ai_assisted_goal_form(generator):
+    """Render an AI-assisted form to help users define their goals"""
+    st.markdown("#### ✨ Let AI Help You Build a Goal")
+    st.caption("Answer a few questions, and our AI will create a personalized goal plan for you.")
+
+    # Initialize conversation state
+    if 'ai_conversation_state' not in st.session_state:
+        st.session_state.ai_conversation_state = {
+            'step': 0,
+            'proficiency': None,
+            'objectives': None,
+            'interests': None,
+            'generated_goal': None
+        }
+
+    state = st.session_state.ai_conversation_state
+
+    # --- Step 0: Proficiency --- #
+    if state['step'] == 0:
+        st.markdown("**1. What is your current proficiency level in this area?**")
+        proficiency = st.radio(
+            "Proficiency Level",
+            ["Beginner", "Intermediate", "Advanced"],
+            key="ai_proficiency"
+        )
+        if st.button("Next", key="ai_next_1"):
+            state['proficiency'] = proficiency
+            state['step'] = 1
+            st.rerun()
+
+    # --- Step 1: Objectives --- #
+    elif state['step'] == 1:
+        st.markdown("**2. What are your main objectives?**")
+        objectives = st.text_area(
+            "Objectives",
+            placeholder="e.g., career change, learn a new skill for a project, start a freelance business",
+            key="ai_objectives"
+        )
+        if st.button("Next", key="ai_next_2"):
+            state['objectives'] = objectives
+            state['step'] = 2
+            st.rerun()
+
+    # --- Step 2: Interests --- #
+    elif state['step'] == 2:
+        st.markdown("**3. What topics or technologies are you most interested in?**")
+        interests = st.text_input(
+            "Interests",
+            placeholder="e.g., Python, AI, data science, web development, UI/UX design",
+            key="ai_interests"
+        )
+        if st.button("Generate Goal", key="ai_generate"):
+            state['interests'] = interests
+            state['step'] = 3
+            
+            with st.spinner("🧠 AI is crafting your personalized goal..."):
+                try:
+                    ai = generator.ai
+                    generated_data = ai.generate_personalized_goal(
+                        proficiency=state['proficiency'],
+                        objectives=state['objectives'],
+                        interests=state['interests']
+                    )
+                    state['generated_goal'] = generated_data
+                except Exception as e:
+                    st.error(f"An error occurred while generating your goal: {e}")
+                    state['step'] = 2 # Go back to the previous step
+            st.rerun()
+
+    # --- Step 3: Confirmation --- #
+    elif state['step'] == 3 and state['generated_goal']:
+        st.markdown("### Your Personalized Goal")
+        goal_data = state['generated_goal']
+        st.success(f"**Goal:** {goal_data['goal_text']}")
+        st.info(f"**Description:** {goal_data['description']}")
+        st.markdown(f"**Recommended Timeframe:** {goal_data['timeframe']} days, at {goal_data['hours_per_day']} hours/day")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Start with this Goal", key="ai_confirm"):
+                # Use this goal to pre-fill the custom goal form
+                from utils.templates import GoalTemplate
+                template = GoalTemplate(
+                    name="AI-Generated Goal",
+                    goal_type="personal", # Default to personal, can be refined
+                    goal_text=goal_data['goal_text'],
+                    timeframe=goal_data['timeframe'],
+                    hours_per_day=goal_data['hours_per_day'],
+                    description=goal_data['description']
+                )
+                st.session_state.selected_template = template
+                st.session_state.show_generator = True
+                # Reset conversation
+                del st.session_state.ai_conversation_state
+                st.rerun()
+        with col2:
+            if st.button("Revise or Start Over", key="ai_revise"):
+                # Reset conversation
+                del st.session_state.ai_conversation_state
+                st.rerun()
                 templates_by_type[template.goal_type] = []
             templates_by_type[template.goal_type].append(template)
 
