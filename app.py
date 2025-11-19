@@ -340,7 +340,9 @@ def render_learning_path_generator(generator):
     with tab1:
         # TEMPLATE SELECTION & CUSTOMIZATION FLOW
         if st.session_state.selected_template is None:
-            render_template_selector(generator)
+            # Use new card-based template selector
+            from utils.template_selector_redesign import render_template_selector_redesign
+            render_template_selector_redesign(generator)
         else:
             render_template_conversation(generator)
     
@@ -457,16 +459,16 @@ def render_template_selector(generator):
                         for i, template in enumerate(template_list):
                             with st.container():
                                 col1, col2 = st.columns([4, 1])
-                    with col1:
-                        st.markdown(f"**{template.name}**")
-                        st.markdown(f"<small>_{template.description}_</small>", unsafe_allow_html=True)
+                                with col1:
+                                    st.markdown(f"**{template.name}**")
+                                    st.markdown(f"<small>_{template.description}_</small>", unsafe_allow_html=True)
                                     difficulty_emoji = {"Beginner": "🟢", "Intermediate": "🟡", "Advanced": "🔴"}.get(template.difficulty, "⚪")
                                     st.markdown(f"<small>⏱️ {template.timeframe} days | {difficulty_emoji} {template.difficulty}</small>", unsafe_allow_html=True)
-                    with col2:
+                                with col2:
                                     if st.button("Select", key=f"select_template_{template.name}_{i}", use_container_width=True):
-                            st.session_state.selected_template = template
-                            st.session_state.template_conversation_step = 1
-                            st.rerun()
+                                        st.session_state.selected_template = template
+                                        st.session_state.template_conversation_step = 1
+                                        st.rerun()
                                 
                                 # Add spacing between templates (except last one)
                                 if i < len(template_list) - 1:
@@ -499,11 +501,11 @@ def render_template_conversation(generator):
         st.caption(f"_{template.description}_")
     with col_close:
         if st.button("❌ Close", key=f"{state_key}_close", use_container_width=True):
-        st.session_state.selected_template = None
-        st.session_state.template_conversation_step = None
-        if state_key in st.session_state:
-            del st.session_state[state_key]
-        st.rerun()
+            st.session_state.selected_template = None
+            st.session_state.template_conversation_step = None
+            if state_key in st.session_state:
+                del st.session_state[state_key]
+            st.rerun()
 
     st.markdown("---")
 
@@ -520,6 +522,14 @@ def render_template_conversation(generator):
             key=f"{state_key}_proficiency",
                 help="Your current skill level in this area"
             )
+            
+            # Check if proficiency changed
+            proficiency_changed = False
+            if proficiency != custom_state['proficiency']:
+                custom_state['proficiency'] = proficiency
+                proficiency_changed = True
+                # Reset AI suggestions when proficiency changes
+                custom_state['ai_suggestions'] = None
         
         with col2:
             from datetime import date as dt_date
@@ -565,46 +575,40 @@ def render_template_conversation(generator):
         section_title, section_caption = section_labels.get(goal_type, ('🎯 Focus Areas', 'What do you want to focus on?'))
         
         st.markdown(f"#### {section_title}")
-        st.caption(f"{section_caption} Get AI suggestions or use the defaults below.")
+        st.caption(f"{section_caption}")
         
-        # AI Suggestions Toggle
-        col_ai_toggle, col_ai_btn = st.columns([3, 1])
-        with col_ai_toggle:
-            use_ai_suggestions = st.checkbox(
-                "🤖 Get AI suggestions based on my proficiency",
-                value=custom_state['show_ai_suggestions'],
-                key=f"{state_key}_use_ai"
-            )
+        # Automatically generate AI suggestions if not already generated or if proficiency changed
+        should_generate_ai = False
+        if custom_state['ai_suggestions'] is None or proficiency_changed:
+            should_generate_ai = True
         
-        with col_ai_btn:
-            if use_ai_suggestions and st.button("Generate Suggestions", key=f"{state_key}_generate_ai"):
-                with st.spinner("🧠 AI is analyzing and generating personalized focus areas..."):
-                    try:
-                        ai_client = generator.get_ai_client()
-                        suggestions = ai_client.get_ai_suggestions_for_focus_areas(template.to_dict(), proficiency)
-                        custom_state['ai_suggestions'] = suggestions
-                        custom_state['show_ai_suggestions'] = True
-                st.rerun()
-                    except Exception as e:
-                        st.error(f"Error generating suggestions: {e}")
+        # Generate AI suggestions automatically
+        if should_generate_ai:
+            with st.spinner("🧠 AI is analyzing and generating personalized focus areas..."):
+                try:
+                    ai_client = generator.get_ai_client()
+                    suggestions = ai_client.get_ai_suggestions_for_focus_areas(template.to_dict(), proficiency)
+                    custom_state['ai_suggestions'] = suggestions
+                    custom_state['show_ai_suggestions'] = True
+                    st.rerun()
+                except Exception as e:
+                    st.warning(f"Could not generate AI suggestions: {e}. Using defaults.")
+                    custom_state['ai_suggestions'] = None
 
-        # Show AI suggestions if available, otherwise use intelligent defaults
+        # Show AI suggestions (they should always be available now)
         focus_options = []
-        if custom_state['ai_suggestions'] and use_ai_suggestions:
+        if custom_state['ai_suggestions']:
             st.info(f"💡 AI suggests these focus areas for a **{proficiency}** level:")
             focus_options = custom_state['ai_suggestions']
         else:
-            # Use template subdivisions if defined, otherwise generate intelligent ones
+            # Fallback: Use template subdivisions if defined
             if template.subdivisions and len(template.subdivisions) > 0:
                 focus_options = template.subdivisions
+                st.caption(f"💡 Using template defaults:")
             else:
-                # Generate intelligent subdivisions based on goal type, name, description, and proficiency
-                from utils.template_helpers import generate_intelligent_subdivisions
-                focus_options = generate_intelligent_subdivisions(
-                    template.to_dict(), 
-                    proficiency=proficiency
-                )
-                st.caption(f"💡 Suggested for **{proficiency}** level (you can mix levels if needed):")
+                # Last resort: basic fallback
+                focus_options = ["Focus Area 1", "Focus Area 2", "Focus Area 3"]
+                st.caption(f"💡 Please refresh to get AI suggestions:")
         
         # Focus areas with checkboxes (readable list format)
         selection_labels = {
@@ -769,11 +773,11 @@ def render_template_conversation(generator):
                 if not focus_areas:
                     st.warning("⚠️ Please select at least one focus area before generating your plan.")
                 else:
-                with st.spinner("✨ Your personalized plan is being crafted by the AI..."):
-                    try:
-                        ai_client = generator.get_ai_client()
-                        plan = ai_client.generate_plan_from_template(
-                            template=template.to_dict(),
+                    with st.spinner("✨ Your personalized plan is being crafted by the AI..."):
+                        try:
+                            ai_client = generator.get_ai_client()
+                            plan = ai_client.generate_plan_from_template(
+                                template=template.to_dict(),
                                 proficiency=proficiency,
                                 timeframe=timeframe,
                                 focus_areas=focus_areas,
@@ -792,17 +796,17 @@ def render_template_conversation(generator):
                                 skip_weekends=skip_weekends,
                                 skip_weekdays=skip_weekdays if skip_weekdays else None
                             )
-                        st.session_state.current_path_id = path_id
-                        st.session_state.show_generator = False
-                        st.session_state.selected_template = None
-                        st.session_state.template_conversation_step = None
+                            st.session_state.current_path_id = path_id
+                            st.session_state.show_generator = False
+                            st.session_state.selected_template = None
+                            st.session_state.template_conversation_step = None
                             if state_key in st.session_state:
                                 del st.session_state[state_key]
-                        st.rerun()
+                            st.rerun()
 
-                    except Exception as e:
-                        st.error(f"An error occurred while generating the plan: {e}")
-                        st.rerun()
+                        except Exception as e:
+                            st.error(f"An error occurred while generating the plan: {e}")
+                            st.rerun()
 
 def render_ai_assisted_goal_form(generator):
     """Render an AI-assisted form to help users define their goals"""

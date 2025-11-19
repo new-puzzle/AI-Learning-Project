@@ -2796,6 +2796,671 @@ TEMPLATES.append(GoalTemplate(
 
 
 # ============================================================================
+# LEARNING → COOKING & NUTRITION (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Master Meal Prep for Healthy Eating",
+    goal_type="learning",
+    goal_text="Learn meal prep strategies and cook healthy meals efficiently",
+    timeframe=30,
+    hours_per_day=1.5,
+    description="Meal planning, batch cooking, nutrition basics, grocery shopping, food storage",
+    tags=["Cooking", "Nutrition", "Health", "Meal Prep", "Life Skills"],
+    difficulty="Beginner",
+    subdivision_category="Cooking & Nutrition"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Learn Baking Fundamentals",
+    goal_type="learning",
+    goal_text="Master bread, pastries, and cake baking techniques",
+    timeframe=45,
+    hours_per_day=2.0,
+    description="Bread making, pastries, cakes, cookies, baking science, techniques",
+    tags=["Baking", "Cooking", "Life Skills", "Creative", "Beginner-Friendly"],
+    difficulty="Beginner",
+    subdivision_category="Cooking & Nutrition"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Plant-Based Cooking Mastery",
+    goal_type="learning",
+    goal_text="Learn to cook delicious and nutritious plant-based meals",
+    timeframe=30,
+    hours_per_day=1.0,
+    description="Vegan recipes, nutrition, protein sources, flavor techniques, meal ideas",
+    tags=["Cooking", "Nutrition", "Health", "Vegan", "Plant-Based"],
+    difficulty="Beginner",
+    subdivision_category="Cooking & Nutrition"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Master Nutrition Fundamentals",
+    goal_type="learning",
+    goal_text="Understand nutrition science and make informed food choices",
+    timeframe=30,
+    hours_per_day=1.0,
+    description="Macronutrients, micronutrients, calorie tracking, meal planning, diet optimization",
+    tags=["Nutrition", "Health", "Science", "Wellness", "Education"],
+    difficulty="Beginner",
+    subdivision_category="Cooking & Nutrition"
+))
+
+
+# ============================================================================
+# LEARNING → HOME & LIFE MANAGEMENT (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Master Home Organization & Decluttering",
+    goal_type="learning",
+    goal_text="Transform your home with organization systems and decluttering methods",
+    timeframe=30,
+    hours_per_day=1.5,
+    description="KonMari method, organization systems, decluttering, minimalism, home efficiency",
+    tags=["Organization", "Home", "Decluttering", "Life Skills", "Minimalism"],
+    difficulty="Beginner",
+    subdivision_category="Home & Life Management"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Basic Home Repairs & Maintenance",
+    goal_type="learning",
+    goal_text="Learn essential home repair skills and routine maintenance",
+    timeframe=45,
+    hours_per_day=2.0,
+    description="Plumbing basics, electrical safety, wall repairs, tool usage, preventive maintenance",
+    tags=["Home Repair", "DIY", "Life Skills", "Practical", "Hands-On"],
+    difficulty="Beginner",
+    subdivision_category="Home & Life Management"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Personal Budgeting & Financial Management",
+    goal_type="learning",
+    goal_text="Master personal budgeting and money management skills",
+    timeframe=21,
+    hours_per_day=1.0,
+    description="Budget creation, expense tracking, saving strategies, debt management, financial goals",
+    tags=["Finance", "Budgeting", "Life Skills", "Money Management", "Quick-Start"],
+    difficulty="Beginner",
+    subdivision_category="Home & Life Management"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Time Management for Busy Professionals",
+    goal_type="learning",
+    goal_text="Learn effective time management and productivity systems",
+    timeframe=30,
+    hours_per_day=1.0,
+    description="Calendar management, prioritization, task management, work-life balance, efficiency",
+    tags=["Time Management", "Productivity", "Life Skills", "Organization", "Professional"],
+    difficulty="Beginner",
+    subdivision_category="Home & Life Management"
+))
+
+
+# ============================================================================
+# LEARNING → PARENTING & FAMILY SKILLS (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Positive Parenting Fundamentals",
+    goal_type="learning",
+    goal_text="Learn positive parenting strategies and child development basics",
+    timeframe=30,
+    hours_per_day=1.0,
+    description="Child development stages, positive discipline, communication, emotional regulation, family dynamics",
+    tags=["Parenting", "Family", "Child Development", "Life Skills", "Relationships"],
+    difficulty="Beginner",
+    subdivision_category="Parenting & Family Skills"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Effective Communication with Teens",
+    goal_type="learning",
+    goal_text="Build better communication and connection with teenage children",
+    timeframe=30,
+    hours_per_day=1.0,
+    description="Teen psychology, active listening, conflict resolution, boundaries, trust building",
+    tags=["Parenting", "Teens", "Communication", "Family", "Relationships"],
+    difficulty="Intermediate",
+    subdivision_category="Parenting & Family Skills"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Quality Family Time Activities",
+    goal_type="learning",
+    goal_text="Create meaningful family experiences and strengthen bonds",
+    timeframe=30,
+    hours_per_day=1.0,
+    description="Family activities, rituals, game nights, outdoor activities, tradition building",
+    tags=["Family", "Parenting", "Relationships", "Quality Time", "Life Skills"],
+    difficulty="Beginner",
+    subdivision_category="Parenting & Family Skills"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Supporting Child's Learning at Home",
+    goal_type="learning",
+    goal_text="Help your child succeed academically with effective home support",
+    timeframe=45,
+    hours_per_day=1.0,
+    description="Homework help, learning styles, motivation, study skills, educational resources",
+    tags=["Parenting", "Education", "Child Development", "Learning", "Family"],
+    difficulty="Beginner",
+    subdivision_category="Parenting & Family Skills"
+))
+
+
+# ============================================================================
+# CAREER → HEALTHCARE & EDUCATION CAREERS (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Transition to Teaching Career",
+    goal_type="career",
+    goal_text="Successfully transition into a teaching role in K-12 or higher education",
+    timeframe=90,
+    hours_per_day=2.0,
+    description="Teaching certification, curriculum design, classroom management, interview prep, first job",
+    tags=["Teaching", "Education", "Career Switch", "Remote-Possible", "Fulfilling"],
+    difficulty="Intermediate",
+    subdivision_category="Healthcare & Education Careers"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Become School Counselor",
+    goal_type="career",
+    goal_text="Launch career as school counselor or educational advisor",
+    timeframe=120,
+    hours_per_day=2.0,
+    description="Counseling certification, student psychology, college prep advising, mental health support",
+    tags=["Counseling", "Education", "Career Switch", "Mental Health", "Fulfilling"],
+    difficulty="Intermediate",
+    subdivision_category="Healthcare & Education Careers"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Healthcare Administration Entry",
+    goal_type="career",
+    goal_text="Break into healthcare administration and management",
+    timeframe=90,
+    hours_per_day=2.0,
+    description="Healthcare systems, administration, compliance, operations, management skills",
+    tags=["Healthcare", "Administration", "Management", "Career Switch", "Stable"],
+    difficulty="Intermediate",
+    subdivision_category="Healthcare & Education Careers"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Online Tutoring Career Launch",
+    goal_type="career",
+    goal_text="Start successful online tutoring career with consistent clients",
+    timeframe=60,
+    hours_per_day=1.5,
+    description="Platform selection, profile optimization, pricing, teaching methods, client acquisition",
+    tags=["Tutoring", "Education", "Remote-Friendly", "Flexible", "Income-Generating"],
+    difficulty="Beginner",
+    subdivision_category="Healthcare & Education Careers"
+))
+
+
+# ============================================================================
+# CAREER → TRADES & SERVICE CAREERS (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Real Estate Agent Certification",
+    goal_type="career",
+    goal_text="Get real estate license and launch agent career",
+    timeframe=90,
+    hours_per_day=2.0,
+    description="License exam prep, market knowledge, client acquisition, first transactions",
+    tags=["Real Estate", "Sales", "License", "High-Earning", "Entrepreneurial"],
+    difficulty="Intermediate",
+    subdivision_category="Trades & Service Careers"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Insurance Sales Career Launch",
+    goal_type="career",
+    goal_text="Start career in insurance sales with established client base",
+    timeframe=60,
+    hours_per_day=2.0,
+    description="Insurance products, sales techniques, licensing, client acquisition, relationship building",
+    tags=["Insurance", "Sales", "Career Launch", "Income-Generating", "People-Oriented"],
+    difficulty="Beginner",
+    subdivision_category="Trades & Service Careers"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Skilled Trade Apprenticeship Entry",
+    goal_type="career",
+    goal_text="Enter skilled trade (plumbing, electrical, HVAC) apprenticeship",
+    timeframe=90,
+    hours_per_day=3.0,
+    description="Trade selection, safety training, tool skills, apprenticeship application, hands-on learning",
+    tags=["Skilled Trade", "Hands-On", "High-Demand", "Stable", "Career Launch"],
+    difficulty="Beginner",
+    subdivision_category="Trades & Service Careers"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Customer Success Manager Role",
+    goal_type="career",
+    goal_text="Land customer success or account management position",
+    timeframe=60,
+    hours_per_day=2.0,
+    description="Customer success skills, CRM tools, communication, problem-solving, interview prep",
+    tags=["Customer Success", "Service", "Remote-Friendly", "Tech-Adjacent", "People-Oriented"],
+    difficulty="Intermediate",
+    subdivision_category="Trades & Service Careers"
+))
+
+
+# ============================================================================
+# FREELANCE → CRAFTS & HANDMADE BUSINESS (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Launch Etsy Shop (First 20 Sales)",
+    goal_type="freelance",
+    goal_text="Create Etsy shop and make first 20 sales with handmade products",
+    timeframe=60,
+    hours_per_day=2.0,
+    description="Product creation, photography, shop setup, SEO, pricing, customer service",
+    tags=["Etsy", "Handmade", "Crafts", "Income-Generating", "Creative"],
+    difficulty="Beginner",
+    subdivision_category="Crafts & Handmade Business"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Jewelry Making Business (First $500)",
+    goal_type="freelance",
+    goal_text="Start handmade jewelry business and earn first $500",
+    timeframe=60,
+    hours_per_day=2.5,
+    description="Jewelry techniques, materials sourcing, branding, online sales, marketing",
+    tags=["Jewelry", "Handmade", "Crafts", "Income-Generating", "Creative"],
+    difficulty="Beginner",
+    subdivision_category="Crafts & Handmade Business"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Custom Artwork & Commissions",
+    goal_type="freelance",
+    goal_text="Build custom art commission business with steady clients",
+    timeframe=60,
+    hours_per_day=2.0,
+    description="Portfolio building, pricing, commission workflow, client communication, art marketing",
+    tags=["Art", "Commissions", "Custom Work", "Income-Generating", "Creative"],
+    difficulty="Intermediate",
+    subdivision_category="Crafts & Handmade Business"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Handmade Soap & Cosmetics Business",
+    goal_type="freelance",
+    goal_text="Create and sell handmade soaps and cosmetics online",
+    timeframe=60,
+    hours_per_day=2.0,
+    description="Soap making, safety regulations, branding, packaging, online sales, marketing",
+    tags=["Handmade", "Cosmetics", "Soap", "Income-Generating", "Creative"],
+    difficulty="Beginner",
+    subdivision_category="Crafts & Handmade Business"
+))
+
+
+# ============================================================================
+# FREELANCE → E-COMMERCE & PHYSICAL PRODUCTS (New subdivision - 3 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Amazon FBA Business Launch",
+    goal_type="freelance",
+    goal_text="Launch Amazon FBA business with first profitable product",
+    timeframe=90,
+    hours_per_day=3.0,
+    description="Product research, supplier sourcing, FBA setup, listing optimization, marketing",
+    tags=["Amazon FBA", "E-Commerce", "Physical Products", "Income-Generating", "Scalable"],
+    difficulty="Intermediate",
+    subdivision_category="E-Commerce & Physical Products"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Local Service Business Launch",
+    goal_type="freelance",
+    goal_text="Start local service business (cleaning, landscaping, pet care)",
+    timeframe=60,
+    hours_per_day=2.5,
+    description="Business setup, licensing, marketing, pricing, client acquisition, operations",
+    tags=["Local Business", "Service", "Physical", "Income-Generating", "Entrepreneurial"],
+    difficulty="Beginner",
+    subdivision_category="E-Commerce & Physical Products"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Thrift Flipping Business",
+    goal_type="freelance",
+    goal_text="Build profitable thrift store flipping business online",
+    timeframe=60,
+    hours_per_day=2.0,
+    description="Sourcing strategies, product photography, pricing, platform selection, shipping",
+    tags=["Thrift Flipping", "Reselling", "E-Commerce", "Income-Generating", "Low-Cost Start"],
+    difficulty="Beginner",
+    subdivision_category="E-Commerce & Physical Products"
+))
+
+
+# ============================================================================
+# PROJECT → CREATIVE PROJECTS (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Complete Art Portfolio",
+    goal_type="project",
+    goal_text="Create comprehensive art portfolio showcasing 20+ finished pieces",
+    timeframe=90,
+    hours_per_day=2.0,
+    description="Portfolio pieces, photography, presentation, online gallery, artist statement",
+    tags=["Art", "Portfolio", "Creative", "Exhibition", "Career-Building"],
+    difficulty="Intermediate",
+    subdivision_category="Creative Projects"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Record Music Album/EP",
+    goal_type="project",
+    goal_text="Write, record, and release original music album or EP",
+    timeframe=120,
+    hours_per_day=2.5,
+    description="Songwriting, recording, mixing, mastering, album art, distribution",
+    tags=["Music", "Recording", "Creative", "Album", "Original Work"],
+    difficulty="Intermediate",
+    subdivision_category="Creative Projects"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Photography Book Project",
+    goal_type="project",
+    goal_text="Create and publish photography book or exhibition",
+    timeframe=90,
+    hours_per_day=2.0,
+    description="Theme development, photo shoots, curation, editing, book design, publishing",
+    tags=["Photography", "Book", "Creative", "Portfolio", "Publishing"],
+    difficulty="Intermediate",
+    subdivision_category="Creative Projects"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Short Film Production",
+    goal_type="project",
+    goal_text="Write, film, and edit short film from concept to completion",
+    timeframe=90,
+    hours_per_day=3.0,
+    description="Screenwriting, production planning, filming, editing, sound design, distribution",
+    tags=["Film", "Video", "Creative", "Storytelling", "Production"],
+    difficulty="Advanced",
+    subdivision_category="Creative Projects"
+))
+
+
+# ============================================================================
+# PROJECT → HOME & LIFE PROJECTS (New subdivision - 3 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Home Renovation Project",
+    goal_type="project",
+    goal_text="Complete major home renovation (kitchen, bathroom, or room makeover)",
+    timeframe=120,
+    hours_per_day=3.0,
+    description="Planning, budgeting, contractor management, design, DIY tasks, project completion",
+    tags=["Home Improvement", "Renovation", "DIY", "Project", "Home"],
+    difficulty="Intermediate",
+    subdivision_category="Home & Life Projects"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Garden Transformation Project",
+    goal_type="project",
+    goal_text="Transform outdoor space into beautiful, functional garden",
+    timeframe=90,
+    hours_per_day=2.0,
+    description="Garden design, plant selection, hardscaping, installation, maintenance planning",
+    tags=["Gardening", "Outdoor", "Home", "Project", "Nature"],
+    difficulty="Beginner",
+    subdivision_category="Home & Life Projects"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Family History Documentation",
+    goal_type="project",
+    goal_text="Research and document complete family history for future generations",
+    timeframe=90,
+    hours_per_day=1.5,
+    description="Genealogy research, interviews, photo collection, story writing, documentation",
+    tags=["Family", "Genealogy", "History", "Legacy", "Documentation"],
+    difficulty="Beginner",
+    subdivision_category="Home & Life Projects"
+))
+
+
+# ============================================================================
+# PERSONAL → GARDENING & PLANTS (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Start Indoor Garden Collection",
+    goal_type="personal",
+    goal_text="Build thriving indoor garden with 15+ healthy houseplants",
+    timeframe=60,
+    hours_per_day=0.5,
+    description="Plant selection, care routines, troubleshooting, propagation, indoor environment",
+    tags=["Gardening", "Plants", "Indoor", "Hobby", "Wellness"],
+    difficulty="Beginner",
+    subdivision_category="Gardening & Plants"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Grow Vegetable Garden from Seed",
+    goal_type="personal",
+    goal_text="Successfully grow vegetables from seed to harvest",
+    timeframe=120,
+    hours_per_day=1.0,
+    description="Seed starting, transplanting, garden maintenance, pest control, harvesting",
+    tags=["Gardening", "Vegetables", "Outdoor", "Food", "Sustainable"],
+    difficulty="Beginner",
+    subdivision_category="Gardening & Plants"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Master Herb Gardening",
+    goal_type="personal",
+    goal_text="Grow and maintain kitchen herb garden year-round",
+    timeframe=90,
+    hours_per_day=0.5,
+    description="Herb selection, growing conditions, harvesting, preservation, culinary use",
+    tags=["Gardening", "Herbs", "Cooking", "Indoor/Outdoor", "Practical"],
+    difficulty="Beginner",
+    subdivision_category="Gardening & Plants"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Urban Gardening Mastery",
+    goal_type="personal",
+    goal_text="Create productive urban garden in limited space",
+    timeframe=90,
+    hours_per_day=1.0,
+    description="Container gardening, vertical gardening, balcony setup, space optimization, urban techniques",
+    tags=["Gardening", "Urban", "Small Space", "Sustainable", "Creative"],
+    difficulty="Intermediate",
+    subdivision_category="Gardening & Plants"
+))
+
+
+# ============================================================================
+# PERSONAL → PUZZLES & GAMES (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Chess Rating 1500 Achievement",
+    goal_type="personal",
+    goal_text="Reach 1500 chess rating through systematic study and practice",
+    timeframe=180,
+    hours_per_day=1.0,
+    description="Opening repertoire, tactics training, endgame study, game analysis, online play",
+    tags=["Chess", "Strategy", "Games", "Mental", "Skill Building"],
+    difficulty="Intermediate",
+    subdivision_category="Puzzles & Games"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Master Sudoku Techniques",
+    goal_type="personal",
+    goal_text="Solve expert-level Sudoku puzzles consistently",
+    timeframe=60,
+    hours_per_day=0.5,
+    description="Advanced techniques, pattern recognition, speed solving, puzzle types",
+    tags=["Sudoku", "Puzzles", "Logic", "Mental", "Quick-Start"],
+    difficulty="Beginner",
+    subdivision_category="Puzzles & Games"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Complete Jigsaw Puzzle Collection",
+    goal_type="personal",
+    goal_text="Assemble 10 challenging jigsaw puzzles (1000+ pieces)",
+    timeframe=90,
+    hours_per_day=1.0,
+    description="Sorting strategies, edge techniques, pattern recognition, mindfulness practice",
+    tags=["Puzzles", "Jigsaw", "Relaxation", "Mindfulness", "Hobby"],
+    difficulty="Beginner",
+    subdivision_category="Puzzles & Games"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Board Game Mastery Challenge",
+    goal_type="personal",
+    goal_text="Master 5 complex strategy board games",
+    timeframe=120,
+    hours_per_day=1.5,
+    description="Game rules, strategies, regular play sessions, game group building, tournaments",
+    tags=["Board Games", "Strategy", "Social", "Games", "Hobby"],
+    difficulty="Intermediate",
+    subdivision_category="Puzzles & Games"
+))
+
+
+# ============================================================================
+# PERSONAL → COOKING & BAKING (HOBBY) (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Master Sourdough Bread Baking",
+    goal_type="personal",
+    goal_text="Consistently bake perfect sourdough bread from scratch",
+    timeframe=60,
+    hours_per_day=1.5,
+    description="Starter maintenance, fermentation, shaping, baking techniques, troubleshooting",
+    tags=["Baking", "Sourdough", "Bread", "Hobby", "Creative"],
+    difficulty="Intermediate",
+    subdivision_category="Cooking & Baking"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Advanced Pastry Techniques",
+    goal_type="personal",
+    goal_text="Master advanced pastry techniques (croissants, puff pastry, éclairs)",
+    timeframe=90,
+    hours_per_day=2.0,
+    description="Laminated dough, pastry cream, precise techniques, temperature control, presentation",
+    tags=["Baking", "Pastry", "Advanced", "Hobby", "Creative"],
+    difficulty="Advanced",
+    subdivision_category="Cooking & Baking"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Explore World Cuisine (10 Countries)",
+    goal_type="personal",
+    goal_text="Master signature dishes from 10 different cuisines",
+    timeframe=90,
+    hours_per_day=1.5,
+    description="Recipe research, ingredient sourcing, technique learning, cultural context, flavor profiles",
+    tags=["Cooking", "World Cuisine", "Cultural", "Hobby", "Creative"],
+    difficulty="Intermediate",
+    subdivision_category="Cooking & Baking"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Fermentation Mastery",
+    goal_type="personal",
+    goal_text="Master fermentation techniques (kimchi, kombucha, sauerkraut, yogurt)",
+    timeframe=60,
+    hours_per_day=1.0,
+    description="Fermentation science, safety, recipes, flavor development, preservation",
+    tags=["Fermentation", "Cooking", "Health", "Hobby", "Science"],
+    difficulty="Intermediate",
+    subdivision_category="Cooking & Baking"
+))
+
+
+# ============================================================================
+# PERSONAL → COMMUNITY & VOLUNTEERING (New subdivision - 4 templates)
+# ============================================================================
+
+TEMPLATES.append(GoalTemplate(
+    name="Regular Volunteering Commitment",
+    goal_type="personal",
+    goal_text="Establish consistent volunteering habit at local organization",
+    timeframe=90,
+    hours_per_day=1.0,
+    description="Organization research, application, training, regular commitment, impact measurement",
+    tags=["Volunteering", "Community", "Giving Back", "Social Impact", "Fulfillment"],
+    difficulty="Beginner",
+    subdivision_category="Community & Volunteering"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Community Project Leadership",
+    goal_type="personal",
+    goal_text="Lead community improvement project from conception to completion",
+    timeframe=120,
+    hours_per_day=2.0,
+    description="Project planning, team building, fundraising, execution, community engagement",
+    tags=["Community", "Leadership", "Project", "Social Impact", "Activism"],
+    difficulty="Intermediate",
+    subdivision_category="Community & Volunteering"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Local Activism Campaign",
+    goal_type="personal",
+    goal_text="Organize and run local advocacy campaign for community issue",
+    timeframe=90,
+    hours_per_day=2.0,
+    description="Issue research, coalition building, strategy, advocacy, community organizing",
+    tags=["Activism", "Community", "Advocacy", "Social Change", "Leadership"],
+    difficulty="Intermediate",
+    subdivision_category="Community & Volunteering"
+))
+
+TEMPLATES.append(GoalTemplate(
+    name="Mentor Youth Program",
+    goal_type="personal",
+    goal_text="Become mentor in youth program and support 1-3 mentees",
+    timeframe=180,
+    hours_per_day=1.0,
+    description="Mentor training, relationship building, guidance, support, long-term commitment",
+    tags=["Mentoring", "Youth", "Community", "Giving Back", "Relationships"],
+    difficulty="Beginner",
+    subdivision_category="Community & Volunteering"
+))
+
+
+# ============================================================================
 # TEMPLATE UTILITIES
 # ============================================================================
 
