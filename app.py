@@ -780,6 +780,7 @@ def render_template_conversation(generator):
                                 template=template.to_dict(),
                                 proficiency=proficiency,
                                 timeframe=timeframe,
+                                hours_per_day=hours_per_day,
                                 focus_areas=focus_areas,
                                 other_requests=other_requests
                             )
@@ -1144,7 +1145,7 @@ def render_custom_goal_form(generator, template=None, key_prefix=""):
 
 def render_learning_path(path_data):
     """Render the complete learning path"""
-    st.markdown("### 📚 Your Learning Path")
+    st.markdown("### 📚 Your Goal")
 
     # Overview section
     if 'overview' in path_data:
@@ -1213,7 +1214,7 @@ def render_learning_path(path_data):
 
 def render_saved_paths(generator):
     """Render list of saved learning paths"""
-    st.markdown("### 📋 My Learning Paths")
+    st.markdown("### 📋 My Goals")
 
     # Status filter
     status_filter = st.selectbox(
@@ -2416,7 +2417,7 @@ Keep responses concise (3-5 sentences) but insightful."""
     # Quick action suggestion
     if len(st.session_state.general_chat_history) >= 4:  # After some conversation
         st.markdown("---")
-        st.success("💡 **Ready to create a goal plan?** Click '➕ New Learning Path' in the sidebar to get started!")
+        st.success("💡 **Ready to create a goal plan?** Click '➕ New Goal' in the sidebar to get started!")
 
 
 def main():
@@ -2436,7 +2437,7 @@ def main():
         with st.sidebar:
             st.markdown("### 🎯 Navigation")
 
-            if st.button("➕ New Learning Path", use_container_width=True):
+            if st.button("➕ New Goal", use_container_width=True):
                 st.session_state.show_generator = True
                 st.session_state.current_path_id = None
                 st.rerun()

@@ -38,97 +38,316 @@ class ClaudeAI:
         """Set the model to use for API calls"""
         self.model = self.MODELS.get(model_name, self.MODELS["Claude Sonnet 4.5"])
 
-    def _get_prompt_template(self, goal_type: str, goal: str, timeframe: int) -> str:
-        """Get the appropriate prompt template based on goal type"""
+    def _get_prompt_template(self, goal_type: str, goal: str, timeframe: int, hours_per_day: float = 2.0, user_context: Dict = None) -> (str, str):
+        """
+        Get the appropriate system and user prompts based on goal type.
 
-        # Common JSON format for all types
-        json_format = """{{
-    "overview": "Brief overview and what will be achieved",
-    "milestones": ["Milestone 1", "Milestone 2", "Milestone 3"],
+        Returns a tuple of (system_prompt, user_prompt).
+        """
+        # Calculate time budget
+        total_hours = timeframe * hours_per_day
+        
+        # Content density based on hours
+        if hours_per_day <= 1.5:
+            content_guide = "Light content, one main topic per day"
+            resource_count = "1-2 high-quality resources"
+            objective_count = "1-2 specific objectives"
+        elif hours_per_day <= 3.0:
+            content_guide = "Moderate content with theory + practice"
+            resource_count = "2-3 diverse resources"
+            objective_count = "2-3 actionable objectives"
+        else:
+            content_guide = "Deep, comprehensive content with projects"
+            resource_count = "3-4 varied resources"
+            objective_count = "3-4 challenging objectives"
+        
+        # Base system prompt
+        system_prompt = f"""You are an expert curriculum architect. Create a {timeframe}-day structured plan.
+
+TIME BUDGET (CRITICAL):
+- Available: {hours_per_day} hours per day
+- Total: {total_hours} hours
+- Daily content MUST fit in {hours_per_day} hours
+- estimated_hours should be ≈ {hours_per_day} (±0.5)
+
+REQUIREMENTS:
+
+1. EXACT DAY COUNT:
+   - Generate EXACTLY {timeframe} days
+   - Count: Day 1, 2, 3... {timeframe}
+   - Verify before submitting
+
+2. TIME-APPROPRIATE CONTENT:
+   - {content_guide}
+   - {resource_count} per day
+   - {objective_count} per day
+   - Respect the {hours_per_day} hour daily limit
+
+3. REAL RESOURCES ONLY:
+   - ALL URLs must be real and working
+   - NO placeholders: example.com, youtube.com/example, REAL_VIDEO_ID, real-article-slug
+   - Use real: YouTube videos (actual video IDs), Medium/Dev.to articles (actual slugs), official docs, GitHub repos
+   - Resource length must fit time budget (10-min videos for 1hr plans, 30-min for 4hr plans)
+
+4. ACTIONABLE OBJECTIVES:
+   - Use action verbs: "Build", "Create", "Implement", "Debug", "Analyze"
+   - NOT vague: "Learn about", "Understand", "Get familiar with"
+   - Each objective completable within daily time budget
+   - Must produce tangible outcome
+
+5. CLEAR PROGRESSION:
+   - Days 1-30% (Days 1-{int(timeframe*0.3)}): Foundation
+     * Core concepts, terminology, setup
+     * Simple confidence-building exercises
+     * Overview of ecosystem
+   - Days 31-65% (Days {int(timeframe*0.3)+1}-{int(timeframe*0.65)}): Application
+     * Practical projects combining concepts
+     * Real-world scenarios
+     * Build small complete applications
+   - Days 66-85% (Days {int(timeframe*0.65)+1}-{int(timeframe*0.85)}): Integration
+     * Complex problems
+     * Optimization and refactoring
+     * Advanced patterns
+   - Days 86-100% (Days {int(timeframe*0.85)+1}-{timeframe}): Mastery
+     * Capstone project
+     * Production-ready work
+     * Portfolio piece
+
+6. REALISTIC SCOPE:
+   - Be honest about what's achievable in {total_hours} hours
+   - Don't promise mastery if time is insufficient
+   - Quality over quantity
+
+Return ONLY valid JSON. No markdown code blocks, no explanations."""
+
+        # --- JSON Schemas ---
+        learning_schema = """{{
+    "overview": "2-3 sentences acknowledging the """ + str(timeframe) + """ days and """ + str(hours_per_day) + """ hours/day, explaining what will be achieved",
+    "milestones": [
+        "Day X: Foundation complete - Specific achievement",
+        "Day Y: First project built - Specific deliverable",
+        "Day Z: Advanced topics covered - Specific skill gained",
+        "Day """ + str(timeframe) + """: Capstone done - Portfolio-ready outcome"
+    ],
     "curriculum": [
         {{
             "day": 1,
-            "topic": "Topic/Task name",
-            "subtopics": ["Subtopic/Action 1", "Subtopic/Action 2", "Subtopic/Action 3"],
-            "estimated_hours": 2.5,
-            "priority": "high|medium|low",
+            "topic": "Specific, clear topic appropriate for """ + str(hours_per_day) + """ hours",
+            "learning_objectives": [
+                "Build/Create specific tangible thing",
+                "Implement specific feature or solve specific problem"
+            ],
+            "estimated_hours": """ + str(hours_per_day) + """,
+            "priority": "high",
             "resources": [
-                {{"type": "course|article|video|tool", "name": "Resource name", "url": "https://example.com"}}
+                {{"type": "video", "name": "Real YouTube video title", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}},
+                {{"type": "article", "name": "Real article from Medium/Dev.to/docs", "url": "https://realpython.com/python-basics/"}}
             ]
         }}
     ]
 }}"""
 
+        career_schema = """{{
+    "overview": "Career plan for """ + str(timeframe) + """ days at """ + str(hours_per_day) + """ hours/day",
+    "phases": [
+        "Phase 1: Skill Building (Days 1-X)",
+        "Phase 2: Applications & Networking (Days X-Y)", 
+        "Phase 3: Interviewing (Days Y-""" + str(timeframe) + """)"
+    ],
+    "schedule": [
+        {{
+            "day": 1,
+            "focus": "Specific focus achievable in """ + str(hours_per_day) + """ hours",
+            "action_items": [
+                "Specific action with deliverable",
+                "Measurable task with outcome"
+            ],
+            "deliverable": "Concrete deliverable for the day",
+            "priority": "high"
+        }}
+    ]
+}}"""
+
+        freelance_schema = """{{
+    "overview": "Freelance plan for """ + str(timeframe) + """ days, """ + str(hours_per_day) + """ hours/day",
+    "revenue_milestones": [
+        "Realistic milestone 1 given time constraints",
+        "Realistic milestone 2 for """ + str(total_hours) + """ total hours"
+    ],
+    "weekly_focus": [
+        {{
+            "week": 1,
+            "theme": "Weekly theme achievable in """ + str(hours_per_day * 7) + """ hours",
+            "tasks": [
+                "Specific task with deliverable",
+                "Measurable action item"
+            ],
+            "goal": "Concrete weekly outcome"
+        }}
+    ]
+}}"""
+
+        project_schema = """{{
+    "overview": "Project plan: """ + str(timeframe) + """ days, """ + str(hours_per_day) + """ hours/day",
+    "deliverables": [
+        "Deliverable 1 realistic for time budget",
+        "Deliverable 2 achievable in """ + str(total_hours) + """ hours"
+    ],
+    "timeline": [
+        {{
+            "day": 1,
+            "task": "Main task for """ + str(hours_per_day) + """ hours",
+            "sub_tasks": [
+                "Specific sub-task 1",
+                "Specific sub-task 2"
+            ],
+            "estimated_hours": """ + str(hours_per_day) + """,
+            "priority": "high"
+        }}
+    ]
+}}"""
+
+        personal_schema = """{{
+    "overview": "Personal plan: """ + str(timeframe) + """ days, """ + str(hours_per_day) + """ hours/day",
+    "key_habits": [
+        "Habit 1 sustainable at """ + str(hours_per_day) + """ hrs/day",
+        "Habit 2 achievable in available time"
+    ],
+    "daily_plan": [
+        {{
+            "day": 1,
+            "focus_habit": "Main habit for the day",
+            "actions": [
+                "Specific action completable in time",
+                "Measurable activity"
+            ],
+            "mindset_tip": "Motivational or practical tip",
+            "priority": "high"
+        }}
+    ]
+}}"""
+
+        # --- User Prompts ---
         if goal_type == 'learning':
-            return f"""You are an expert learning path designer. Create a day-by-day learning curriculum for: {goal} in {timeframe} days.
+            system_prompt += f"\n\nJSON Schema:\n{learning_schema}"
+            user_prompt = f"""Create a {timeframe}-day learning curriculum for: "{goal}"
 
-Include daily topics, subtopics, estimated hours, and recommended resources (courses, articles, videos).
-Format as structured learning path with clear progression. Mark foundational topics as "high" priority.
+TIME CONSTRAINTS:
+- {hours_per_day} hours available per day
+- {total_hours} hours total budget
+- Each day must fit in {hours_per_day} hours
 
-Use this JSON format:
-{json_format}"""
+REQUIREMENTS:
+- EXACTLY {timeframe} days (count them!)
+- estimated_hours ≈ {hours_per_day} for each day
+- {resource_count} per day (all real URLs)
+- {objective_count} per day (all actionable)
+- Clear progression: foundation → application → integration → mastery
+- Realistic scope for {total_hours} total hours
 
+QUALITY CHECKLIST:
+✓ Exactly {timeframe} days?
+✓ Each day ≈ {hours_per_day} hours?
+✓ All resource URLs real and working?
+✓ Objectives use action verbs with deliverables?
+✓ Progression from basic to advanced?
+✓ Total scope realistic for {total_hours} hours?
+
+Generate the complete curriculum now."""
         elif goal_type == 'career':
-            return f"""You are a career transition coach. Create an action plan to achieve: {goal} in {timeframe} days.
+            system_prompt += f"\n\nJSON Schema:\n{career_schema}"
+            user_prompt = f"""Create a {timeframe}-day career transition plan for: "{goal}"
 
-Break down into phases with:
-- Skills to acquire (with priority levels)
-- Portfolio projects to build
-- Networking activities
-- Application strategy
-- Interview preparation
-- Weekly milestones with specific actions
+TIME: {hours_per_day} hrs/day ({total_hours} hrs total)
 
-Mark critical career-building actions as "high" priority. Use this JSON format:
-{json_format}"""
+REQUIREMENTS:
+- EXACTLY {timeframe} days with specific action items
+- Mix: skill-building, resume/portfolio, networking, applications
+- Each day's actions fit in {hours_per_day} hours
+- Concrete deliverables (updated resume, portfolio piece, applications sent)
+- Real resources and platforms (LinkedIn, job boards, courses)
 
+PHASES:
+- Early days: Skills and portfolio
+- Middle days: Applications and networking
+- Final days: Interview prep and follow-ups
+
+CHECKLIST:
+✓ {timeframe} days with actionable items?
+✓ Daily work fits {hours_per_day} hours?
+✓ Deliverables are concrete?
+✓ Resources are real platforms/links?"""
         elif goal_type == 'freelance':
-            return f"""You are a freelance business consultant. Create a step-by-step plan to: {goal} in {timeframe} days.
+            system_prompt += f"\n\nJSON Schema:\n{freelance_schema}"
+            user_prompt = f"""Create a {timeframe}-day freelance business launch plan for: "{goal}"
 
-Include:
-- Profile/platform setup tasks (high priority at start)
-- Market research and positioning
-- Client acquisition strategy
-- Service pricing and packages
-- Marketing and outreach actions
-- Revenue milestones
+TIME: {hours_per_day} hrs/day ({total_hours} hrs total)
 
-Mark revenue-generating actions as "high" priority. Use this JSON format:
-{json_format}"""
+REQUIREMENTS:
+- Organize by weeks (Week 1, 2, etc.)
+- {hours_per_day * 7} hours per week available
+- Cover: service definition, pricing, portfolio, marketing, client outreach
+- Realistic revenue milestones for available time
+- Real platforms (Upwork, Fiverr, LinkedIn, cold email)
 
+PROGRESSION:
+- Weeks 1-2: Foundation (services, pricing, portfolio)
+- Weeks 3-4: Marketing and outreach
+- Remaining: Client work and scaling
+
+CHECKLIST:
+✓ Weekly tasks fit {hours_per_day * 7} hours/week?
+✓ Revenue goals realistic for time investment?
+✓ Platforms and tools are real?"""
         elif goal_type == 'project':
-            return f"""You are a project manager. Create a project plan to: {goal} in {timeframe} days.
+            system_prompt += f"\n\nJSON Schema:\n{project_schema}"
+            user_prompt = f"""Create a {timeframe}-day project execution plan for: "{goal}"
 
-Break into phases:
-- Planning and research
-- Design/architecture decisions
-- Implementation milestones
-- Testing and refinement
-- Launch/delivery checklist
-- Specific deliverables per phase
+TIME: {hours_per_day} hrs/day ({total_hours} hrs total)
 
-Mark critical path items as "high" priority. Use this JSON format:
-{json_format}"""
+REQUIREMENTS:
+- EXACTLY {timeframe} days
+- Each day ≈ {hours_per_day} hours of work
+- Include 20% buffer time for debugging
+- Clear phases: Planning → Build → Test → Deploy
+- Specific deliverables each day
 
+CHECKLIST:
+✓ {timeframe} days counted?
+✓ Each day fits {hours_per_day} hours?
+✓ Buffer time included for issues?
+✓ Deliverables are specific?"""
         elif goal_type == 'personal':
-            return f"""You are a personal achievement coach. Create a progressive plan to: {goal} in {timeframe} days.
+            system_prompt += f"\n\nJSON Schema:\n{personal_schema}"
+            user_prompt = f"""Create a {timeframe}-day personal development plan for: "{goal}"
 
-Include:
-- Starting point assessment
-- Progressive milestones
-- Weekly targets
-- Required resources/tools
-- Habit formation strategy
-- Progress checkpoints
+TIME: {hours_per_day} hrs/day
 
-Mark habit-building activities as "high" priority. Use this JSON format:
-{json_format}"""
+REQUIREMENTS:
+- EXACTLY {timeframe} days
+- Daily actions fit in {hours_per_day} hours
+- Sustainable pace (avoid burnout)
+- Reflection checkpoints every 7-10 days
+- Motivational support throughout
 
+CHECKLIST:
+✓ {timeframe} days?
+✓ Actions completable in {hours_per_day} hours?
+✓ Pace is sustainable?"""
         else:
             # Default to learning
-            return self._get_prompt_template('learning', goal, timeframe)
+            return self._get_prompt_template('learning', goal, timeframe, hours_per_day, user_context)
 
-    def generate_learning_path(self, goal: str, timeframe: int, goal_type: str = 'learning') -> Dict:
+        # Add user context if available
+        if user_context:
+            context_str = "\n\nUser Context (tailor accordingly):\n"
+            for key, value in user_context.items():
+                context_str += f"- {key.replace('_', ' ').title()}: {value}\n"
+            user_prompt += context_str
+
+        return system_prompt, user_prompt
+
+    def generate_learning_path(self, goal: str, timeframe: int, goal_type: str = 'learning', hours_per_day: float = 2.0, user_context: Dict = None) -> Dict:
         """
         Generate a goal plan based on goal type and timeframe
 
@@ -136,19 +355,22 @@ Mark habit-building activities as "high" priority. Use this JSON format:
             goal: The goal (e.g., "Learn Python", "Get hired as AI engineer")
             timeframe: Number of days to complete the goal
             goal_type: Type of goal (learning, career, freelance, project, personal)
+            hours_per_day: Hours available per day (default: 2.0)
+            user_context: Optional dictionary with user-specific context
 
         Returns:
             Dict containing the structured goal plan
         """
-        prompt = self._get_prompt_template(goal_type, goal, timeframe)
+        system_prompt, user_prompt = self._get_prompt_template(goal_type, goal, timeframe, hours_per_day, user_context)
 
         try:
             message = self.client.messages.create(
                 model=self.model,
-                max_tokens=4000,
-                temperature=0.7,
+                max_tokens=4096,  # Increased max_tokens for longer plans
+                temperature=0.6, # Slightly lowered temperature for more deterministic output
+                system=system_prompt,
                 messages=[
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": user_prompt}
                 ]
             )
 
@@ -159,23 +381,27 @@ Mark habit-building activities as "high" priority. Use this JSON format:
             import json
 
             # Try to extract JSON from the response
-            # Sometimes Claude wraps JSON in markdown code blocks
+            # Claude sometimes wraps JSON in markdown code blocks
             if "```json" in response_text:
                 json_start = response_text.find("```json") + 7
-                json_end = response_text.find("```", json_start)
+                json_end = response_text.rfind("```")
                 json_text = response_text[json_start:json_end].strip()
-            elif "```" in response_text:
-                json_start = response_text.find("```") + 3
-                json_end = response_text.find("```", json_start)
-                json_text = response_text[json_start:json_end].strip()
-            else:
+            elif response_text.startswith("{") and response_text.endswith("}"):
                 json_text = response_text
+            else:
+                # Fallback for cases where JSON is not perfectly formatted
+                json_start = response_text.find("{")
+                json_end = response_text.rfind("}") + 1
+                json_text = response_text[json_start:json_end]
 
             learning_path = json.loads(json_text)
             return learning_path
 
         except Exception as e:
-            raise Exception(f"Error generating learning path: {str(e)}")
+            # Log the error and the response text for debugging
+            print(f"Error generating learning path: {str(e)}")
+            print(f"LLM Response Text: {response_text if 'response_text' in locals() else 'No response text available'}")
+            raise Exception(f"Error generating learning path. Please check the logs for details.")
 
     def get_learning_assistance(self, question: str, context: str = "") -> str:
         """
@@ -417,8 +643,25 @@ Return a simple JSON array of strings (5-7 focus areas).
                 return parts if parts else ["Focus area 1", "Focus area 2", "Focus area 3"]
             return ["Focus area 1", "Focus area 2", "Focus area 3"]
 
-    def generate_plan_from_template(self, template: Dict, proficiency: str, timeframe: int, focus_areas: List[str], other_requests: str) -> Dict:
+    def generate_plan_from_template(self, template: Dict, proficiency: str, timeframe: int, hours_per_day: float, focus_areas: List[str], other_requests: str) -> Dict:
         """Generate a personalized learning plan from a template and user inputs."""
+        # Calculate time budget
+        total_hours = timeframe * hours_per_day
+        
+        # Content density
+        if hours_per_day <= 1.5:
+            depth_guide = "Light content, one main topic per day"
+            resource_count = "1-2 resources"
+            objective_count = "1-2 objectives"
+        elif hours_per_day <= 3.0:
+            depth_guide = "Moderate content with balanced theory/practice"
+            resource_count = "2-3 resources"
+            objective_count = "2-3 objectives"
+        else:
+            depth_guide = "Deep content with extensive practice/projects"
+            resource_count = "3-4 resources"
+            objective_count = "3-4 objectives"
+        
         # Build template context
         subdivisions_text = ""
         if template.get('subdivisions') and len(template['subdivisions']) > 0:
@@ -432,69 +675,162 @@ Return a simple JSON array of strings (5-7 focus areas).
         if template.get('tags') and len(template['tags']) > 0:
             tags_text = f"- **Tags:** {', '.join(template['tags'])}\n"
         
-        prompt = f"""You are an expert learning path designer. A user has selected a goal template and provided their personal preferences. Your task is to create a highly personalized, day-by-day learning plan based on this information.
+        # Proficiency-specific guidance
+        prof_guide = {
+            'Beginner': {
+                'approach': 'Start with absolute basics, explain every concept thoroughly, use simple language',
+                'pace': 'Slow and steady, confidence-building',
+                'resources': 'Beginner-friendly videos, interactive tutorials, visual guides'
+            },
+            'Intermediate': {
+                'approach': 'Skip basics, focus on practical application and real-world scenarios',
+                'pace': 'Moderate, assume foundational knowledge',
+                'resources': 'Mix of videos, articles, hands-on projects'
+            },
+            'Advanced': {
+                'approach': 'Advanced concepts only, optimization, architecture, expert patterns',
+                'pace': 'Fast-paced, challenge with complex problems',
+                'resources': 'Technical documentation, research papers, open-source projects'
+            }
+        }.get(proficiency, {
+            'approach': 'Practical focus',
+            'pace': 'Moderate',
+            'resources': 'Varied resources'
+        })
+        
+        system_prompt = f"""You are an expert learning path architect. Create a personalized {timeframe}-day curriculum.
 
-**Template Information:**
-- **Goal Name:** {template['name']}
-- **Original Description:** {template.get('description', '')}
-- **Goal Type:** {template.get('goal_type', 'learning')}
-- **Standard Timeframe:** {template.get('timeframe', 30)} days
-{subdivision_category_text}{subdivisions_text}{tags_text}- **Difficulty:** {template.get('difficulty', 'Intermediate')}
+TIME BUDGET (CRITICAL):
+- Available: {hours_per_day} hours per day
+- Total: {total_hours} hours
+- Daily content MUST fit in {hours_per_day} hours
+- estimated_hours ≈ {hours_per_day} per day
 
-**User's Personalization:**
-- **Proficiency Level:** {proficiency}
-- **Desired Timeframe:** {timeframe} days
-- **Focus Areas:** {', '.join(focus_areas) if focus_areas else 'None specified'}
-- **Other Requests:** {other_requests if other_requests else 'None'}
+REQUIREMENTS:
 
-**Your Task:**
-Generate a detailed, day-by-day curriculum for the user. The plan should be:
-1.  **Tailored:** Adjust the content difficulty and pace based on the user's proficiency.
-2.  **Focused:** Prioritize the user's chosen focus areas.
-3.  **Comprehensive:** Incorporate the user's other requests.
-4.  **Structured:** Provide a clear, actionable, and motivating plan.
+1. EXACT DAY COUNT:
+   - Generate EXACTLY {timeframe} days
+   - Count: Day 1, 2, 3... {timeframe}
+   - Verify before submitting
 
-**Output Format:**
-Return the plan in the following JSON format:
+2. TIME-APPROPRIATE CONTENT:
+   - {depth_guide}
+   - {resource_count} per day
+   - {objective_count} per day
+   - Respect {hours_per_day} hour daily limit
 
-```json
+3. FOCUS AREA PRIORITIZATION:
+   - User chose: {', '.join(focus_areas) if focus_areas else 'comprehensive coverage'}
+   - Allocate 60-70% of time to focus areas
+   - Introduce focus areas in first 20% of days
+   - Provide extra depth and resources for focus areas
+   - Still cover other topics at 30-40% depth
+
+4. REAL RESOURCES ONLY:
+   - ALL URLs must be real and working
+   - NO placeholders: example.com, youtube.com/example, REAL_VIDEO_ID, real-article-slug
+   - Use: Real YouTube videos (actual video IDs), Medium/Dev.to articles (actual slugs), official docs, GitHub repos
+   - Resource duration must fit time (10-min videos for 1hr, 30-min for 4hr)
+
+5. ACTIONABLE SUBTOPICS:
+   - Use imperatives: "Build X", "Implement Y", "Debug Z", "Create W"
+   - NOT vague: "Learn about", "Understand", "Explore"
+   - Each subtopic completable in 20-40 minutes
+   - Must produce tangible mini-outcome
+
+6. CLEAR PROGRESSION:
+   - Days 1-30% (Days 1-{int(timeframe*0.3)}): Foundation
+     * Core concepts for {proficiency} level
+     * Setup and basics
+     * Simple exercises
+   - Days 31-65% (Days {int(timeframe*0.3)+1}-{int(timeframe*0.65)}): Application  
+     * Practical projects
+     * Combine multiple concepts
+     * Real-world scenarios
+   - Days 66-85% (Days {int(timeframe*0.65)+1}-{int(timeframe*0.85)}): Integration
+     * Complex problems
+     * Optimization
+     * Advanced patterns
+   - Days 86-100% (Days {int(timeframe*0.85)+1}-{timeframe}): Mastery
+     * Capstone project
+     * Production-ready work
+     * Portfolio piece
+
+7. PROFICIENCY ADAPTATION:
+   - Content difficulty matches {proficiency} level
+   - Vocabulary: {"simple, explanatory" if proficiency == "Beginner" else "technical, in-depth" if proficiency == "Advanced" else "practical, applied"}
+   - Examples: {"step-by-step" if proficiency == "Beginner" else "challenging" if proficiency == "Advanced" else "real-world"}
+
+8. INCORPORATE REQUESTS:
+   - User requested: "{other_requests if other_requests else 'Standard curriculum'}"
+   - Weave naturally throughout (don't just append at end)
+   - Integrate where relevant to topics
+
+Return ONLY valid JSON. No markdown code blocks, no explanations."""
+
+        user_prompt = f"""TEMPLATE: {template['name']}
+Description: {template.get('description', '')}
+Goal Type: {template.get('goal_type', 'learning')}
+Standard Timeframe: {template.get('timeframe', 30)} days
+{subdivision_category_text}{subdivisions_text}{tags_text}Difficulty: {template.get('difficulty', 'Intermediate')}
+
+PERSONALIZATION:
+- Proficiency: {proficiency}
+  * Approach: {prof_guide['approach']}
+  * Pace: {prof_guide['pace']}
+  * Resources: {prof_guide['resources']}
+- Focus Areas: {', '.join(focus_areas) if focus_areas else 'All topics comprehensively'}
+- Additional Requests: {other_requests if other_requests else 'None'}
+
+OUTPUT JSON:
+
 {{
-    "overview": "A brief, encouraging overview of the personalized plan and what the user will achieve.",
+    "overview": "2-3 inspiring sentences acknowledging {timeframe} days, {hours_per_day} hrs/day, {proficiency} level, focus on {', '.join(focus_areas) if focus_areas else 'comprehensive coverage'}, and final outcome",
     "milestones": [
-        "Personalized Milestone 1 based on user input",
-        "Personalized Milestone 2 based on user input",
-        "Personalized Milestone 3 based on user input"
+        "Day {int(timeframe*0.3)}: Foundation complete - Specific {proficiency}-level achievement",
+        "Day {int(timeframe*0.65)}: First major project - Specific deliverable",
+        "Day {int(timeframe*0.85)}: Advanced integration - Specific skill",
+        "Day {timeframe}: Capstone done - Portfolio-ready work"
     ],
     "curriculum": [
         {{
             "day": 1,
-            "topic": "Topic tailored to user's proficiency and focus",
+            "topic": "Specific topic appropriate for {proficiency} learner, achievable in {hours_per_day} hours",
             "subtopics": [
-                "Actionable sub-topic 1",
-                "Actionable sub-topic 2"
+                "Build/Create specific thing 1 (20-40 min)",
+                "Implement specific feature 2 (20-40 min)",
+                "Debug/Analyze specific problem 3 (20-40 min)"
             ],
-            "estimated_hours": 2.0,
+            "estimated_hours": {hours_per_day},
             "priority": "high",
             "resources": [
-                {{
-                    "type": "video",
-                    "name": "Relevant Video Title",
-                    "url": "https://youtube.com/example"
-                }}
+                {{"type": "video", "name": "Real YouTube video title", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}},
+                {{"type": "article", "name": "Real article title", "url": "https://realpython.com/python-basics/"}}
             ]
         }}
     ]
 }}
-```
-"""
+
+QUALITY CHECKLIST (verify before submitting):
+✓ EXACTLY {timeframe} days? (Count them!)
+✓ Each day ≈ {hours_per_day} hours?
+✓ Focus areas ({', '.join(focus_areas) if focus_areas else 'all topics'}) prioritized at 60-70%?
+✓ ALL resource URLs are real and working? (NO placeholders!)
+✓ Subtopics are action-oriented with deliverables?
+✓ Progression from foundation → mastery?
+✓ Difficulty matches {proficiency} level?
+✓ Additional requests incorporated: "{other_requests if other_requests else 'N/A'}"?
+✓ Total scope realistic for {total_hours} hours?
+
+Generate the complete {timeframe}-day personalized curriculum now."""
+
         try:
             message = self.client.messages.create(
                 model=self.model,
                 max_tokens=4000,
                 temperature=0.7,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_prompt}]
             )
             response_text = message.content[0].text
             import json
@@ -502,8 +838,12 @@ Return the plan in the following JSON format:
                 json_start = response_text.find("```json") + 7
                 json_end = response_text.find("```", json_start)
                 json_text = response_text[json_start:json_end].strip()
+            elif "```" in response_text:
+                json_start = response_text.find("```") + 3
+                json_end = response_text.find("```", json_start)
+                json_text = response_text[json_start:json_end].strip()
             else:
-                json_text = response_text
+                json_text = response_text.strip()
             
             return json.loads(json_text)
         except Exception as e:

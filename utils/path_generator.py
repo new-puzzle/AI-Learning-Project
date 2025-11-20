@@ -50,7 +50,7 @@ class LearningPathGenerator:
             Dictionary containing the goal plan with path_id
         """
         # Generate goal plan using AI
-        learning_path = self.ai.generate_learning_path(goal, timeframe, goal_type)
+        learning_path = self.ai.generate_learning_path(goal, timeframe, goal_type, hours_per_day)
 
         # Parse unavailable dates
         unavailable_dates = []
