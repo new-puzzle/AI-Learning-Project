@@ -125,3 +125,9 @@ dmypy.json
 
 # Streamlit secrets (contains API keys)
 .streamlit/secrets.toml
+
+# Untracked files to ignore
+.idea/
+.zencoder/
+templates_expanded.py
+temporary/
