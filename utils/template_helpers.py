@@ -114,19 +114,39 @@ def _generate_learning_subdivisions(name: str, description: str, category: str, 
     
     # Data Science
     elif 'data science' in name_lower or 'data analysis' in name_lower:
-        subdivisions = ['Data Wrangling', 'Statistical Analysis', 'Visualization', 'Machine Learning']
+        if level == 'Beginner':
+            subdivisions = ['Data Basics & Cleaning', 'Basic Statistics', 'Simple Visualizations', 'Introduction to Tools']
+        elif level == 'Intermediate':
+            subdivisions = ['Data Wrangling & Transformation', 'Statistical Analysis', 'Advanced Visualization', 'Machine Learning Basics']
+        else:
+            subdivisions = ['Advanced Data Engineering', 'Statistical Modeling', 'Complex Visualizations', 'Advanced ML & Deep Learning']
     
     # Languages
     elif any(term in name_lower for term in ['language', 'spanish', 'french', 'german', 'japanese', 'chinese']):
-        subdivisions = ['Grammar & Vocabulary', 'Speaking & Pronunciation', 'Reading & Writing', 'Cultural Context']
+        if level == 'Beginner':
+            subdivisions = ['Basic Vocabulary & Phrases', 'Pronunciation Basics', 'Simple Conversations', 'Grammar Foundations']
+        elif level == 'Intermediate':
+            subdivisions = ['Grammar & Vocabulary Expansion', 'Speaking & Pronunciation', 'Reading & Writing', 'Cultural Context']
+        else:
+            subdivisions = ['Advanced Grammar & Idioms', 'Fluency & Nuance', 'Literature & Media', 'Cultural Mastery']
     
     # Business/Finance
     elif any(term in name_lower for term in ['business', 'finance', 'marketing', 'management']):
-        subdivisions = ['Core Concepts', 'Practical Strategies', 'Case Studies', 'Real-world Application']
+        if level == 'Beginner':
+            subdivisions = ['Core Concepts & Fundamentals', 'Basic Principles', 'Introduction to Tools', 'Simple Case Studies']
+        elif level == 'Intermediate':
+            subdivisions = ['Core Concepts', 'Practical Strategies', 'Case Studies', 'Real-world Application']
+        else:
+            subdivisions = ['Advanced Strategies', 'Complex Case Analysis', 'Strategic Planning', 'Leadership & Innovation']
     
     # Arts/Creative
     elif any(term in name_lower for term in ['art', 'design', 'music', 'guitar', 'piano', 'drawing', 'photography']):
-        subdivisions = ['Fundamentals & Technique', 'Practice & Exercises', 'Creative Projects', 'Style Development']
+        if level == 'Beginner':
+            subdivisions = ['Fundamentals & Basics', 'Basic Techniques', 'Simple Exercises', 'Getting Started']
+        elif level == 'Intermediate':
+            subdivisions = ['Fundamentals & Technique', 'Practice & Exercises', 'Creative Projects', 'Style Development']
+        else:
+            subdivisions = ['Advanced Techniques', 'Mastery & Refinement', 'Complex Projects', 'Personal Style & Innovation']
     
     return subdivisions
 
@@ -139,25 +159,60 @@ def _generate_personal_subdivisions(name: str, description: str, category: str, 
     # Fitness/Health
     if 'fitness' in category.lower() or 'health' in category.lower() or any(term in name_lower for term in ['run', 'fitness', 'weight', 'muscle', 'yoga', 'gym']):
         if 'run' in name_lower or 'marathon' in name_lower or 'race' in name_lower:
-            subdivisions = ['Running Training', 'Nutrition & Hydration', 'Injury Prevention', 'Mental Preparation']
+            if level == 'Beginner':
+                subdivisions = ['Basic Running Form', 'Starting Distance', 'Basic Nutrition', 'Injury Prevention Basics']
+            elif level == 'Intermediate':
+                subdivisions = ['Running Training', 'Nutrition & Hydration', 'Injury Prevention', 'Mental Preparation']
+            else:
+                subdivisions = ['Advanced Training Plans', 'Performance Nutrition', 'Advanced Injury Prevention', 'Mental Toughness']
         elif 'weight' in name_lower or 'lose' in name_lower or 'gain' in name_lower:
-            subdivisions = ['Nutrition Plan', 'Exercise Routine', 'Habit Formation', 'Progress Tracking']
+            if level == 'Beginner':
+                subdivisions = ['Basic Nutrition', 'Simple Exercise Routine', 'Habit Formation', 'Basic Tracking']
+            elif level == 'Intermediate':
+                subdivisions = ['Nutrition Plan', 'Exercise Routine', 'Habit Formation', 'Progress Tracking']
+            else:
+                subdivisions = ['Advanced Nutrition Strategies', 'Optimized Training', 'Habit Mastery', 'Advanced Tracking & Analysis']
         elif 'yoga' in name_lower:
-            subdivisions = ['Asana Practice', 'Breathwork', 'Meditation', 'Lifestyle Integration']
+            if level == 'Beginner':
+                subdivisions = ['Basic Poses', 'Breathing Basics', 'Introduction to Meditation', 'Getting Started']
+            elif level == 'Intermediate':
+                subdivisions = ['Asana Practice', 'Breathwork', 'Meditation', 'Lifestyle Integration']
+            else:
+                subdivisions = ['Advanced Asanas', 'Advanced Breathwork', 'Deep Meditation', 'Philosophy & Lifestyle']
         else:
-            subdivisions = ['Training Plan', 'Nutrition', 'Recovery', 'Consistency']
+            if level == 'Beginner':
+                subdivisions = ['Basic Training Plan', 'Nutrition Basics', 'Recovery Basics', 'Building Consistency']
+            elif level == 'Intermediate':
+                subdivisions = ['Training Plan', 'Nutrition', 'Recovery', 'Consistency']
+            else:
+                subdivisions = ['Advanced Training', 'Optimized Nutrition', 'Advanced Recovery', 'Consistency Mastery']
     
     # Habits/Wellness
     elif 'habit' in category.lower() or 'wellness' in category.lower() or any(term in name_lower for term in ['habit', 'meditation', 'gratitude', 'sleep']):
-        subdivisions = ['Habit Formation', 'Tracking & Accountability', 'Environment Setup', 'Consistency Strategies']
+        if level == 'Beginner':
+            subdivisions = ['Habit Basics', 'Simple Tracking', 'Environment Basics', 'Getting Started']
+        elif level == 'Intermediate':
+            subdivisions = ['Habit Formation', 'Tracking & Accountability', 'Environment Setup', 'Consistency Strategies']
+        else:
+            subdivisions = ['Advanced Habit Systems', 'Advanced Tracking', 'Optimized Environment', 'Mastery & Refinement']
     
     # Creative Skills
     elif 'creative' in category.lower() or any(term in name_lower for term in ['guitar', 'piano', 'draw', 'paint', 'cook']):
-        subdivisions = ['Fundamentals & Technique', 'Regular Practice', 'Project Work', 'Skill Progression']
+        if level == 'Beginner':
+            subdivisions = ['Fundamentals & Basics', 'Basic Practice', 'Simple Projects', 'Getting Started']
+        elif level == 'Intermediate':
+            subdivisions = ['Fundamentals & Technique', 'Regular Practice', 'Project Work', 'Skill Progression']
+        else:
+            subdivisions = ['Advanced Techniques', 'Mastery Practice', 'Complex Projects', 'Personal Style']
     
     # Relationships
     elif 'relationship' in category.lower() or any(term in name_lower for term in ['friend', 'parent', 'relationship', 'communication']):
-        subdivisions = ['Communication Skills', 'Quality Time', 'Understanding & Empathy', 'Consistent Effort']
+        if level == 'Beginner':
+            subdivisions = ['Basic Communication', 'Quality Time Basics', 'Understanding Basics', 'Getting Started']
+        elif level == 'Intermediate':
+            subdivisions = ['Communication Skills', 'Quality Time', 'Understanding & Empathy', 'Consistent Effort']
+        else:
+            subdivisions = ['Advanced Communication', 'Deep Connection', 'Empathy Mastery', 'Relationship Mastery']
     
     return subdivisions
 
@@ -169,19 +224,39 @@ def _generate_career_subdivisions(name: str, description: str, category: str, le
     
     # Tech roles
     if 'tech' in category.lower() or any(term in name_lower for term in ['developer', 'engineer', 'programmer', 'data']):
-        subdivisions = ['Technical Skills', 'Portfolio Projects', 'Interview Prep', 'Networking']
+        if level == 'Beginner':
+            subdivisions = ['Basic Technical Skills', 'Simple Portfolio Projects', 'Interview Basics', 'Networking Basics']
+        elif level == 'Intermediate':
+            subdivisions = ['Technical Skills', 'Portfolio Projects', 'Interview Prep', 'Networking']
+        else:
+            subdivisions = ['Advanced Technical Skills', 'Complex Portfolio Projects', 'Advanced Interview Prep', 'Strategic Networking']
     
     # Business roles
     elif 'business' in category.lower() or any(term in name_lower for term in ['manager', 'consulting', 'analyst', 'product']):
-        subdivisions = ['Core Skills', 'Case Studies', 'Networking', 'Interview Preparation']
+        if level == 'Beginner':
+            subdivisions = ['Core Skills Basics', 'Basic Case Studies', 'Networking Basics', 'Interview Preparation Basics']
+        elif level == 'Intermediate':
+            subdivisions = ['Core Skills', 'Case Studies', 'Networking', 'Interview Preparation']
+        else:
+            subdivisions = ['Advanced Skills', 'Complex Case Studies', 'Strategic Networking', 'Advanced Interview Prep']
     
     # Creative roles
     elif 'creative' in category.lower() or any(term in name_lower for term in ['designer', 'writer', 'artist']):
-        subdivisions = ['Portfolio Building', 'Skill Development', 'Client Work', 'Industry Networking']
+        if level == 'Beginner':
+            subdivisions = ['Portfolio Basics', 'Skill Development Basics', 'Simple Client Work', 'Networking Basics']
+        elif level == 'Intermediate':
+            subdivisions = ['Portfolio Building', 'Skill Development', 'Client Work', 'Industry Networking']
+        else:
+            subdivisions = ['Advanced Portfolio', 'Skill Mastery', 'Complex Client Work', 'Strategic Networking']
     
     # General
     else:
-        subdivisions = ['Skill Development', 'Portfolio/Resume', 'Networking', 'Job Search Strategy']
+        if level == 'Beginner':
+            subdivisions = ['Skill Development Basics', 'Portfolio/Resume Basics', 'Networking Basics', 'Job Search Basics']
+        elif level == 'Intermediate':
+            subdivisions = ['Skill Development', 'Portfolio/Resume', 'Networking', 'Job Search Strategy']
+        else:
+            subdivisions = ['Advanced Skill Development', 'Advanced Portfolio/Resume', 'Strategic Networking', 'Advanced Job Search']
     
     return subdivisions
 
@@ -193,19 +268,39 @@ def _generate_project_subdivisions(name: str, description: str, category: str, l
     
     # Tech projects
     if 'tech' in category.lower() or any(term in name_lower for term in ['app', 'website', 'saas', 'software', 'extension']):
-        subdivisions = ['Planning & Design', 'Development', 'Testing & Refinement', 'Launch & Marketing']
+        if level == 'Beginner':
+            subdivisions = ['Basic Planning', 'Simple Development', 'Basic Testing', 'Simple Launch']
+        elif level == 'Intermediate':
+            subdivisions = ['Planning & Design', 'Development', 'Testing & Refinement', 'Launch & Marketing']
+        else:
+            subdivisions = ['Advanced Planning & Architecture', 'Advanced Development', 'Comprehensive Testing', 'Strategic Launch & Marketing']
     
     # Content projects
     elif any(term in name_lower for term in ['youtube', 'podcast', 'blog', 'newsletter', 'course']):
-        subdivisions = ['Content Creation', 'Platform Setup', 'Marketing & Growth', 'Monetization']
+        if level == 'Beginner':
+            subdivisions = ['Content Basics', 'Platform Setup Basics', 'Basic Marketing', 'Getting Started']
+        elif level == 'Intermediate':
+            subdivisions = ['Content Creation', 'Platform Setup', 'Marketing & Growth', 'Monetization']
+        else:
+            subdivisions = ['Advanced Content Strategy', 'Optimized Platform Setup', 'Advanced Marketing', 'Advanced Monetization']
     
     # Business projects
     elif any(term in name_lower for term in ['business', 'store', 'e-commerce', 'product']):
-        subdivisions = ['Planning & Research', 'Setup & Development', 'Marketing', 'Launch & Sales']
+        if level == 'Beginner':
+            subdivisions = ['Basic Planning', 'Simple Setup', 'Basic Marketing', 'Simple Launch']
+        elif level == 'Intermediate':
+            subdivisions = ['Planning & Research', 'Setup & Development', 'Marketing', 'Launch & Sales']
+        else:
+            subdivisions = ['Advanced Planning & Strategy', 'Advanced Setup', 'Strategic Marketing', 'Advanced Launch & Sales']
     
     # General
     else:
-        subdivisions = ['Planning', 'Development', 'Testing', 'Launch']
+        if level == 'Beginner':
+            subdivisions = ['Basic Planning', 'Simple Development', 'Basic Testing', 'Simple Launch']
+        elif level == 'Intermediate':
+            subdivisions = ['Planning', 'Development', 'Testing', 'Launch']
+        else:
+            subdivisions = ['Advanced Planning', 'Advanced Development', 'Comprehensive Testing', 'Strategic Launch']
     
     return subdivisions
 
