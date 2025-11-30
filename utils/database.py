@@ -7,10 +7,17 @@ import sqlite3
 import json
 from datetime import datetime
 from typing import List, Dict, Optional
+import os
+
+
+# Determine the absolute path to the project's root directory
+# The current file is in 'utils', so we go one level up.
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_DB_PATH = os.path.join(_PROJECT_ROOT, "learnpath.db")
 
 
 class Database:
-    def __init__(self, db_path: str = "learnpath.db"):
+    def __init__(self, db_path: str = _DB_PATH):
         """Initialize database connection and create tables if they don't exist"""
         self.db_path = db_path
         self.init_database()
