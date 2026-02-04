@@ -1981,6 +1981,21 @@ Format your response in 3 clear sections with those headers."""
         # Context about current learning path
         current_context = f"Learning Goal: {path_info['goal']}\nTopics covered: " + ", ".join([t['topic'] for t in curriculum[:5]])
 
+        # Download Chat Button
+        if st.session_state[f'chat_history_{path_id}']:
+            chat_text = f"GoalPath AI - AI Tutor Chat ({path_info['goal']})\n" + "-"*50 + "\n\n"
+            for msg in st.session_state[f'chat_history_{path_id}']:
+                role = "User" if msg['role'] == 'user' else f"AI Tutor ({msg.get('model', 'AI')})"
+                chat_text += f"{role}:\n{msg['content']}\n\n{'-'*30}\n\n"
+            
+            st.download_button(
+                label="💾 Download Conversation",
+                data=chat_text,
+                file_name=f"goalpath_tutor_chat_{path_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                mime="text/plain",
+                key=f"download_tutor_chat_{path_id}"
+            )
+
         # Display chat history
         for i, message in enumerate(st.session_state[f'chat_history_{path_id}']):
             if message['role'] == 'user':
@@ -2177,6 +2192,21 @@ Examples of BAD responses:
 
 Remember: You're having a CONVERSATION, not delivering a report."""
 
+        # Download Chat Button
+        if st.session_state[f'coach_chat_{path_id}']:
+            chat_text = f"GoalPath AI - Coach Chat ({path_info['goal']})\n" + "-"*50 + "\n\n"
+            for msg in st.session_state[f'coach_chat_{path_id}']:
+                role = "User" if msg['role'] == 'user' else "Coach"
+                chat_text += f"{role}:\n{msg['content']}\n\n{'-'*30}\n\n"
+            
+            st.download_button(
+                label="💾 Download Conversation",
+                data=chat_text,
+                file_name=f"goalpath_coach_chat_{path_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                mime="text/plain",
+                key=f"download_coach_chat_{path_id}"
+            )
+
         # Display coaching chat history
         for i, message in enumerate(st.session_state[f'coach_chat_{path_id}']):
             if message['role'] == 'user':
@@ -2333,6 +2363,21 @@ def render_general_ai_chat():
     # Display chat history
     if st.session_state.general_chat_history:
         st.markdown("### 💭 Conversation")
+        
+        # Download Chat Button
+        chat_text = "GoalPath AI - General Chat History\n" + "-"*50 + "\n\n"
+        for msg in st.session_state.general_chat_history:
+            role = "User" if msg['role'] == 'user' else f"AI ({msg.get('model', 'Assistant')})"
+            chat_text += f"{role}:\n{msg['content']}\n\n{'-'*30}\n\n"
+            
+        st.download_button(
+            label="💾 Download Conversation",
+            data=chat_text,
+            file_name=f"goalpath_chat_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+            mime="text/plain",
+            key="download_general_chat"
+        )
+        
         for i, msg in enumerate(st.session_state.general_chat_history):
             if msg['role'] == 'user':
                 st.markdown(f"**You:** {msg['content']}")

@@ -356,19 +356,19 @@ class MistralProvider(AIProvider):
             raise ValueError("Mistral API key not configured")
 
         try:
-            from mistralai.client import MistralClient
-            from mistralai.models.chat_completion import ChatMessage
+            from mistralai import Mistral
+            from mistralai.models import UserMessage, SystemMessage
         except ImportError:
             raise ImportError("Mistral package not installed. Run: pip install mistralai")
 
-        client = MistralClient(api_key=self.api_key)
+        client = Mistral(api_key=self.api_key)
 
         messages = []
         if system_prompt:
-            messages.append(ChatMessage(role="system", content=system_prompt))
-        messages.append(ChatMessage(role="user", content=prompt))
+            messages.append(SystemMessage(content=system_prompt))
+        messages.append(UserMessage(content=prompt))
 
-        response = client.chat(
+        response = client.chat.complete(
             model=self.MODELS.get(self.model_name, self.MODELS["Mistral Large"]),
             messages=messages,
             max_tokens=max_tokens
